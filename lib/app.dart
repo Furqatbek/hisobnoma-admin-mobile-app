@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hisobnoma/core/constants/app_strings.dart';
 import 'package:hisobnoma/core/di/injection.dart';
 import 'package:hisobnoma/core/router/app_router.dart';
@@ -12,14 +13,35 @@ import 'package:hisobnoma/presentation/blocs/settings/settings_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/alerts/alerts_cubit.dart';
 
 /// Root application widget
-class HisobnomaApp extends StatelessWidget {
+class HisobnomaApp extends StatefulWidget {
   const HisobnomaApp({super.key});
+
+  @override
+  State<HisobnomaApp> createState() => _HisobnomaAppState();
+}
+
+class _HisobnomaAppState extends State<HisobnomaApp> {
+  late final AuthCubit _authCubit;
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _authCubit = getIt<AuthCubit>()..checkAuth();
+    _router = createAppRouter(_authCubit);
+  }
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => getIt<AuthCubit>()..checkAuth()),
+        BlocProvider.value(value: _authCubit),
         BlocProvider(create: (_) => getIt<DashboardCubit>()),
         BlocProvider(create: (_) => getIt<TransactionsCubit>()),
         BlocProvider(create: (_) => getIt<ReportsCubit>()),
@@ -34,7 +56,7 @@ class HisobnomaApp extends StatelessWidget {
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: settingsState.themeMode,
-            routerConfig: appRouter,
+            routerConfig: _router,
           );
         },
       ),

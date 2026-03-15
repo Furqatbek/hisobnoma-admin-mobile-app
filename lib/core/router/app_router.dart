@@ -1,6 +1,10 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hisobnoma/core/di/injection.dart';
 import 'package:hisobnoma/core/network/interceptors/auth_interceptor.dart';
+import 'package:hisobnoma/presentation/blocs/auth/auth_cubit.dart';
 import 'package:hisobnoma/presentation/screens/auth/login_screen.dart';
 import 'package:hisobnoma/presentation/screens/dashboard/dashboard_screen.dart';
 import 'package:hisobnoma/presentation/screens/transactions/transactions_screen.dart';
@@ -19,64 +23,94 @@ abstract final class AppRoutes {
   static const String alerts = '/alerts';
 }
 
-/// App router configuration using go_router
-final GoRouter appRouter = GoRouter(
-  initialLocation: AppRoutes.home,
-  redirect: (context, state) async {
-    final authInterceptor = getIt<AuthInterceptor>();
-    final hasToken = await authInterceptor.hasToken();
-    final isLoginRoute = state.matchedLocation == AppRoutes.login;
+/// Creates the app router with auth-aware redirect.
+///
+/// Listens to [AuthCubit] state changes to automatically redirect
+/// between login and authenticated routes.
+GoRouter createAppRouter(AuthCubit authCubit) {
+  return GoRouter(
+    initialLocation: AppRoutes.home,
+    refreshListenable: _AuthRefreshNotifier(authCubit),
+    redirect: (context, state) async {
+      final authInterceptor = getIt<AuthInterceptor>();
+      final hasToken = await authInterceptor.hasToken();
+      final isLoginRoute = state.matchedLocation == AppRoutes.login;
 
-    if (!hasToken && !isLoginRoute) {
-      return AppRoutes.login;
-    }
-    if (hasToken && isLoginRoute) {
-      return AppRoutes.home;
-    }
-    return null;
-  },
-  routes: [
-    // Login (outside shell)
-    GoRoute(
-      path: AppRoutes.login,
-      builder: (context, state) => const LoginScreen(),
-    ),
+      // If the user just authenticated, go home
+      if (authCubit.state is AuthAuthenticated && isLoginRoute) {
+        return AppRoutes.home;
+      }
 
-    // Main shell with bottom navigation
-    ShellRoute(
-      builder: (context, state, child) => ShellScreen(child: child),
-      routes: [
-        GoRoute(
-          path: AppRoutes.home,
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: DashboardScreen(),
-          ),
-        ),
-        GoRoute(
-          path: AppRoutes.transactions,
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: TransactionsScreen(),
-          ),
-        ),
-        GoRoute(
-          path: AppRoutes.reports,
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: ReportsScreen(),
-          ),
-        ),
-        GoRoute(
-          path: AppRoutes.settings,
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: SettingsScreen(),
-          ),
-        ),
-      ],
-    ),
+      // If logged out or no token, go to login
+      if (!hasToken && !isLoginRoute) {
+        return AppRoutes.login;
+      }
+      if (hasToken && isLoginRoute) {
+        return AppRoutes.home;
+      }
+      return null;
+    },
+    routes: [
+      // Login (outside shell)
+      GoRoute(
+        path: AppRoutes.login,
+        builder: (context, state) => const LoginScreen(),
+      ),
 
-    // Full-screen routes (outside shell)
-    GoRoute(
-      path: AppRoutes.alerts,
-      builder: (context, state) => const AlertsScreen(),
-    ),
-  ],
-);
+      // Main shell with bottom navigation
+      ShellRoute(
+        builder: (context, state, child) => ShellScreen(child: child),
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: DashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.transactions,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: TransactionsScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.reports,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ReportsScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.settings,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: SettingsScreen(),
+            ),
+          ),
+        ],
+      ),
+
+      // Full-screen routes (outside shell)
+      GoRoute(
+        path: AppRoutes.alerts,
+        builder: (context, state) => const AlertsScreen(),
+      ),
+    ],
+  );
+}
+
+/// Converts [AuthCubit] stream into a [ChangeNotifier] for GoRouter's
+/// refreshListenable.
+class _AuthRefreshNotifier extends ChangeNotifier {
+  late final StreamSubscription<AuthState> _subscription;
+
+  _AuthRefreshNotifier(AuthCubit authCubit) {
+    _subscription = authCubit.stream.listen((_) {
+      notifyListeners();
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
