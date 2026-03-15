@@ -11,12 +11,14 @@ import 'package:hisobnoma/data/repositories/dashboard_repository.dart';
 import 'package:hisobnoma/data/repositories/transaction_repository.dart';
 import 'package:hisobnoma/data/repositories/alert_repository.dart';
 import 'package:hisobnoma/data/repositories/sync_repository.dart';
+import 'package:hisobnoma/data/services/sync_service.dart';
 import 'package:hisobnoma/presentation/blocs/auth/auth_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/dashboard/dashboard_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/reports/reports_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/settings/settings_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/alerts/alerts_cubit.dart';
+import 'package:hisobnoma/presentation/blocs/sync/sync_cubit.dart';
 
 final getIt = GetIt.instance;
 
@@ -67,6 +69,16 @@ Future<void> configureDependencies() async {
     () => SyncRepository(apiClient: getIt()),
   );
 
+  // Services
+  getIt.registerLazySingleton<SyncService>(
+    () => SyncService(
+      syncRepository: getIt(),
+      apiClient: getIt(),
+      databaseHelper: getIt(),
+      connectivityChecker: getIt(),
+    ),
+  );
+
   // Blocs / Cubits
   getIt.registerFactory<AuthCubit>(
     () => AuthCubit(authRepository: getIt()),
@@ -85,5 +97,8 @@ Future<void> configureDependencies() async {
   );
   getIt.registerFactory<AlertsCubit>(
     () => AlertsCubit(alertRepository: getIt()),
+  );
+  getIt.registerFactory<SyncCubit>(
+    () => SyncCubit(syncService: getIt()),
   );
 }

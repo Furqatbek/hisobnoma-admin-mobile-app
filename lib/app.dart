@@ -11,6 +11,8 @@ import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dar
 import 'package:hisobnoma/presentation/blocs/reports/reports_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/settings/settings_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/alerts/alerts_cubit.dart';
+import 'package:hisobnoma/presentation/blocs/sync/sync_cubit.dart';
+import 'package:hisobnoma/data/services/sync_service.dart';
 
 /// Root application widget
 class HisobnomaApp extends StatefulWidget {
@@ -20,19 +22,34 @@ class HisobnomaApp extends StatefulWidget {
   State<HisobnomaApp> createState() => _HisobnomaAppState();
 }
 
-class _HisobnomaAppState extends State<HisobnomaApp> {
+class _HisobnomaAppState extends State<HisobnomaApp> with WidgetsBindingObserver {
   late final AuthCubit _authCubit;
   late final GoRouter _router;
+  late final SyncService _syncService;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _authCubit = getIt<AuthCubit>()..checkAuth();
     _router = createAppRouter(_authCubit);
+
+    // Initialize sync service and trigger first sync
+    _syncService = getIt<SyncService>()..initialize();
+    _syncService.syncAll();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _syncService.syncAll();
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _syncService.dispose();
     _router.dispose();
     super.dispose();
   }
@@ -47,6 +64,7 @@ class _HisobnomaAppState extends State<HisobnomaApp> {
         BlocProvider(create: (_) => getIt<ReportsCubit>()),
         BlocProvider(create: (_) => getIt<SettingsCubit>()..loadSettings()),
         BlocProvider(create: (_) => getIt<AlertsCubit>()),
+        BlocProvider(create: (_) => getIt<SyncCubit>()),
       ],
       child: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, settingsState) {

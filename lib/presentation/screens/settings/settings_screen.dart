@@ -7,6 +7,7 @@ import 'package:hisobnoma/core/constants/app_strings.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/presentation/blocs/auth/auth_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/settings/settings_cubit.dart';
+import 'package:hisobnoma/presentation/blocs/sync/sync_cubit.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_list_tile.dart';
 
 /// Settings screen with grouped Apple-style sections.
@@ -567,100 +568,137 @@ class _CurrencyPickerSheet extends StatelessWidget {
 }
 
 /// Sync info bottom sheet.
-class _SyncInfoSheet extends StatelessWidget {
+class _SyncInfoSheet extends StatefulWidget {
   final bool isDark;
 
   const _SyncInfoSheet({required this.isDark});
 
   @override
+  State<_SyncInfoSheet> createState() => _SyncInfoSheetState();
+}
+
+class _SyncInfoSheetState extends State<_SyncInfoSheet> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<SyncCubit>().loadSyncInfo();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkElevated : AppColors.white,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusLg),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 36,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.darkSeparator
-                      : AppColors.separator,
-                  borderRadius: BorderRadius.circular(2.5),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Icon(Icons.sync, size: 48, color: AppColors.royalBlue),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                'Data Sync',
-                style: AppTypography.title3.copyWith(
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'Sync products, customers, and categories from the server for offline use.',
-                style: AppTypography.subheadline.copyWith(
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _SyncItem(
-                icon: Icons.inventory_2_outlined,
-                label: 'Products',
-                isDark: isDark,
-              ),
-              _SyncItem(
-                icon: Icons.people_outline,
-                label: 'Customers',
-                isDark: isDark,
-              ),
-              _SyncItem(
-                icon: Icons.category_outlined,
-                label: 'Categories',
-                isDark: isDark,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Sync started...'),
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.radiusSm),
+    return BlocBuilder<SyncCubit, SyncState>(
+      builder: (context, state) {
+        final info = state.syncInfo;
+        final isSyncing = state.status == SyncUIStatus.syncing;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: widget.isDark ? AppColors.darkElevated : AppColors.white,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppSpacing.radiusLg),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: widget.isDark
+                          ? AppColors.darkSeparator
+                          : AppColors.separator,
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: isSyncing
+                        ? const SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: CircularProgressIndicator.adaptive(),
+                          )
+                        : Icon(Icons.sync, size: 48,
+                            color: AppColors.royalBlue),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Data Sync',
+                    style: AppTypography.title3.copyWith(
+                      color: widget.isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'Sync products, customers, and categories from the server for offline use.',
+                    style: AppTypography.subheadline.copyWith(
+                      color: widget.isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  _SyncItem(
+                    icon: Icons.inventory_2_outlined,
+                    label: 'Products',
+                    count: info?.productCount,
+                    lastSync: info?.productsLastSync,
+                    isDark: widget.isDark,
+                  ),
+                  _SyncItem(
+                    icon: Icons.people_outline,
+                    label: 'Customers',
+                    count: info?.customerCount,
+                    lastSync: info?.customersLastSync,
+                    isDark: widget.isDark,
+                  ),
+                  _SyncItem(
+                    icon: Icons.category_outlined,
+                    label: 'Categories',
+                    count: info?.categoryCount,
+                    lastSync: info?.categoriesLastSync,
+                    isDark: widget.isDark,
+                  ),
+                  if (info != null && info.pendingActions > 0)
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(top: AppSpacing.sm),
+                      child: Text(
+                        '${info.pendingActions} pending offline action(s)',
+                        style: AppTypography.footnote.copyWith(
+                          color: AppColors.warning,
                         ),
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.sync, size: 18),
-                  label: const Text('Sync Now'),
-                ),
+                    ),
+                  const SizedBox(height: AppSpacing.lg),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: isSyncing
+                          ? null
+                          : () {
+                              HapticFeedback.mediumImpact();
+                              context.read<SyncCubit>().syncAll();
+                            },
+                      icon: const Icon(Icons.sync, size: 18),
+                      label: Text(isSyncing ? 'Syncing...' : 'Sync Now'),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -668,11 +706,15 @@ class _SyncInfoSheet extends StatelessWidget {
 class _SyncItem extends StatelessWidget {
   final IconData icon;
   final String label;
+  final int? count;
+  final DateTime? lastSync;
   final bool isDark;
 
   const _SyncItem({
     required this.icon,
     required this.label,
+    this.count,
+    this.lastSync,
     required this.isDark,
   });
 
@@ -691,19 +733,33 @@ class _SyncItem extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Text(
-              label,
-              style: AppTypography.body.copyWith(
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.textPrimary,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: AppTypography.body.copyWith(
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                  ),
+                ),
+                if (count != null)
+                  Text(
+                    '$count items synced',
+                    style: AppTypography.caption2.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
+                  ),
+              ],
             ),
           ),
           Icon(
-            Icons.check_circle_outline,
+            lastSync != null
+                ? Icons.check_circle_outline
+                : Icons.circle_outlined,
             size: 18,
-            color: AppColors.income,
+            color: lastSync != null ? AppColors.income : AppColors.textTertiary,
           ),
         ],
       ),
