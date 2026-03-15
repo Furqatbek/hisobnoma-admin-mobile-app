@@ -1,8 +1,11 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hisobnoma/core/config/app_config.dart';
 import 'package:hisobnoma/core/network/api_client.dart';
+import 'package:hisobnoma/core/network/connectivity_checker.dart';
 import 'package:hisobnoma/core/network/interceptors/auth_interceptor.dart';
+import 'package:hisobnoma/data/local/database_helper.dart';
 import 'package:hisobnoma/data/repositories/auth_repository.dart';
 import 'package:hisobnoma/data/repositories/dashboard_repository.dart';
 import 'package:hisobnoma/data/repositories/transaction_repository.dart';
@@ -28,15 +31,22 @@ Future<void> configureDependencies() async {
   );
   getIt.registerSingleton<FlutterSecureStorage>(secureStorage);
 
+  // Local Database
+  final databaseHelper = DatabaseHelper();
+  getIt.registerSingleton<DatabaseHelper>(databaseHelper);
+
+  // Connectivity
+  final connectivityChecker = ConnectivityChecker();
+  getIt.registerSingleton<ConnectivityChecker>(connectivityChecker);
+
   // Network
   final authInterceptor = AuthInterceptor(secureStorage: secureStorage);
   getIt.registerSingleton<AuthInterceptor>(authInterceptor);
 
-  // TODO: Replace with actual base URL from environment config
-  const baseUrl = 'https://api.hisobnoma.com';
   final apiClient = ApiClient(
-    baseUrl: baseUrl,
+    baseUrl: AppConfig.current.baseUrl,
     authInterceptor: authInterceptor,
+    enableLogging: AppConfig.current.enableLogging,
   );
   getIt.registerSingleton<ApiClient>(apiClient);
 

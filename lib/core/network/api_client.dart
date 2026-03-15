@@ -1,7 +1,10 @@
+import 'dart:developer' as developer;
+
 import 'package:dio/dio.dart';
 import 'package:hisobnoma/core/network/api_endpoints.dart';
 import 'package:hisobnoma/core/network/interceptors/auth_interceptor.dart';
 import 'package:hisobnoma/core/network/interceptors/error_interceptor.dart';
+import 'package:hisobnoma/core/network/interceptors/retry_interceptor.dart';
 
 /// Central HTTP client wrapping Dio for all API calls
 class ApiClient {
@@ -12,6 +15,7 @@ class ApiClient {
   ApiClient({
     required String baseUrl,
     required AuthInterceptor authInterceptor,
+    bool enableLogging = false,
   }) {
     _dio = Dio(
       BaseOptions(
@@ -28,12 +32,14 @@ class ApiClient {
 
     _dio.interceptors.addAll([
       authInterceptor,
+      RetryInterceptor(maxRetries: 3),
       ErrorInterceptor(),
-      LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-        logPrint: (obj) => print('[API] $obj'),
-      ),
+      if (enableLogging)
+        LogInterceptor(
+          requestBody: true,
+          responseBody: true,
+          logPrint: (obj) => developer.log('$obj', name: 'API'),
+        ),
     ]);
   }
 
