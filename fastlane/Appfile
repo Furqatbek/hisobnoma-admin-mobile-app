@@ -1,0 +1,9 @@
+app_identifier("com.hisobnoma.hisobnoma")
+
+# Apple
+# apple_id("your-apple-id@email.com")
+# team_id("YOUR_TEAM_ID")
+
+# Google Play
+# json_key_file("path/to/google-play-key.json")
+# package_name("com.hisobnoma.hisobnoma")
