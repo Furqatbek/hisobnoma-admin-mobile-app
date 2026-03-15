@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:hisobnoma/app.dart';
 import 'package:hisobnoma/core/config/app_config.dart';
 import 'package:hisobnoma/core/di/injection.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  // Preserve native splash until auth state is resolved
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   // Set environment (override via --dart-define=ENV=prod)
   const env = String.fromEnvironment('ENV', defaultValue: 'dev');

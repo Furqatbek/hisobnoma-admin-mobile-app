@@ -12,9 +12,11 @@ import 'package:hisobnoma/presentation/screens/reports/reports_screen.dart';
 import 'package:hisobnoma/presentation/screens/settings/settings_screen.dart';
 import 'package:hisobnoma/presentation/screens/alerts/alerts_screen.dart';
 import 'package:hisobnoma/presentation/screens/shell_screen.dart';
+import 'package:hisobnoma/presentation/screens/splash/splash_screen.dart';
 
 /// Route paths
 abstract final class AppRoutes {
+  static const String splash = '/splash';
   static const String login = '/login';
   static const String home = '/';
   static const String transactions = '/transactions';
@@ -29,28 +31,47 @@ abstract final class AppRoutes {
 /// between login and authenticated routes.
 GoRouter createAppRouter(AuthCubit authCubit) {
   return GoRouter(
-    initialLocation: AppRoutes.home,
+    initialLocation: AppRoutes.splash,
     refreshListenable: _AuthRefreshNotifier(authCubit),
     redirect: (context, state) async {
+      final authState = authCubit.state;
+      final isOnSplash = state.matchedLocation == AppRoutes.splash;
+      final isOnLogin = state.matchedLocation == AppRoutes.login;
+
+      // While auth is loading, stay on splash
+      if (authState is AuthInitial || authState is AuthLoading) {
+        return isOnSplash ? null : AppRoutes.splash;
+      }
+
+      // Auth resolved — leave splash
+      if (isOnSplash) {
+        final authInterceptor = getIt<AuthInterceptor>();
+        final hasToken = await authInterceptor.hasToken();
+        return hasToken ? AppRoutes.home : AppRoutes.login;
+      }
+
+      // Standard auth redirect
       final authInterceptor = getIt<AuthInterceptor>();
       final hasToken = await authInterceptor.hasToken();
-      final isLoginRoute = state.matchedLocation == AppRoutes.login;
 
-      // If the user just authenticated, go home
-      if (authCubit.state is AuthAuthenticated && isLoginRoute) {
+      if (authState is AuthAuthenticated && isOnLogin) {
         return AppRoutes.home;
       }
-
-      // If logged out or no token, go to login
-      if (!hasToken && !isLoginRoute) {
+      if (!hasToken && !isOnLogin) {
         return AppRoutes.login;
       }
-      if (hasToken && isLoginRoute) {
+      if (hasToken && isOnLogin) {
         return AppRoutes.home;
       }
       return null;
     },
     routes: [
+      // Splash (shown while auth resolves)
+      GoRoute(
+        path: AppRoutes.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
+
       // Login (outside shell)
       GoRoute(
         path: AppRoutes.login,
