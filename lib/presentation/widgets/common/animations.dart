@@ -176,6 +176,153 @@ class AnimatedFab extends StatelessWidget {
   }
 }
 
+/// Chart entrance animation — slides up + fades in with configurable delay.
+/// Ideal for staggered chart section reveals.
+class ChartEntrance extends StatefulWidget {
+  final Widget child;
+  final Duration delay;
+  final Duration duration;
+
+  const ChartEntrance({
+    super.key,
+    required this.child,
+    this.delay = Duration.zero,
+    this.duration = const Duration(milliseconds: 600),
+  });
+
+  @override
+  State<ChartEntrance> createState() => _ChartEntranceState();
+}
+
+class _ChartEntranceState extends State<ChartEntrance>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _slideAnimation;
+  late final Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.duration,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.2),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.8, curve: Curves.easeOut),
+      ),
+    );
+
+    Future.delayed(widget.delay, () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// Custom pull-to-refresh indicator with app branding
+class HisobRefreshIndicator extends StatelessWidget {
+  final Widget child;
+  final Future<void> Function() onRefresh;
+
+  const HisobRefreshIndicator({
+    super.key,
+    required this.child,
+    required this.onRefresh,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator.adaptive(
+      onRefresh: () async {
+        HapticFeedback.mediumImpact();
+        await onRefresh();
+      },
+      displacement: 40,
+      strokeWidth: 2.5,
+      child: child,
+    );
+  }
+}
+
+/// Bottom sheet spring transition — wraps content with slide + fade entrance
+class BottomSheetEntrance extends StatefulWidget {
+  final Widget child;
+
+  const BottomSheetEntrance({super.key, required this.child});
+
+  @override
+  State<BottomSheetEntrance> createState() => _BottomSheetEntranceState();
+}
+
+class _BottomSheetEntranceState extends State<BottomSheetEntrance>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _slideAnimation;
+  late final Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
 /// Haptic feedback helper
 abstract final class Haptics {
   static void light() => HapticFeedback.lightImpact();
