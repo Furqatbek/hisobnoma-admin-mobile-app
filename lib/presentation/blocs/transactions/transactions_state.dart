@@ -1,0 +1,61 @@
+part of 'transactions_cubit.dart';
+
+abstract class TransactionsState extends Equatable {
+  const TransactionsState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class TransactionsInitial extends TransactionsState {
+  const TransactionsInitial();
+}
+
+class TransactionsLoading extends TransactionsState {
+  const TransactionsLoading();
+}
+
+class ProductsSearchLoaded extends TransactionsState {
+  final Map<String, dynamic> data;
+
+  const ProductsSearchLoaded({required this.data});
+
+  @override
+  List<Object?> get props => [data];
+}
+
+class BarcodeLookupLoaded extends TransactionsState {
+  final Map<String, dynamic> product;
+
+  const BarcodeLookupLoaded({required this.product});
+
+  @override
+  List<Object?> get props => [product];
+}
+
+class QuickSaleCompleted extends TransactionsState {
+  final Map<String, dynamic> transaction;
+
+  const QuickSaleCompleted({required this.transaction});
+
+  @override
+  List<Object?> get props => [transaction];
+}
+
+class QuickCountCompleted extends TransactionsState {
+  final Map<String, dynamic> result;
+
+  const QuickCountCompleted({required this.result});
+
+  @override
+  List<Object?> get props => [result];
+}
+
+class TransactionsError extends TransactionsState {
+  final String message;
+
+  const TransactionsError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
