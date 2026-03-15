@@ -16,10 +16,10 @@ class DashboardLoading extends DashboardState {
 }
 
 class DashboardLoaded extends DashboardState {
-  final Map<String, dynamic> revenue;
-  final Map<String, dynamic> inventory;
-  final Map<String, dynamic> financial;
-  final List<Map<String, dynamic>> chartData;
+  final RevenueSummary revenue;
+  final InventorySummary inventory;
+  final FinancialSummary financial;
+  final List<RevenueChartData> chartData;
 
   const DashboardLoaded({
     required this.revenue,

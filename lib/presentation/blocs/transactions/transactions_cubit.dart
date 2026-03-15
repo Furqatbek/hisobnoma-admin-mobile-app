@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hisobnoma/data/models/transaction/transaction_models.dart';
 import 'package:hisobnoma/data/repositories/transaction_repository.dart';
 
 part 'transactions_state.dart';
@@ -15,7 +16,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
     emit(const TransactionsLoading());
     try {
       final data = await _transactionRepository.searchProducts(query: query);
-      emit(ProductsSearchLoaded(data: data));
+      emit(ProductsSearchLoaded(products: data.content));
     } catch (e) {
       emit(TransactionsError(message: e.toString()));
     }
@@ -24,52 +25,28 @@ class TransactionsCubit extends Cubit<TransactionsState> {
   Future<void> lookupBarcode(String barcode) async {
     emit(const TransactionsLoading());
     try {
-      final data = await _transactionRepository.barcodeLookup(barcode);
-      emit(BarcodeLookupLoaded(product: data));
+      final product = await _transactionRepository.barcodeLookup(barcode);
+      emit(BarcodeLookupLoaded(product: product));
     } catch (e) {
       emit(TransactionsError(message: e.toString()));
     }
   }
 
-  Future<void> createQuickSale({
-    required int terminalId,
-    int? customerId,
-    required List<Map<String, dynamic>> items,
-    required String paymentType,
-    required double tenderedAmount,
-    String? notes,
-  }) async {
+  Future<void> createQuickSale(QuickSaleRequest request) async {
     emit(const TransactionsLoading());
     try {
-      final data = await _transactionRepository.quickSale(
-        terminalId: terminalId,
-        customerId: customerId,
-        items: items,
-        paymentType: paymentType,
-        tenderedAmount: tenderedAmount,
-        notes: notes,
-      );
-      emit(QuickSaleCompleted(transaction: data));
+      final result = await _transactionRepository.quickSale(request);
+      emit(QuickSaleCompleted(transaction: result));
     } catch (e) {
       emit(TransactionsError(message: e.toString()));
     }
   }
 
-  Future<void> quickCount({
-    required int productId,
-    required int locationId,
-    required int countedQuantity,
-    String? notes,
-  }) async {
+  Future<void> quickCount(QuickCountRequest request) async {
     emit(const TransactionsLoading());
     try {
-      final data = await _transactionRepository.quickCount(
-        productId: productId,
-        locationId: locationId,
-        countedQuantity: countedQuantity,
-        notes: notes,
-      );
-      emit(QuickCountCompleted(result: data));
+      final result = await _transactionRepository.quickCount(request);
+      emit(QuickCountCompleted(result: result));
     } catch (e) {
       emit(TransactionsError(message: e.toString()));
     }

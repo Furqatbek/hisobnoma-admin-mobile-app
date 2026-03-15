@@ -1,5 +1,7 @@
 import 'package:hisobnoma/core/network/api_client.dart';
 import 'package:hisobnoma/core/network/api_endpoints.dart';
+import 'package:hisobnoma/core/network/api_response.dart';
+import 'package:hisobnoma/data/models/transaction/transaction_models.dart';
 
 /// Repository for transaction / quick action operations
 class TransactionRepository {
@@ -9,57 +11,36 @@ class TransactionRepository {
       : _apiClient = apiClient;
 
   /// Barcode product lookup
-  Future<Map<String, dynamic>> barcodeLookup(String barcode) async {
+  Future<ProductLookup> barcodeLookup(String barcode) async {
     final response = await _apiClient.get(
       ApiEndpoints.barcodeLookup(barcode),
     );
-    return response.data['data'] as Map<String, dynamic>;
+    return ProductLookup.fromJson(
+        response.data['data'] as Map<String, dynamic>);
   }
 
   /// Quick stock count
-  Future<Map<String, dynamic>> quickCount({
-    required int productId,
-    required int locationId,
-    required int countedQuantity,
-    String? notes,
-  }) async {
+  Future<QuickCountResponse> quickCount(QuickCountRequest request) async {
     final response = await _apiClient.post(
       ApiEndpoints.quickCount,
-      data: {
-        'productId': productId,
-        'locationId': locationId,
-        'countedQuantity': countedQuantity,
-        if (notes != null) 'notes': notes,
-      },
+      data: request.toJson(),
     );
-    return response.data['data'] as Map<String, dynamic>;
+    return QuickCountResponse.fromJson(
+        response.data['data'] as Map<String, dynamic>);
   }
 
   /// Quick sale
-  Future<Map<String, dynamic>> quickSale({
-    required int terminalId,
-    int? customerId,
-    required List<Map<String, dynamic>> items,
-    required String paymentType,
-    required double tenderedAmount,
-    String? notes,
-  }) async {
+  Future<QuickSaleResponse> quickSale(QuickSaleRequest request) async {
     final response = await _apiClient.post(
       ApiEndpoints.quickSale,
-      data: {
-        'terminalId': terminalId,
-        'customerId': customerId,
-        'items': items,
-        'paymentType': paymentType,
-        'tenderedAmount': tenderedAmount,
-        if (notes != null) 'notes': notes,
-      },
+      data: request.toJson(),
     );
-    return response.data['data'] as Map<String, dynamic>;
+    return QuickSaleResponse.fromJson(
+        response.data['data'] as Map<String, dynamic>);
   }
 
-  /// Search products
-  Future<Map<String, dynamic>> searchProducts({
+  /// Search products (paginated)
+  Future<PaginatedResponse<ProductLookup>> searchProducts({
     required String query,
     int page = 0,
     int size = 20,
@@ -68,11 +49,14 @@ class TransactionRepository {
       ApiEndpoints.searchProducts,
       queryParameters: {'query': query, 'page': page, 'size': size},
     );
-    return response.data['data'] as Map<String, dynamic>;
+    return PaginatedResponse.fromJson(
+      response.data['data'] as Map<String, dynamic>,
+      ProductLookup.fromJson,
+    );
   }
 
-  /// Search customers
-  Future<Map<String, dynamic>> searchCustomers({
+  /// Search customers (paginated)
+  Future<PaginatedResponse<Map<String, dynamic>>> searchCustomers({
     required String query,
     int page = 0,
     int size = 20,
@@ -81,6 +65,9 @@ class TransactionRepository {
       ApiEndpoints.searchCustomers,
       queryParameters: {'query': query, 'page': page, 'size': size},
     );
-    return response.data['data'] as Map<String, dynamic>;
+    return PaginatedResponse.fromJson(
+      response.data['data'] as Map<String, dynamic>,
+      (json) => json,
+    );
   }
 }

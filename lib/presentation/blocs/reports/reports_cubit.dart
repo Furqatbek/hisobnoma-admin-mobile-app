@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hisobnoma/data/models/dashboard/dashboard_models.dart';
 import 'package:hisobnoma/data/repositories/dashboard_repository.dart';
 
 part 'reports_state.dart';
@@ -20,8 +21,8 @@ class ReportsCubit extends Cubit<ReportsState> {
       ]);
 
       emit(ReportsLoaded(
-        chartData: results[0] as List<Map<String, dynamic>>,
-        revenueSummary: results[1] as Map<String, dynamic>,
+        chartData: results[0] as List<RevenueChartData>,
+        revenueSummary: results[1] as RevenueSummary,
         selectedPeriod: period,
       ));
     } catch (e) {

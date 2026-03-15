@@ -1,5 +1,6 @@
 import 'package:hisobnoma/core/network/api_client.dart';
 import 'package:hisobnoma/core/network/api_endpoints.dart';
+import 'package:hisobnoma/data/models/dashboard/dashboard_models.dart';
 
 /// Repository for dashboard data
 class DashboardRepository {
@@ -8,13 +9,14 @@ class DashboardRepository {
   DashboardRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Get revenue summary
-  Future<Map<String, dynamic>> getRevenueSummary() async {
+  Future<RevenueSummary> getRevenueSummary() async {
     final response = await _apiClient.get(ApiEndpoints.revenueSummary);
-    return response.data['data'] as Map<String, dynamic>;
+    return RevenueSummary.fromJson(
+        response.data['data'] as Map<String, dynamic>);
   }
 
   /// Get revenue chart data
-  Future<List<Map<String, dynamic>>> getRevenueChart({
+  Future<List<RevenueChartData>> getRevenueChart({
     String period = 'daily',
   }) async {
     final response = await _apiClient.get(
@@ -22,18 +24,22 @@ class DashboardRepository {
       queryParameters: {'period': period},
     );
     final data = response.data['data'] as Map<String, dynamic>;
-    return (data['dailyRevenue'] as List).cast<Map<String, dynamic>>();
+    return (data['dailyRevenue'] as List)
+        .map((e) => RevenueChartData.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   /// Get inventory summary
-  Future<Map<String, dynamic>> getInventorySummary() async {
+  Future<InventorySummary> getInventorySummary() async {
     final response = await _apiClient.get(ApiEndpoints.inventorySummary);
-    return response.data['data'] as Map<String, dynamic>;
+    return InventorySummary.fromJson(
+        response.data['data'] as Map<String, dynamic>);
   }
 
   /// Get financial summary
-  Future<Map<String, dynamic>> getFinancialSummary() async {
+  Future<FinancialSummary> getFinancialSummary() async {
     final response = await _apiClient.get(ApiEndpoints.financialSummary);
-    return response.data['data'] as Map<String, dynamic>;
+    return FinancialSummary.fromJson(
+        response.data['data'] as Map<String, dynamic>);
   }
 }

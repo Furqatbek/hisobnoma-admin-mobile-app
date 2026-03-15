@@ -8,6 +8,7 @@ import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/router/app_router.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/presentation/blocs/dashboard/dashboard_cubit.dart';
+import 'package:hisobnoma/presentation/widgets/common/loading_shimmer.dart';
 
 /// Main dashboard / home screen
 class DashboardScreen extends StatefulWidget {
@@ -41,7 +42,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
           if (state is DashboardLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const DashboardShimmer();
           }
           if (state is DashboardError) {
             return Center(
@@ -65,13 +66,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(AppSpacing.screenPadding),
                 children: [
-                  // Balance hero card
                   _buildHeroCard(state, isDark),
                   const SizedBox(height: AppSpacing.md),
-                  // Revenue / Expense summary
                   _buildSummaryRow(state, isDark),
                   const SizedBox(height: AppSpacing.lg),
-                  // Inventory overview
                   Text(AppStrings.inventoryOverview,
                       style: AppTypography.title3),
                   const SizedBox(height: AppSpacing.sm),
@@ -93,10 +91,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildHeroCard(DashboardLoaded state, bool isDark) {
-    final netCash = (state.financial['netCashPosition'] as num?)?.toDouble() ?? 0;
-    final monthChange =
-        (state.revenue['monthChangePercent'] as num?)?.toDouble() ?? 0;
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -120,19 +114,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           Text(
             AppStrings.currentBalance,
-            style:
-                AppTypography.subheadline.copyWith(color: Colors.white70),
+            style: AppTypography.subheadline.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            Formatters.currency(netCash),
+            Formatters.currency(state.financial.netCashPosition),
             style: AppTypography.title1.copyWith(color: AppColors.white),
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
               Icon(
-                monthChange >= 0
+                state.revenue.monthChangePercent >= 0
                     ? Icons.trending_up
                     : Icons.trending_down,
                 color: Colors.white70,
@@ -140,9 +133,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(width: AppSpacing.xs),
               Text(
-                '${Formatters.percentage(monthChange)} this month',
-                style:
-                    AppTypography.footnote.copyWith(color: Colors.white70),
+                '${Formatters.percentage(state.revenue.monthChangePercent)} this month',
+                style: AppTypography.footnote.copyWith(color: Colors.white70),
               ),
             ],
           ),
@@ -152,18 +144,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildSummaryRow(DashboardLoaded state, bool isDark) {
-    final monthRevenue =
-        (state.revenue['thisMonthRevenue'] as num?)?.toDouble() ?? 0;
-    final weekChange =
-        (state.revenue['weekChangePercent'] as num?)?.toDouble() ?? 0;
-
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
             label: AppStrings.revenue,
-            value: Formatters.compactCurrency(monthRevenue),
-            change: weekChange,
+            value: Formatters.compactCurrency(state.revenue.thisMonthRevenue),
+            change: state.revenue.weekChangePercent,
             color: AppColors.income,
             isDark: isDark,
           ),
@@ -172,8 +159,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Expanded(
           child: _buildStatCard(
             label: AppStrings.expenses,
-            value: Formatters.compactCurrency(
-                (state.financial['apOutstanding'] as num?)?.toDouble() ?? 0),
+            value:
+                Formatters.compactCurrency(state.financial.apOutstanding),
             change: -3.2,
             color: AppColors.expense,
             isDark: isDark,
@@ -208,9 +195,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: AppTypography.footnote.copyWith(
-            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-          )),
+          Text(label,
+              style: AppTypography.footnote.copyWith(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
+              )),
           const SizedBox(height: AppSpacing.xs),
           Text(value, style: AppTypography.headline),
           const SizedBox(height: AppSpacing.xs),
@@ -228,8 +218,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         Expanded(
           child: _buildMetricCard(
-            value: Formatters.integer(
-                (state.inventory['activeSkuCount'] as num?)?.toInt() ?? 0),
+            value: Formatters.integer(state.inventory.activeSkuCount),
             label: 'Active',
             isDark: isDark,
           ),
@@ -237,8 +226,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _buildMetricCard(
-            value: Formatters.integer(
-                (state.inventory['lowStockCount'] as num?)?.toInt() ?? 0),
+            value: Formatters.integer(state.inventory.lowStockCount),
             label: 'Low Stock',
             color: AppColors.warning,
             isDark: isDark,
@@ -247,8 +235,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _buildMetricCard(
-            value: Formatters.integer(
-                (state.inventory['outOfStockCount'] as num?)?.toInt() ?? 0),
+            value: Formatters.integer(state.inventory.outOfStockCount),
             label: 'Out',
             color: AppColors.error,
             isDark: isDark,
@@ -281,15 +268,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       child: Column(
         children: [
-          Text(
-            value,
-            style: AppTypography.title2.copyWith(color: color),
-          ),
+          Text(value, style: AppTypography.title2.copyWith(color: color)),
           const SizedBox(height: AppSpacing.xs),
           Text(
             label,
             style: AppTypography.caption1.copyWith(
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
             ),
           ),
         ],

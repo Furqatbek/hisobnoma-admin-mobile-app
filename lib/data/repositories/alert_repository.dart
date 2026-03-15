@@ -1,5 +1,7 @@
 import 'package:hisobnoma/core/network/api_client.dart';
 import 'package:hisobnoma/core/network/api_endpoints.dart';
+import 'package:hisobnoma/core/network/api_response.dart';
+import 'package:hisobnoma/data/models/alert/alert_models.dart';
 
 /// Repository for alerts management
 class AlertRepository {
@@ -8,7 +10,7 @@ class AlertRepository {
   AlertRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Get paginated alerts
-  Future<Map<String, dynamic>> getAlerts({
+  Future<PaginatedResponse<Alert>> getAlerts({
     bool? unreadOnly,
     int page = 0,
     int size = 20,
@@ -21,7 +23,10 @@ class AlertRepository {
         'size': size,
       },
     );
-    return response.data['data'] as Map<String, dynamic>;
+    return PaginatedResponse.fromJson(
+      response.data['data'] as Map<String, dynamic>,
+      Alert.fromJson,
+    );
   }
 
   /// Get unread alert count
@@ -41,29 +46,21 @@ class AlertRepository {
   }
 
   /// Get alert preferences
-  Future<List<Map<String, dynamic>>> getPreferences() async {
+  Future<List<AlertPreference>> getPreferences() async {
     final response = await _apiClient.get(ApiEndpoints.alertPreferences);
-    return (response.data['data'] as List).cast<Map<String, dynamic>>();
+    return (response.data['data'] as List)
+        .map((e) => AlertPreference.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   /// Update alert preference
   Future<void> updatePreference({
     required String alertType,
-    required bool pushEnabled,
-    required bool inAppEnabled,
-    required bool emailEnabled,
-    required bool smsEnabled,
-    int? thresholdValue,
+    required AlertPreference preference,
   }) async {
     await _apiClient.put(
       ApiEndpoints.updateAlertPreference(alertType),
-      data: {
-        'pushEnabled': pushEnabled,
-        'inAppEnabled': inAppEnabled,
-        'emailEnabled': emailEnabled,
-        'smsEnabled': smsEnabled,
-        if (thresholdValue != null) 'thresholdValue': thresholdValue,
-      },
+      data: preference.toJson(),
     );
   }
 }

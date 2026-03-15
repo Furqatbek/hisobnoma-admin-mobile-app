@@ -16,8 +16,8 @@ class ReportsLoading extends ReportsState {
 }
 
 class ReportsLoaded extends ReportsState {
-  final List<Map<String, dynamic>> chartData;
-  final Map<String, dynamic> revenueSummary;
+  final List<RevenueChartData> chartData;
+  final RevenueSummary revenueSummary;
   final String selectedPeriod;
 
   const ReportsLoaded({

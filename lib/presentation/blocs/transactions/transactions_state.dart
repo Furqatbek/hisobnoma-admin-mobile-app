@@ -16,16 +16,16 @@ class TransactionsLoading extends TransactionsState {
 }
 
 class ProductsSearchLoaded extends TransactionsState {
-  final Map<String, dynamic> data;
+  final List<ProductLookup> products;
 
-  const ProductsSearchLoaded({required this.data});
+  const ProductsSearchLoaded({required this.products});
 
   @override
-  List<Object?> get props => [data];
+  List<Object?> get props => [products];
 }
 
 class BarcodeLookupLoaded extends TransactionsState {
-  final Map<String, dynamic> product;
+  final ProductLookup product;
 
   const BarcodeLookupLoaded({required this.product});
 
@@ -34,7 +34,7 @@ class BarcodeLookupLoaded extends TransactionsState {
 }
 
 class QuickSaleCompleted extends TransactionsState {
-  final Map<String, dynamic> transaction;
+  final QuickSaleResponse transaction;
 
   const QuickSaleCompleted({required this.transaction});
 
@@ -43,7 +43,7 @@ class QuickSaleCompleted extends TransactionsState {
 }
 
 class QuickCountCompleted extends TransactionsState {
-  final Map<String, dynamic> result;
+  final QuickCountResponse result;
 
   const QuickCountCompleted({required this.result});
 

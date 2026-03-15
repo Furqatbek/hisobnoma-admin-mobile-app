@@ -16,20 +16,38 @@ class AlertsLoading extends AlertsState {
 }
 
 class AlertsLoaded extends AlertsState {
-  final Map<String, dynamic> data;
+  final List<Alert> alerts;
   final int unreadCount;
+  final int page;
+  final int totalPages;
+  final bool hasMore;
 
-  const AlertsLoaded({required this.data, this.unreadCount = 0});
+  const AlertsLoaded({
+    required this.alerts,
+    this.unreadCount = 0,
+    this.page = 0,
+    this.totalPages = 0,
+    this.hasMore = false,
+  });
 
-  AlertsLoaded copyWith({Map<String, dynamic>? data, int? unreadCount}) {
+  AlertsLoaded copyWith({
+    List<Alert>? alerts,
+    int? unreadCount,
+    int? page,
+    int? totalPages,
+    bool? hasMore,
+  }) {
     return AlertsLoaded(
-      data: data ?? this.data,
+      alerts: alerts ?? this.alerts,
       unreadCount: unreadCount ?? this.unreadCount,
+      page: page ?? this.page,
+      totalPages: totalPages ?? this.totalPages,
+      hasMore: hasMore ?? this.hasMore,
     );
   }
 
   @override
-  List<Object?> get props => [data, unreadCount];
+  List<Object?> get props => [alerts, unreadCount, page, totalPages, hasMore];
 }
 
 class AlertsUnreadCountLoaded extends AlertsState {

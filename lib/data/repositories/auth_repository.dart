@@ -1,6 +1,7 @@
 import 'package:hisobnoma/core/network/api_client.dart';
 import 'package:hisobnoma/core/network/api_endpoints.dart';
 import 'package:hisobnoma/core/network/interceptors/auth_interceptor.dart';
+import 'package:hisobnoma/data/models/auth/auth_models.dart';
 
 /// Repository for authentication operations
 class AuthRepository {
@@ -14,58 +15,41 @@ class AuthRepository {
         _authInterceptor = authInterceptor;
 
   /// Login with phone + OTP code
-  Future<Map<String, dynamic>> login({
-    required String phone,
-    required String code,
-  }) async {
+  Future<LoginResponse> login(LoginRequest request) async {
     final response = await _apiClient.post(
       ApiEndpoints.login,
-      data: {'phone': phone, 'code': code},
+      data: request.toJson(),
     );
     final data = response.data['data'] as Map<String, dynamic>;
+    final loginResponse = LoginResponse.fromJson(data);
 
     await _authInterceptor.saveTokens(
-      accessToken: data['accessToken'],
-      refreshToken: data['refreshToken'],
+      accessToken: loginResponse.accessToken,
+      refreshToken: loginResponse.refreshToken,
+    );
+    await _authInterceptor.saveUserInfo(
+      userId: loginResponse.userId,
+      permissions: loginResponse.permissions,
     );
 
-    return data;
-  }
-
-  /// Refresh access token
-  Future<void> refreshToken() async {
-    // Handled by AuthInterceptor automatically
+    return loginResponse;
   }
 
   /// Register device for push notifications
-  Future<Map<String, dynamic>> registerDevice({
-    required String deviceId,
-    required String fcmToken,
-    required String platform,
-    required String deviceName,
-    required String deviceModel,
-    required String osVersion,
-    required String appVersion,
-  }) async {
+  Future<DeviceInfo> registerDevice(DeviceRegistration registration) async {
     final response = await _apiClient.post(
       ApiEndpoints.registerDevice,
-      data: {
-        'deviceId': deviceId,
-        'fcmToken': fcmToken,
-        'platform': platform,
-        'deviceName': deviceName,
-        'deviceModel': deviceModel,
-        'osVersion': osVersion,
-        'appVersion': appVersion,
-      },
+      data: registration.toJson(),
     );
-    return response.data['data'] as Map<String, dynamic>;
+    return DeviceInfo.fromJson(response.data['data'] as Map<String, dynamic>);
   }
 
   /// Get registered devices
-  Future<List<Map<String, dynamic>>> getDevices() async {
+  Future<List<DeviceInfo>> getDevices() async {
     final response = await _apiClient.get(ApiEndpoints.devices);
-    return (response.data['data'] as List).cast<Map<String, dynamic>>();
+    return (response.data['data'] as List)
+        .map((e) => DeviceInfo.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   /// Deactivate a device
@@ -75,13 +59,20 @@ class AuthRepository {
 
   /// Logout and optionally deactivate device
   Future<void> logout({String? deviceId}) async {
-    await _apiClient.post(
-      ApiEndpoints.logout,
-      queryParameters: deviceId != null ? {'deviceId': deviceId} : null,
-    );
+    try {
+      await _apiClient.post(
+        ApiEndpoints.logout,
+        queryParameters: deviceId != null ? {'deviceId': deviceId} : null,
+      );
+    } catch (_) {
+      // Proceed with local cleanup even if API call fails
+    }
     await _authInterceptor.clearTokens();
   }
 
   /// Check if user is authenticated
   Future<bool> isAuthenticated() => _authInterceptor.hasToken();
+
+  /// Get current user's permissions
+  Future<List<String>> getPermissions() => _authInterceptor.getPermissions();
 }
