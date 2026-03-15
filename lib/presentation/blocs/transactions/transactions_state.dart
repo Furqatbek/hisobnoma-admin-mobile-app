@@ -17,11 +17,12 @@ class TransactionsLoading extends TransactionsState {
 
 class ProductsSearchLoaded extends TransactionsState {
   final List<ProductLookup> products;
+  final String query;
 
-  const ProductsSearchLoaded({required this.products});
+  const ProductsSearchLoaded({required this.products, this.query = ''});
 
   @override
-  List<Object?> get props => [products];
+  List<Object?> get props => [products, query];
 }
 
 class BarcodeLookupLoaded extends TransactionsState {

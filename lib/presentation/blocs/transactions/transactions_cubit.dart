@@ -12,11 +12,17 @@ class TransactionsCubit extends Cubit<TransactionsState> {
       : _transactionRepository = transactionRepository,
         super(const TransactionsInitial());
 
+  void reset() => emit(const TransactionsInitial());
+
   Future<void> searchProducts(String query) async {
+    if (query.trim().isEmpty) {
+      emit(const ProductsSearchLoaded(products: []));
+      return;
+    }
     emit(const TransactionsLoading());
     try {
       final data = await _transactionRepository.searchProducts(query: query);
-      emit(ProductsSearchLoaded(products: data.content));
+      emit(ProductsSearchLoaded(products: data.content, query: query));
     } catch (e) {
       emit(TransactionsError(message: e.toString()));
     }
