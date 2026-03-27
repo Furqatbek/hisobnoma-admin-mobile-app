@@ -40,11 +40,14 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
           ),
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height -
-                MediaQuery.of(context).padding.top -
-                MediaQuery.of(context).padding.bottom,
-            child: Column(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  MediaQuery.of(context).padding.bottom,
+            ),
+            child: IntrinsicHeight(
+              child: Column(
               children: [
                 const Spacer(flex: 2),
                 // App icon
@@ -102,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const Spacer(flex: 3),
               ],
+              ),
             ),
           ),
         ),
