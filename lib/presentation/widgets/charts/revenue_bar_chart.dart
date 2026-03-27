@@ -143,7 +143,6 @@ class RevenueBarChart extends StatelessWidget {
                     getTooltipColor: (_) => isDark
                         ? AppColors.darkElevated
                         : AppColors.cardBackground,
-                    tooltipRoundedRadius: AppSpacing.radiusSm,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
                         '${data[groupIndex].label}\n',

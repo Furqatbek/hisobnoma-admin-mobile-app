@@ -127,7 +127,6 @@ class RevenueLineChart extends StatelessWidget {
                   getTooltipColor: (spot) => isDark
                       ? AppColors.darkElevated
                       : AppColors.cardBackground,
-                  tooltipRoundedRadius: AppSpacing.radiusSm,
                   getTooltipItems: (spots) => spots.map((spot) {
                     return LineTooltipItem(
                       Formatters.compactCurrency(spot.y),
