@@ -1,8 +1,8 @@
 class LoginRequest {
-  final String phone;
-  final String code;
+  final String username;
+  final String pin;
 
-  const LoginRequest({required this.phone, required this.code});
+  const LoginRequest({required this.username, required this.pin});
 
-  Map<String, dynamic> toJson() => {'phone': phone, 'code': code};
+  Map<String, dynamic> toJson() => {'username': username, 'pin': pin};
 }

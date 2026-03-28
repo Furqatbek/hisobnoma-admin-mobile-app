@@ -14,7 +14,7 @@ class AuthRepository {
   })  : _apiClient = apiClient,
         _authInterceptor = authInterceptor;
 
-  /// Login with phone + OTP code
+  /// Login with username + PIN
   Future<LoginResponse> login(LoginRequest request) async {
     final response = await _apiClient.post(
       ApiEndpoints.login,

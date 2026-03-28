@@ -15,16 +15,6 @@ class AuthLoading extends AuthState {
   const AuthLoading();
 }
 
-/// OTP code has been sent, waiting for user to enter it
-class AuthCodeSent extends AuthState {
-  final String phone;
-
-  const AuthCodeSent({required this.phone});
-
-  @override
-  List<Object?> get props => [phone];
-}
-
 class AuthAuthenticated extends AuthState {
   final int? userId;
   final List<String>? permissions;
@@ -41,10 +31,9 @@ class AuthUnauthenticated extends AuthState {
 
 class AuthError extends AuthState {
   final String message;
-  final String? phone; // preserve phone so user can retry
 
-  const AuthError({required this.message, this.phone});
+  const AuthError({required this.message});
 
   @override
-  List<Object?> get props => [message, phone];
+  List<Object?> get props => [message];
 }

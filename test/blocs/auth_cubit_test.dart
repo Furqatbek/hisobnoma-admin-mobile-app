@@ -56,19 +56,7 @@ void main() {
       );
     });
 
-    group('sendCode', () {
-      blocTest<AuthCubit, AuthState>(
-        'emits AuthCodeSent with phone number',
-        build: () => AuthCubit(authRepository: mockRepository),
-        act: (cubit) => cubit.sendCode('+998901234567'),
-        expect: () => [
-          isA<AuthCodeSent>()
-              .having((s) => s.phone, 'phone', '+998901234567'),
-        ],
-      );
-    });
-
-    group('verifyCode', () {
+    group('login', () {
       blocTest<AuthCubit, AuthState>(
         'emits [AuthLoading, AuthAuthenticated] on success',
         setUp: () {
@@ -85,9 +73,9 @@ void main() {
           );
         },
         build: () => AuthCubit(authRepository: mockRepository),
-        act: (cubit) => cubit.verifyCode(
-          phone: '+998901234567',
-          code: '123456',
+        act: (cubit) => cubit.login(
+          username: 'admin',
+          pin: '1234',
         ),
         expect: () => [
           isA<AuthLoading>(),
@@ -103,16 +91,15 @@ void main() {
               .thenThrow(Exception('UNAUTHORIZED'));
         },
         build: () => AuthCubit(authRepository: mockRepository),
-        act: (cubit) => cubit.verifyCode(
-          phone: '+998901234567',
-          code: '000000',
+        act: (cubit) => cubit.login(
+          username: 'admin',
+          pin: '0000',
         ),
         expect: () => [
           isA<AuthLoading>(),
           isA<AuthError>()
               .having((s) => s.message, 'message',
-                  'Invalid verification code. Please try again.')
-              .having((s) => s.phone, 'phone', '+998901234567'),
+                  'Invalid username or PIN. Please try again.'),
         ],
       );
 
@@ -123,21 +110,12 @@ void main() {
               .thenThrow(Exception('SocketException'));
         },
         build: () => AuthCubit(authRepository: mockRepository),
-        act: (cubit) => cubit.verifyCode(phone: '123', code: '456'),
+        act: (cubit) => cubit.login(username: 'admin', pin: '1234'),
         expect: () => [
           isA<AuthLoading>(),
           isA<AuthError>().having((s) => s.message, 'message',
               'No internet connection. Please check your network.'),
         ],
-      );
-    });
-
-    group('backToPhone', () {
-      blocTest<AuthCubit, AuthState>(
-        'emits AuthUnauthenticated',
-        build: () => AuthCubit(authRepository: mockRepository),
-        act: (cubit) => cubit.backToPhone(),
-        expect: () => [isA<AuthUnauthenticated>()],
       );
     });
 

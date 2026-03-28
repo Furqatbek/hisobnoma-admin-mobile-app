@@ -3,7 +3,7 @@ abstract final class ApiEndpoints {
   static const String baseUrl = '/api/v1/mobile';
 
   // Auth
-  static const String login = '/auth/login';
+  static const String login = '/auth/pin-login';
   static const String refreshToken = '/auth/refresh';
   static const String registerDevice = '/auth/register-device';
   static const String devices = '/auth/devices';

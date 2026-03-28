@@ -22,38 +22,23 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Step 1: User submits phone number → show OTP screen
-  void sendCode(String phone) {
-    // In a real app, this would call an API to send SMS.
-    // For now, we transition to the code-entry state.
-    emit(AuthCodeSent(phone: phone));
-  }
-
-  /// Step 2: User enters OTP code → authenticate
-  Future<void> verifyCode({
-    required String phone,
-    required String code,
+  /// Login with username + pin
+  Future<void> login({
+    required String username,
+    required String pin,
   }) async {
     emit(const AuthLoading());
     try {
       final response = await _authRepository.login(
-        LoginRequest(phone: phone, code: code),
+        LoginRequest(username: username, pin: pin),
       );
       emit(AuthAuthenticated(
         userId: response.userId,
         permissions: response.permissions,
       ));
     } catch (e) {
-      emit(AuthError(
-        message: _parseError(e),
-        phone: phone,
-      ));
+      emit(AuthError(message: _parseError(e)));
     }
-  }
-
-  /// Go back to phone input from OTP screen
-  void backToPhone() {
-    emit(const AuthUnauthenticated());
   }
 
   Future<void> logout() async {
@@ -70,7 +55,7 @@ class AuthCubit extends Cubit<AuthState> {
     final message = error.toString();
     if (message.contains('UNAUTHORIZED') ||
         message.contains('Invalid or expired')) {
-      return 'Invalid verification code. Please try again.';
+      return 'Invalid username or PIN. Please try again.';
     }
     if (message.contains('NETWORK_ERROR') ||
         message.contains('SocketException')) {
