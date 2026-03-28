@@ -19,7 +19,42 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthAuthenticated(permissions: permissions));
     } else {
       emit(const AuthUnauthenticated());
+      await loadUsers();
     }
+  }
+
+  /// Fetch available user accounts
+  Future<void> loadUsers() async {
+    try {
+      final users = await _authRepository.getUsers();
+      emit(AuthUsersLoaded(users: users));
+    } catch (e) {
+      emit(AuthError(message: _parseError(e)));
+    }
+  }
+
+  /// User selects an account from the list
+  void selectAccount(UserAccount user) {
+    final currentState = state;
+    final users = currentState is AuthUsersLoaded
+        ? currentState.users
+        : currentState is AuthAccountSelected
+            ? currentState.users
+            : currentState is AuthError
+                ? currentState.users ?? []
+                : <UserAccount>[];
+    emit(AuthAccountSelected(users: users, selectedUser: user));
+  }
+
+  /// Go back to account selection
+  void backToAccountSelection() {
+    final currentState = state;
+    final users = currentState is AuthAccountSelected
+        ? currentState.users
+        : currentState is AuthError
+            ? currentState.users ?? []
+            : <UserAccount>[];
+    emit(AuthUsersLoaded(users: users));
   }
 
   /// Login with username + pin
@@ -27,6 +62,18 @@ class AuthCubit extends Cubit<AuthState> {
     required String username,
     required String pin,
   }) async {
+    final currentState = state;
+    final users = currentState is AuthAccountSelected
+        ? currentState.users
+        : currentState is AuthError
+            ? currentState.users
+            : null;
+    final selectedUser = currentState is AuthAccountSelected
+        ? currentState.selectedUser
+        : currentState is AuthError
+            ? currentState.selectedUser
+            : null;
+
     emit(const AuthLoading());
     try {
       final response = await _authRepository.login(
@@ -37,7 +84,11 @@ class AuthCubit extends Cubit<AuthState> {
         permissions: response.permissions,
       ));
     } catch (e) {
-      emit(AuthError(message: _parseError(e)));
+      emit(AuthError(
+        message: _parseError(e),
+        users: users,
+        selectedUser: selectedUser,
+      ));
     }
   }
 
@@ -49,6 +100,7 @@ class AuthCubit extends Cubit<AuthState> {
       // Proceed with logout even on failure
     }
     emit(const AuthUnauthenticated());
+    await loadUsers();
   }
 
   String _parseError(Object error) {

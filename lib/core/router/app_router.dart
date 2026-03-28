@@ -38,9 +38,16 @@ GoRouter createAppRouter(AuthCubit authCubit) {
       final isOnSplash = state.matchedLocation == AppRoutes.splash;
       final isOnLogin = state.matchedLocation == AppRoutes.login;
 
-      // While auth is loading, stay on splash
-      if (authState is AuthInitial || authState is AuthLoading) {
+      // While initial auth check is loading, stay on splash
+      if (authState is AuthInitial) {
         return isOnSplash ? null : AppRoutes.splash;
+      }
+
+      // Login-related states — stay on / go to login
+      if (authState is AuthUsersLoaded ||
+          authState is AuthAccountSelected ||
+          authState is AuthLoading) {
+        return isOnLogin ? null : AppRoutes.login;
       }
 
       // Auth resolved — leave splash

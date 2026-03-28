@@ -5,10 +5,11 @@ import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_strings.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
+import 'package:hisobnoma/data/models/auth/user_account.dart';
 import 'package:hisobnoma/presentation/blocs/auth/auth_cubit.dart';
 import 'package:hisobnoma/presentation/widgets/common/animations.dart';
 
-/// Login screen with username + PIN
+/// Login screen: select account → enter PIN
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -17,17 +18,22 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _usernameController = TextEditingController();
   final _pinController = TextEditingController();
-  final _usernameFocusNode = FocusNode();
   final _pinFocusNode = FocusNode();
   bool _obscurePin = true;
 
   @override
+  void initState() {
+    super.initState();
+    final state = context.read<AuthCubit>().state;
+    if (state is AuthUnauthenticated || state is AuthInitial) {
+      context.read<AuthCubit>().loadUsers();
+    }
+  }
+
+  @override
   void dispose() {
-    _usernameController.dispose();
     _pinController.dispose();
-    _usernameFocusNode.dispose();
     _pinFocusNode.dispose();
     super.dispose();
   }
@@ -39,9 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               minHeight: MediaQuery.of(context).size.height -
@@ -52,10 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 children: [
                   const Spacer(flex: 2),
-                  // App icon
-                  FadeScaleIn(
-                    child: _buildAppIcon(),
-                  ),
+                  FadeScaleIn(child: _buildAppIcon()),
                   const SizedBox(height: AppSpacing.lg),
                   FadeScaleIn(
                     delay: const Duration(milliseconds: 100),
@@ -82,10 +83,39 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xxl),
 
-                  // Login form
-                  FadeScaleIn(
-                    delay: const Duration(milliseconds: 300),
-                    child: _buildLoginForm(context, isDark),
+                  // Auth content
+                  BlocBuilder<AuthCubit, AuthState>(
+                    builder: (context, state) {
+                      if (state is AuthUsersLoaded) {
+                        return _buildAccountList(state.users, isDark);
+                      }
+                      if (state is AuthAccountSelected) {
+                        return _buildPinEntry(state.selectedUser, isDark);
+                      }
+                      if (state is AuthError) {
+                        if (state.selectedUser != null) {
+                          return _buildPinEntry(
+                            state.selectedUser!,
+                            isDark,
+                            errorMessage: state.message,
+                          );
+                        }
+                        if (state.users != null && state.users!.isNotEmpty) {
+                          return _buildAccountList(state.users!, isDark,
+                              errorMessage: state.message);
+                        }
+                        return _buildErrorRetry(state.message, isDark);
+                      }
+                      if (state is AuthLoading) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      // AuthInitial / AuthUnauthenticated — loading users
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    },
                   ),
 
                   const Spacer(flex: 3),
@@ -98,196 +128,309 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLoginForm(BuildContext context, bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Username field
-        Text(
-          'Username',
-          style: AppTypography.subheadline.copyWith(
-            color: isDark
-                ? AppColors.darkTextSecondary
-                : AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkFill : AppColors.fill,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-          ),
-          child: TextField(
-            controller: _usernameController,
-            focusNode: _usernameFocusNode,
-            textInputAction: TextInputAction.next,
-            onSubmitted: (_) => _pinFocusNode.requestFocus(),
-            style: AppTypography.body.copyWith(
+  Widget _buildAccountList(
+    List<UserAccount> users,
+    bool isDark, {
+    String? errorMessage,
+  }) {
+    return FadeScaleIn(
+      delay: const Duration(milliseconds: 300),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Select Account',
+            style: AppTypography.title3.copyWith(
               color: isDark
                   ? AppColors.darkTextPrimary
                   : AppColors.textPrimary,
             ),
-            decoration: InputDecoration(
-              hintText: 'Enter username',
-              hintStyle: AppTypography.body.copyWith(
-                color: AppColors.textTertiary,
-              ),
-              prefixIcon: Icon(
-                Icons.person_outline,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.md,
-              ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          if (errorMessage != null) ...[
+            Text(
+              errorMessage,
+              style: AppTypography.footnote.copyWith(color: AppColors.error),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-
-        // PIN field
-        Text(
-          'PIN',
-          style: AppTypography.subheadline.copyWith(
-            color: isDark
-                ? AppColors.darkTextSecondary
-                : AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkFill : AppColors.fill,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-          ),
-          child: TextField(
-            controller: _pinController,
-            focusNode: _pinFocusNode,
-            keyboardType: TextInputType.number,
-            obscureText: _obscurePin,
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _onLogin(context),
-            style: AppTypography.body.copyWith(
-              color: isDark
-                  ? AppColors.darkTextPrimary
-                  : AppColors.textPrimary,
-              letterSpacing: _obscurePin ? 4 : 0,
-            ),
-            decoration: InputDecoration(
-              hintText: 'Enter PIN',
-              hintStyle: AppTypography.body.copyWith(
-                color: AppColors.textTertiary,
-                letterSpacing: 0,
-              ),
-              prefixIcon: Icon(
-                Icons.lock_outline,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePin ? Icons.visibility_off : Icons.visibility,
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.textSecondary,
-                  size: 20,
-                ),
-                onPressed: () => setState(() => _obscurePin = !_obscurePin),
-              ),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.md,
-              ),
-            ),
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-
-        // Error message
-        BlocBuilder<AuthCubit, AuthState>(
-          builder: (context, state) {
-            if (state is AuthError) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                child: Text(
-                  state.message,
-                  style: AppTypography.footnote.copyWith(
-                    color: AppColors.error,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          },
-        ),
-
-        // Login button
-        BlocBuilder<AuthCubit, AuthState>(
-          builder: (context, state) {
-            final isLoading = state is AuthLoading;
-            return SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : () => _onLogin(context),
-                child: isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text('Login'),
-              ),
-            );
-          },
-        ),
-      ],
+            const SizedBox(height: AppSpacing.md),
+          ],
+          ...users.map((user) => _buildAccountTile(user, isDark)),
+        ],
+      ),
     );
   }
 
-  void _onLogin(BuildContext context) {
-    final username = _usernameController.text.trim();
-    final pin = _pinController.text.trim();
+  Widget _buildAccountTile(UserAccount user, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Material(
+        color: isDark ? AppColors.darkFill : AppColors.fill,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            _pinController.clear();
+            context.read<AuthCubit>().selectAccount(user);
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.md,
+            ),
+            child: Row(
+              children: [
+                // Avatar with initials
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.royalBlue.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      user.initials,
+                      style: AppTypography.headline.copyWith(
+                        color: AppColors.royalBlue,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.fullName,
+                        style: AppTypography.body.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        user.username,
+                        style: AppTypography.caption1.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-    if (username.isEmpty) {
-      _showError(context, 'Please enter your username');
-      return;
-    }
+  Widget _buildPinEntry(
+    UserAccount user,
+    bool isDark, {
+    String? errorMessage,
+  }) {
+    return FadeScaleIn(
+      child: Column(
+        children: [
+          // Back + selected user
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  context.read<AuthCubit>().backToAccountSelection();
+                },
+                child: Icon(
+                  Icons.arrow_back_ios,
+                  size: 20,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.royalBlue.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: Text(
+                    user.initials,
+                    style: AppTypography.subheadline.copyWith(
+                      color: AppColors.royalBlue,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user.fullName,
+                      style: AppTypography.headline.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      user.username,
+                      style: AppTypography.caption1.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+
+          // PIN field
+          Container(
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkFill : AppColors.fill,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+            ),
+            child: TextField(
+              controller: _pinController,
+              focusNode: _pinFocusNode,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              obscureText: _obscurePin,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _onLogin(context, user),
+              style: AppTypography.body.copyWith(
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
+                letterSpacing: _obscurePin ? 4 : 0,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Enter PIN',
+                hintStyle: AppTypography.body.copyWith(
+                  color: AppColors.textTertiary,
+                  letterSpacing: 0,
+                ),
+                prefixIcon: Icon(
+                  Icons.lock_outline,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePin ? Icons.visibility_off : Icons.visibility,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
+                    size: 20,
+                  ),
+                  onPressed: () =>
+                      setState(() => _obscurePin = !_obscurePin),
+                ),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.md,
+                ),
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Error message
+          if (errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: Text(
+                errorMessage,
+                style: AppTypography.footnote.copyWith(
+                  color: AppColors.error,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+
+          // Login button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _onLogin(context, user),
+              child: const Text('Login'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorRetry(String message, bool isDark) {
+    return FadeScaleIn(
+      child: Column(
+        children: [
+          Text(
+            message,
+            style: AppTypography.subheadline.copyWith(
+              color: AppColors.error,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          ElevatedButton(
+            onPressed: () => context.read<AuthCubit>().loadUsers(),
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onLogin(BuildContext context, UserAccount user) {
+    final pin = _pinController.text.trim();
     if (pin.isEmpty) {
-      _showError(context, 'Please enter your PIN');
+      HapticFeedback.heavyImpact();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please enter your PIN'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+          ),
+        ),
+      );
       return;
     }
 
     HapticFeedback.mediumImpact();
-    context.read<AuthCubit>().login(username: username, pin: pin);
-  }
-
-  void _showError(BuildContext context, String message) {
-    HapticFeedback.heavyImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        ),
-      ),
-    );
+    context.read<AuthCubit>().login(username: user.username, pin: pin);
   }
 
   Widget _buildAppIcon() {

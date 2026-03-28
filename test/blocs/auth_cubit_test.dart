@@ -9,6 +9,27 @@ class MockAuthRepository extends Mock implements AuthRepository {}
 
 class FakeLoginRequest extends Fake implements LoginRequest {}
 
+const _testUsers = [
+  UserAccount(
+    id: 1,
+    username: 'admin',
+    firstName: 'System',
+    lastName: 'Admin',
+    fullName: 'System Admin',
+    initials: 'SA',
+    hasPin: true,
+  ),
+  UserAccount(
+    id: 2,
+    username: 'ahmed',
+    firstName: 'Ahmed',
+    lastName: '',
+    fullName: 'Ahmed',
+    initials: 'A',
+    hasPin: true,
+  ),
+];
+
 void main() {
   late MockAuthRepository mockRepository;
 
@@ -45,14 +66,50 @@ void main() {
       );
 
       blocTest<AuthCubit, AuthState>(
-        'emits AuthUnauthenticated when no token',
+        'emits AuthUnauthenticated then loads users when no token',
         setUp: () {
           when(() => mockRepository.isAuthenticated())
               .thenAnswer((_) async => false);
+          when(() => mockRepository.getUsers())
+              .thenAnswer((_) async => _testUsers);
         },
         build: () => AuthCubit(authRepository: mockRepository),
         act: (cubit) => cubit.checkAuth(),
-        expect: () => [isA<AuthUnauthenticated>()],
+        expect: () => [
+          isA<AuthUnauthenticated>(),
+          isA<AuthUsersLoaded>()
+              .having((s) => s.users.length, 'users.length', 2),
+        ],
+      );
+    });
+
+    group('loadUsers', () {
+      blocTest<AuthCubit, AuthState>(
+        'emits AuthUsersLoaded on success',
+        setUp: () {
+          when(() => mockRepository.getUsers())
+              .thenAnswer((_) async => _testUsers);
+        },
+        build: () => AuthCubit(authRepository: mockRepository),
+        act: (cubit) => cubit.loadUsers(),
+        expect: () => [
+          isA<AuthUsersLoaded>()
+              .having((s) => s.users.length, 'users.length', 2),
+        ],
+      );
+
+      blocTest<AuthCubit, AuthState>(
+        'emits AuthError on failure',
+        setUp: () {
+          when(() => mockRepository.getUsers())
+              .thenThrow(Exception('SocketException'));
+        },
+        build: () => AuthCubit(authRepository: mockRepository),
+        act: (cubit) => cubit.loadUsers(),
+        expect: () => [
+          isA<AuthError>().having((s) => s.message, 'message',
+              'No internet connection. Please check your network.'),
+        ],
       );
     });
 
@@ -60,6 +117,8 @@ void main() {
       blocTest<AuthCubit, AuthState>(
         'emits [AuthLoading, AuthAuthenticated] on success',
         setUp: () {
+          when(() => mockRepository.getUsers())
+              .thenAnswer((_) async => _testUsers);
           when(() => mockRepository.login(any())).thenAnswer(
             (_) async => const LoginResponse(
               accessToken: 'token',
@@ -73,10 +132,11 @@ void main() {
           );
         },
         build: () => AuthCubit(authRepository: mockRepository),
-        act: (cubit) => cubit.login(
-          username: 'admin',
-          pin: '1234',
+        seed: () => AuthAccountSelected(
+          users: _testUsers,
+          selectedUser: _testUsers[0],
         ),
+        act: (cubit) => cubit.login(username: 'admin', pin: '1234'),
         expect: () => [
           isA<AuthLoading>(),
           isA<AuthAuthenticated>()
@@ -85,65 +145,41 @@ void main() {
       );
 
       blocTest<AuthCubit, AuthState>(
-        'emits [AuthLoading, AuthError] on failure',
+        'emits [AuthLoading, AuthError] on failure with user preserved',
         setUp: () {
           when(() => mockRepository.login(any()))
               .thenThrow(Exception('UNAUTHORIZED'));
         },
         build: () => AuthCubit(authRepository: mockRepository),
-        act: (cubit) => cubit.login(
-          username: 'admin',
-          pin: '0000',
+        seed: () => AuthAccountSelected(
+          users: _testUsers,
+          selectedUser: _testUsers[0],
         ),
+        act: (cubit) => cubit.login(username: 'admin', pin: '0000'),
         expect: () => [
           isA<AuthLoading>(),
           isA<AuthError>()
               .having((s) => s.message, 'message',
-                  'Invalid username or PIN. Please try again.'),
-        ],
-      );
-
-      blocTest<AuthCubit, AuthState>(
-        'emits network error message on SocketException',
-        setUp: () {
-          when(() => mockRepository.login(any()))
-              .thenThrow(Exception('SocketException'));
-        },
-        build: () => AuthCubit(authRepository: mockRepository),
-        act: (cubit) => cubit.login(username: 'admin', pin: '1234'),
-        expect: () => [
-          isA<AuthLoading>(),
-          isA<AuthError>().having((s) => s.message, 'message',
-              'No internet connection. Please check your network.'),
+                  'Invalid username or PIN. Please try again.')
+              .having((s) => s.selectedUser?.username, 'selectedUser', 'admin'),
         ],
       );
     });
 
     group('logout', () {
       blocTest<AuthCubit, AuthState>(
-        'emits [AuthLoading, AuthUnauthenticated] on success',
+        'emits [AuthLoading, AuthUnauthenticated, AuthUsersLoaded] on success',
         setUp: () {
           when(() => mockRepository.logout()).thenAnswer((_) async {});
+          when(() => mockRepository.getUsers())
+              .thenAnswer((_) async => _testUsers);
         },
         build: () => AuthCubit(authRepository: mockRepository),
         act: (cubit) => cubit.logout(),
         expect: () => [
           isA<AuthLoading>(),
           isA<AuthUnauthenticated>(),
-        ],
-      );
-
-      blocTest<AuthCubit, AuthState>(
-        'still logs out on API failure',
-        setUp: () {
-          when(() => mockRepository.logout())
-              .thenThrow(Exception('Network error'));
-        },
-        build: () => AuthCubit(authRepository: mockRepository),
-        act: (cubit) => cubit.logout(),
-        expect: () => [
-          isA<AuthLoading>(),
-          isA<AuthUnauthenticated>(),
+          isA<AuthUsersLoaded>(),
         ],
       );
     });

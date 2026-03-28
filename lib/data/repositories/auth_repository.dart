@@ -14,6 +14,14 @@ class AuthRepository {
   })  : _apiClient = apiClient,
         _authInterceptor = authInterceptor;
 
+  /// Fetch list of user accounts
+  Future<List<UserAccount>> getUsers() async {
+    final response = await _apiClient.get(ApiEndpoints.usersList);
+    return (response.data['data'] as List)
+        .map((e) => UserAccount.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   /// Login with username + PIN
   Future<LoginResponse> login(LoginRequest request) async {
     final response = await _apiClient.post(

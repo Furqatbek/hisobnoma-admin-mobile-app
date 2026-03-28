@@ -27,6 +27,7 @@ class AuthInterceptor extends QueuedInterceptor {
   ) async {
     // Skip auth header for login/refresh endpoints
     final isAuthEndpoint = options.path.contains('/auth/pin-login') ||
+        options.path.contains('/auth/users/list') ||
         options.path.contains('/auth/refresh');
 
     if (!isAuthEndpoint) {
