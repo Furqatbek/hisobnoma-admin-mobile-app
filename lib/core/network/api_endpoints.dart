@@ -1,6 +1,6 @@
 /// All API endpoint paths for the Mobile Module
 abstract final class ApiEndpoints {
-  static const String baseUrl = '/api/v1/mobile';
+  static const String baseUrl = '/api/v1';
 
   // Auth
   static const String usersList = '/auth/users/list';

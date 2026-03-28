@@ -30,7 +30,7 @@ class AppConfig {
 
   static const prod = AppConfig._(
     environment: Environment.prod,
-    baseUrl: 'https://www.temurmchj.uz/api',
+    baseUrl: 'https://temurmchj.uz',
     appName: 'Hisobnoma',
     enableLogging: false,
   );
