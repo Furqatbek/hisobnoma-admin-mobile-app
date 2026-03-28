@@ -18,14 +18,17 @@ class LoginResponse {
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
+    final user = json['user'] as Map<String, dynamic>? ?? {};
     return LoginResponse(
       accessToken: json['accessToken'] as String,
       refreshToken: json['refreshToken'] as String,
       tokenType: json['tokenType'] as String? ?? 'Bearer',
       expiresIn: json['expiresIn'] as int? ?? 86400,
-      userId: json['userId'] as int,
-      tenantId: json['tenantId'] as int,
-      permissions: (json['permissions'] as List?)?.cast<String>() ?? [],
+      userId: user['id'] as int? ?? json['userId'] as int? ?? 0,
+      tenantId: user['tenantId'] as int? ?? json['tenantId'] as int? ?? 0,
+      permissions: (user['permissions'] as List?)?.cast<String>() ??
+          (json['permissions'] as List?)?.cast<String>() ??
+          [],
     );
   }
 }
