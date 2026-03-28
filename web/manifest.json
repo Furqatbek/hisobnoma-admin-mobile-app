@@ -1,0 +1,11 @@
+{
+  "name": "Hisobnoma",
+  "short_name": "Hisobnoma",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4169E1",
+  "description": "Financial tracking and accounting app",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
+}
