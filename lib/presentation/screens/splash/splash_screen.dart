@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
@@ -21,8 +22,10 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    // Remove the native splash
-    FlutterNativeSplash.remove();
+    // Remove the native splash (skip on web)
+    if (!kIsWeb) {
+      FlutterNativeSplash.remove();
+    }
 
     _controller = AnimationController(
       vsync: this,
