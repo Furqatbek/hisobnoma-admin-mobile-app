@@ -29,12 +29,13 @@ class SettingsCubit extends Cubit<SettingsState> {
     final currency = _preferences.getString(_currencyKey) ?? 'UZS';
     final localeCode = _preferences.getString(_localeKey);
 
-    Locale? locale;
+    Locale locale;
     if (localeCode != null) {
       locale = Locale(localeCode);
     } else {
-      // Auto-detect from system
+      // Auto-detect from system and persist it
       locale = _resolveSystemLocale();
+      _preferences.setString(_localeKey, locale.languageCode);
     }
 
     emit(SettingsState(
