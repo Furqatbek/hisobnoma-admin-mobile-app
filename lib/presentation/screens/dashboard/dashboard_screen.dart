@@ -142,7 +142,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           context.read<AlertsCubit>().loadUnreadCount();
         }
       },
-      child: ListView(
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: ListView(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.screenPadding,
         ),
@@ -246,6 +248,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // Bottom padding for FAB
           const SizedBox(height: 80),
         ],
+      ),
       ),
     );
   }
