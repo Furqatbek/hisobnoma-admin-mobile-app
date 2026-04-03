@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hisobnoma/core/di/injection.dart';
-import 'package:hisobnoma/core/network/interceptors/auth_interceptor.dart';
 import 'package:hisobnoma/presentation/blocs/auth/auth_cubit.dart';
 import 'package:hisobnoma/presentation/screens/auth/login_screen.dart';
 import 'package:hisobnoma/presentation/screens/dashboard/dashboard_screen.dart';
@@ -37,6 +35,7 @@ GoRouter createAppRouter(AuthCubit authCubit) {
       final authState = authCubit.state;
       final isOnSplash = state.matchedLocation == AppRoutes.splash;
       final isOnLogin = state.matchedLocation == AppRoutes.login;
+      final isAuthenticated = authState is AuthAuthenticated;
 
       // While initial auth check is loading, stay on splash
       if (authState is AuthInitial) {
@@ -50,26 +49,26 @@ GoRouter createAppRouter(AuthCubit authCubit) {
         return isOnLogin ? null : AppRoutes.login;
       }
 
+      // Auth error — go to login
+      if (authState is AuthError) {
+        return isOnLogin ? null : AppRoutes.login;
+      }
+
       // Auth resolved — leave splash
       if (isOnSplash) {
-        final authInterceptor = getIt<AuthInterceptor>();
-        final hasToken = await authInterceptor.hasToken();
-        return hasToken ? AppRoutes.home : AppRoutes.login;
+        return isAuthenticated ? AppRoutes.home : AppRoutes.login;
       }
 
-      // Standard auth redirect
-      final authInterceptor = getIt<AuthInterceptor>();
-      final hasToken = await authInterceptor.hasToken();
-
-      if (authState is AuthAuthenticated && isOnLogin) {
+      // Authenticated user on login page → go home
+      if (isAuthenticated && isOnLogin) {
         return AppRoutes.home;
       }
-      if (!hasToken && !isOnLogin) {
+
+      // Unauthenticated user on protected page → go to login
+      if (!isAuthenticated && !isOnLogin) {
         return AppRoutes.login;
       }
-      if (hasToken && isOnLogin) {
-        return AppRoutes.home;
-      }
+
       return null;
     },
     routes: [
