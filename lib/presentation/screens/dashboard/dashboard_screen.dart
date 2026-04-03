@@ -148,17 +148,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         children: [
           const SizedBox(height: AppSpacing.sm),
-          // Greeting
+
+          // Greeting + last updated
           FadeScaleIn(
-            child: Text(
-              _greeting,
-              style: AppTypography.title2.copyWith(
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.textPrimary,
-              ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _greeting,
+                    style: AppTypography.title2.copyWith(
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                if (state.lastUpdated != null)
+                  Text(
+                    Formatters.time(state.lastUpdated!),
+                    style: AppTypography.caption2.copyWith(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textTertiary,
+                    ),
+                  ),
+              ],
             ),
           ),
+
+          // Partial error banner
+          if (state.partialErrors != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _PartialErrorBanner(
+              errors: state.partialErrors!,
+              isDark: isDark,
+              onRetry: () => context.read<DashboardCubit>().refresh(),
+            ),
+          ],
           const SizedBox(height: AppSpacing.md),
 
           // Hero balance card
@@ -169,6 +195,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               changePercent: state.revenue.monthChangePercent,
               todayRevenue: state.revenue.todayRevenue,
               transactionCount: state.revenue.todayTransactionCount,
+              weekRevenue: state.revenue.thisWeekRevenue,
+              weekTransactions: state.revenue.thisWeekTransactionCount,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -178,17 +206,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
             delay: const Duration(milliseconds: 160),
             child: _SummaryPillRow(
               revenue: state.revenue.thisMonthRevenue,
-              revenueChange: state.revenue.weekChangePercent,
+              revenueChange: state.revenue.monthChangePercent,
               expenses: state.financial.apOutstanding,
+              avgTransaction: state.revenue.averageTransactionValue,
               isDark: isDark,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
 
-          // Revenue chart
+          // Revenue chart with period selector
           FadeScaleIn(
             delay: const Duration(milliseconds: 240),
-            child: RevenueLineChart(data: state.chartData),
+            child: _ChartSection(
+              chartData: state.chartData,
+              isDark: isDark,
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
 
@@ -219,18 +251,73 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
+/// Partial error banner
+class _PartialErrorBanner extends StatelessWidget {
+  final List<String> errors;
+  final bool isDark;
+  final VoidCallback onRetry;
+
+  const _PartialErrorBanner({
+    required this.errors,
+    required this.isDark,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.warning.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.warning_amber_rounded, size: 16, color: AppColors.warning),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              'Could not load: ${errors.join(', ')}',
+              style: AppTypography.caption1.copyWith(
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: onRetry,
+            child: Text(
+              'Retry',
+              style: AppTypography.caption1.copyWith(
+                color: AppColors.royalBlue,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Hero card showing current balance with gradient background.
 class _BalanceHeroCard extends StatelessWidget {
   final double balance;
   final double changePercent;
   final double todayRevenue;
   final int transactionCount;
+  final double weekRevenue;
+  final int weekTransactions;
 
   const _BalanceHeroCard({
     required this.balance,
     required this.changePercent,
     required this.todayRevenue,
     required this.transactionCount,
+    required this.weekRevenue,
+    required this.weekTransactions,
   });
 
   @override
@@ -273,46 +360,64 @@ class _BalanceHeroCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
-              Icon(
-                changePercent >= 0
-                    ? Icons.trending_up
-                    : Icons.trending_down,
-                color: Colors.white70,
-                size: 16,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: (changePercent >= 0 ? AppColors.income : AppColors.expense)
+                      .withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      changePercent >= 0
+                          ? Icons.trending_up
+                          : Icons.trending_down,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      Formatters.percentage(changePercent),
+                      style: AppTypography.caption1.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(width: AppSpacing.xs),
+              const SizedBox(width: AppSpacing.sm),
               Text(
-                '${Formatters.percentage(changePercent)} this month',
-                style: AppTypography.footnote.copyWith(color: Colors.white70),
+                'this month',
+                style: AppTypography.caption1.copyWith(color: Colors.white60),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          // Today's mini stats row
+          // Stats row
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.md,
               vertical: AppSpacing.sm,
             ),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _HeroMiniStat(
                   label: 'Today',
                   value: Formatters.compactCurrency(todayRevenue),
+                  sub: '${Formatters.integer(transactionCount)} txn',
                 ),
-                Container(
-                  width: 1,
-                  height: 24,
-                  color: Colors.white24,
-                ),
+                Container(width: 1, height: 30, color: Colors.white24),
                 _HeroMiniStat(
-                  label: 'Transactions',
-                  value: Formatters.integer(transactionCount),
+                  label: 'This Week',
+                  value: Formatters.compactCurrency(weekRevenue),
+                  sub: '${Formatters.integer(weekTransactions)} txn',
                 ),
               ],
             ),
@@ -326,8 +431,9 @@ class _BalanceHeroCard extends StatelessWidget {
 class _HeroMiniStat extends StatelessWidget {
   final String label;
   final String value;
+  final String? sub;
 
-  const _HeroMiniStat({required this.label, required this.value});
+  const _HeroMiniStat({required this.label, required this.value, this.sub});
 
   @override
   Widget build(BuildContext context) {
@@ -341,6 +447,13 @@ class _HeroMiniStat extends StatelessWidget {
               fontSize: 15,
             ),
           ),
+          if (sub != null) ...[
+            const SizedBox(height: 1),
+            Text(
+              sub!,
+              style: AppTypography.caption2.copyWith(color: Colors.white54),
+            ),
+          ],
           const SizedBox(height: 2),
           Text(
             label,
@@ -359,12 +472,14 @@ class _SummaryPillRow extends StatelessWidget {
   final double revenue;
   final double revenueChange;
   final double expenses;
+  final double avgTransaction;
   final bool isDark;
 
   const _SummaryPillRow({
     required this.revenue,
     required this.revenueChange,
     required this.expenses,
+    required this.avgTransaction,
     required this.isDark,
   });
 
@@ -384,10 +499,9 @@ class _SummaryPillRow extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _SummaryPill(
-            label: AppStrings.expenses,
-            value: Formatters.compactCurrency(expenses),
-            change: -3.2,
-            color: AppColors.expense,
+            label: 'Avg. Transaction',
+            value: Formatters.compactCurrency(avgTransaction),
+            color: AppColors.royalBlue,
             isDark: isDark,
           ),
         ),
@@ -399,14 +513,14 @@ class _SummaryPillRow extends StatelessWidget {
 class _SummaryPill extends StatelessWidget {
   final String label;
   final String value;
-  final double change;
+  final double? change;
   final Color color;
   final bool isDark;
 
   const _SummaryPill({
     required this.label,
     required this.value,
-    required this.change,
+    this.change,
     required this.color,
     required this.isDark,
   });
@@ -431,38 +545,172 @@ class _SummaryPill extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: AppTypography.footnote.copyWith(
-              color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(value, style: AppTypography.headline),
-          const SizedBox(height: AppSpacing.xs),
           Row(
             children: [
-              Icon(
-                change >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
-                size: 12,
-                color: color,
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                ),
               ),
-              const SizedBox(width: 2),
+              const SizedBox(width: AppSpacing.xs),
               Text(
-                Formatters.percentage(change),
-                style: AppTypography.caption1.copyWith(color: color),
+                label,
+                style: AppTypography.footnote.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
               ),
             ],
           ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(value, style: AppTypography.headline),
+          if (change != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Row(
+              children: [
+                Icon(
+                  change! >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                  size: 12,
+                  color: change! >= 0 ? AppColors.income : AppColors.expense,
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  '${Formatters.percentage(change!)} this month',
+                  style: AppTypography.caption1.copyWith(
+                    color: change! >= 0 ? AppColors.income : AppColors.expense,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-/// Inventory overview section with 3 metric cards.
+/// Revenue chart with period selector
+class _ChartSection extends StatelessWidget {
+  final List<RevenueChartData> chartData;
+  final bool isDark;
+
+  const _ChartSection({required this.chartData, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = context.read<DashboardCubit>();
+    final selectedPeriod = cubit.chartPeriod;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Revenue Trend',
+                style: AppTypography.title3.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                ),
+              ),
+            ),
+            _PeriodChip(
+              label: 'Day',
+              selected: selectedPeriod == 'daily',
+              onTap: () => cubit.changeChartPeriod('daily'),
+              isDark: isDark,
+            ),
+            const SizedBox(width: 4),
+            _PeriodChip(
+              label: 'Week',
+              selected: selectedPeriod == 'weekly',
+              onTap: () => cubit.changeChartPeriod('weekly'),
+              isDark: isDark,
+            ),
+            const SizedBox(width: 4),
+            _PeriodChip(
+              label: 'Month',
+              selected: selectedPeriod == 'monthly',
+              onTap: () => cubit.changeChartPeriod('monthly'),
+              isDark: isDark,
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        if (chartData.isEmpty)
+          Container(
+            height: 200,
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard : AppColors.cardBackground,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+            ),
+            child: Center(
+              child: Text(
+                'No chart data available',
+                style: AppTypography.subheadline.copyWith(
+                  color: AppColors.textTertiary,
+                ),
+              ),
+            ),
+          )
+        else
+          RevenueLineChart(data: chartData),
+      ],
+    );
+  }
+}
+
+class _PeriodChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final bool isDark;
+
+  const _PeriodChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.royalBlue
+              : (isDark ? AppColors.darkFill : AppColors.fill),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          label,
+          style: AppTypography.caption1.copyWith(
+            color: selected
+                ? Colors.white
+                : (isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary),
+            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Inventory overview section with metric cards.
 class _InventorySection extends StatelessWidget {
   final InventorySummary inventory;
   final bool isDark;
@@ -500,7 +748,7 @@ class _InventorySection extends StatelessWidget {
                 value: Formatters.integer(inventory.lowStockCount),
                 label: 'Low Stock',
                 icon: Icons.warning_amber_outlined,
-                color: AppColors.warning,
+                color: inventory.lowStockCount > 0 ? AppColors.warning : null,
                 isDark: isDark,
               ),
             ),
@@ -510,14 +758,13 @@ class _InventorySection extends StatelessWidget {
                 value: Formatters.integer(inventory.outOfStockCount),
                 label: 'Out of Stock',
                 icon: Icons.remove_shopping_cart_outlined,
-                color: AppColors.error,
+                color: inventory.outOfStockCount > 0 ? AppColors.error : null,
                 isDark: isDark,
               ),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
-        // Inventory value + expiring row
         Row(
           children: [
             Expanded(
@@ -538,6 +785,15 @@ class _InventorySection extends StatelessWidget {
                 color: inventory.expiringCount > 0
                     ? AppColors.warning
                     : null,
+                isDark: isDark,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: _MetricCard(
+                value: Formatters.integer(inventory.totalSkuCount),
+                label: 'Total SKUs',
+                icon: Icons.category_outlined,
                 isDark: isDark,
               ),
             ),
@@ -567,6 +823,55 @@ class _FinancialSection extends StatelessWidget {
           'Financial Overview',
           style: AppTypography.title3.copyWith(
             color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        // Net position highlight
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: financial.netCashPosition >= 0
+                ? AppColors.income.withValues(alpha: 0.08)
+                : AppColors.expense.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+            border: Border.all(
+              color: financial.netCashPosition >= 0
+                  ? AppColors.income.withValues(alpha: 0.2)
+                  : AppColors.expense.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                financial.netCashPosition >= 0
+                    ? Icons.trending_up
+                    : Icons.trending_down,
+                color: financial.netCashPosition >= 0
+                    ? AppColors.income
+                    : AppColors.expense,
+                size: 20,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Net Cash Position',
+                  style: AppTypography.subheadline.copyWith(
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              Text(
+                Formatters.currency(financial.netCashPosition),
+                style: AppTypography.headline.copyWith(
+                  color: financial.netCashPosition >= 0
+                      ? AppColors.income
+                      : AppColors.expense,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
