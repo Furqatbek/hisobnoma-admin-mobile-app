@@ -218,18 +218,18 @@ class SettingsScreen extends StatelessWidget {
     HapticFeedback.selectionClick();
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Log Out'),
         content: const Text('Are you sure you want to log out?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text(AppStrings.cancel),
           ),
           TextButton(
             onPressed: () {
               HapticFeedback.heavyImpact();
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
               context.read<AuthCubit>().logout();
             },
             child: Text(
