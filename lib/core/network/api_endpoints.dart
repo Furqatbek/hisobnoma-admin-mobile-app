@@ -12,30 +12,30 @@ abstract final class ApiEndpoints {
   static const String logout = '/auth/logout';
 
   // Dashboard
-  static const String revenueSummary = '/dashboard/revenue';
-  static const String revenueChart = '/dashboard/revenue/chart';
-  static const String inventorySummary = '/dashboard/inventory';
-  static const String financialSummary = '/dashboard/financial';
+  static const String revenueSummary = '/mobile/dashboard/revenue';
+  static const String revenueChart = '/mobile/dashboard/revenue/chart';
+  static const String inventorySummary = '/mobile/dashboard/inventory';
+  static const String financialSummary = '/mobile/dashboard/finance';
 
   // Alerts
-  static const String alerts = '/alerts';
-  static const String unreadCount = '/alerts/unread-count';
-  static String markRead(int id) => '/alerts/$id/read';
-  static const String markAllRead = '/alerts/read-all';
-  static const String alertPreferences = '/alerts/preferences';
+  static const String alerts = '/mobile/alerts';
+  static const String unreadCount = '/mobile/alerts/count';
+  static String markRead(int id) => '/mobile/alerts/$id/read';
+  static const String markAllRead = '/mobile/alerts/read-all';
+  static const String alertPreferences = '/mobile/alerts/preferences';
   static String updateAlertPreference(String alertType) =>
-      '/alerts/preferences/$alertType';
+      '/mobile/alerts/preferences/$alertType';
 
   // Quick Actions
-  static String barcodeLookup(String barcode) => '/barcode/$barcode';
-  static const String quickCount = '/quick-count';
-  static const String quickSale = '/quick-sale';
-  static const String searchProducts = '/products/search';
-  static const String searchCustomers = '/customers/search';
+  static String barcodeLookup(String barcode) => '/mobile/barcode/$barcode';
+  static const String quickCount = '/mobile/quick-count';
+  static const String quickSale = '/mobile/quick-sale';
+  static const String searchProducts = '/mobile/products/search';
+  static const String searchCustomers = '/mobile/customers/search';
 
   // Sync
-  static const String syncProducts = '/sync/products';
-  static const String syncCustomers = '/sync/customers';
-  static const String syncCategories = '/sync/categories';
-  static const String syncLastUpdated = '/sync/last-updated';
+  static const String syncProducts = '/mobile/sync/products';
+  static const String syncCustomers = '/mobile/sync/customers';
+  static const String syncCategories = '/mobile/sync/categories';
+  static const String syncLastUpdated = '/mobile/sync/last-updated';
 }
