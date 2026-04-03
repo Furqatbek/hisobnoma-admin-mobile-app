@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
-import 'package:hisobnoma/core/constants/app_strings.dart';
+import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/data/models/auth/user_account.dart';
 import 'package:hisobnoma/presentation/blocs/auth/auth_cubit.dart';
@@ -40,6 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -61,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   FadeScaleIn(
                     delay: const Duration(milliseconds: 100),
                     child: Text(
-                      AppStrings.appName,
+                      t.appName,
                       style: AppTypography.title1.copyWith(
                         color: isDark
                             ? AppColors.darkTextPrimary
@@ -73,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   FadeScaleIn(
                     delay: const Duration(milliseconds: 200),
                     child: Text(
-                      'Financial tracking made simple',
+                      t.financialTrackingTagline,
                       style: AppTypography.subheadline.copyWith(
                         color: isDark
                             ? AppColors.darkTextSecondary
@@ -133,13 +134,14 @@ class _LoginScreenState extends State<LoginScreen> {
     bool isDark, {
     String? errorMessage,
   }) {
+    final t = S.of(context);
     return FadeScaleIn(
       delay: const Duration(milliseconds: 300),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Select Account',
+            t.selectAccount,
             style: AppTypography.title3.copyWith(
               color: isDark
                   ? AppColors.darkTextPrimary
@@ -243,6 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
     bool isDark, {
     String? errorMessage,
   }) {
+    final t = S.of(context);
     return FadeScaleIn(
       child: Column(
         children: [
@@ -329,7 +332,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 letterSpacing: _obscurePin ? 4 : 0,
               ),
               decoration: InputDecoration(
-                hintText: 'Enter PIN',
+                hintText: t.enterPin,
                 hintStyle: AppTypography.body.copyWith(
                   color: AppColors.textTertiary,
                   letterSpacing: 0,
@@ -384,7 +387,7 @@ class _LoginScreenState extends State<LoginScreen> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () => _onLogin(context, user),
-              child: const Text('Login'),
+              child: Text(t.login),
             ),
           ),
         ],
@@ -393,6 +396,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildErrorRetry(String message, bool isDark) {
+    final t = S.of(context);
     return FadeScaleIn(
       child: Column(
         children: [
@@ -406,7 +410,7 @@ class _LoginScreenState extends State<LoginScreen> {
           const SizedBox(height: AppSpacing.lg),
           ElevatedButton(
             onPressed: () => context.read<AuthCubit>().loadUsers(),
-            child: const Text('Retry'),
+            child: Text(t.retry),
           ),
         ],
       ),
@@ -414,12 +418,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _onLogin(BuildContext context, UserAccount user) {
+    final t = S.of(context);
     final pin = _pinController.text.trim();
     if (pin.isEmpty) {
       HapticFeedback.heavyImpact();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Please enter your PIN'),
+          content: Text(t.pleaseEnterPin),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),

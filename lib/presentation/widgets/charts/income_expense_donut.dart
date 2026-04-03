@@ -6,6 +6,7 @@ import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
+import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 
 /// Donut chart showing income vs expense ratio with center label.
 class IncomeExpenseDonut extends StatefulWidget {
@@ -52,7 +53,7 @@ class _IncomeExpenseDonutState extends State<IncomeExpenseDonut> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Income vs Expense',
+            S.of(context).incomeVsExpense,
             style: AppTypography.headline.copyWith(
               color:
                   isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
@@ -104,7 +105,7 @@ class _IncomeExpenseDonutState extends State<IncomeExpenseDonut> {
                             ),
                           ),
                           Text(
-                            'Income',
+                            S.of(context).income,
                             style: AppTypography.caption2.copyWith(
                               color: AppColors.textTertiary,
                             ),
@@ -123,14 +124,14 @@ class _IncomeExpenseDonutState extends State<IncomeExpenseDonut> {
                     children: [
                       _LegendItem(
                         color: AppColors.income,
-                        label: 'Income',
+                        label: S.of(context).income,
                         value: Formatters.compactCurrency(widget.income),
                         isDark: isDark,
                       ),
                       const SizedBox(height: AppSpacing.md),
                       _LegendItem(
                         color: AppColors.expense,
-                        label: 'Expense',
+                        label: S.of(context).expense,
                         value: Formatters.compactCurrency(widget.expense),
                         isDark: isDark,
                       ),

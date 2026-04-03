@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
-import 'package:hisobnoma/core/constants/app_strings.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/data/models/transaction/transaction_models.dart';
+import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
 import 'package:hisobnoma/presentation/screens/transactions/add_sale_sheet.dart';
 import 'package:hisobnoma/presentation/widgets/common/animations.dart';
@@ -40,12 +40,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final t = S.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: _isSearching
             ? _buildSearchField(isDark)
-            : Text(AppStrings.transactions, style: AppTypography.headline),
+            : Text(t.transactions, style: AppTypography.headline),
         actions: [
           if (!_isSearching)
             IconButton(
@@ -77,18 +78,18 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               vertical: AppSpacing.sm,
             ),
             child: HisobSegmentedControl<_TabFilter>(
-              segments: const [
+              segments: [
                 HisobSegment(
                   value: _TabFilter.products,
-                  label: 'Products',
+                  label: t.products,
                 ),
                 HisobSegment(
                   value: _TabFilter.quickSale,
-                  label: 'Quick Sale',
+                  label: t.quickSale,
                 ),
                 HisobSegment(
                   value: _TabFilter.quickCount,
-                  label: 'Quick Count',
+                  label: t.quickCount,
                 ),
               ],
               selectedValue: _activeTab,
@@ -112,6 +113,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   Widget _buildSearchField(bool isDark) {
+    final t = S.of(context);
+
     return TextField(
       controller: _searchController,
       focusNode: _searchFocus,
@@ -119,7 +122,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
       ),
       decoration: InputDecoration(
-        hintText: 'Search products...',
+        hintText: t.searchProductsHint,
         hintStyle: AppTypography.body.copyWith(
           color: AppColors.textTertiary,
         ),
@@ -155,6 +158,8 @@ class _ProductsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
+
     return BlocBuilder<TransactionsCubit, TransactionsState>(
       builder: (context, state) {
         if (state is TransactionsLoading) {
@@ -163,17 +168,16 @@ class _ProductsTab extends StatelessWidget {
         if (state is ProductsSearchLoaded) {
           if (state.products.isEmpty) {
             if (state.query.isEmpty) {
-              return const HisobEmptyState(
+              return HisobEmptyState(
                 icon: Icons.inventory_2_outlined,
-                title: 'Search Products',
-                message:
-                    'Tap the search icon to find products by name, SKU, or barcode',
+                title: t.searchProducts,
+                message: t.tapSearchToFind,
               );
             }
             return HisobEmptyState(
               icon: Icons.search_off,
-              title: 'No results',
-              message: 'No products found for "${state.query}"',
+              title: t.noResults,
+              message: t.noProductsFoundFor(state.query),
             );
           }
           return ListView.separated(
@@ -204,18 +208,17 @@ class _ProductsTab extends StatelessWidget {
         if (state is TransactionsError) {
           return HisobEmptyState(
             icon: Icons.error_outline,
-            title: 'Error',
+            title: t.error,
             message: state.message,
-            actionLabel: AppStrings.retry,
+            actionLabel: t.retry,
             onAction: () =>
                 context.read<TransactionsCubit>().searchProducts(''),
           );
         }
-        return const HisobEmptyState(
+        return HisobEmptyState(
           icon: Icons.inventory_2_outlined,
-          title: 'Products',
-          message:
-              'Search for products by name, SKU, or scan a barcode',
+          title: t.products,
+          message: t.searchForProducts,
         );
       },
     );
@@ -253,6 +256,8 @@ class _ProductDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
+
     return Container(
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkElevated : AppColors.white,
@@ -305,23 +310,23 @@ class _ProductDetailSheet extends StatelessWidget {
 
               // Price row
               _InfoRow(
-                label: 'Selling Price',
+                label: t.sellingPrice,
                 value: Formatters.currency(product.sellingPrice),
                 isDark: isDark,
               ),
               _InfoRow(
-                label: 'Cost Price',
+                label: t.costPrice,
                 value: Formatters.currency(product.costPrice),
                 isDark: isDark,
               ),
               _InfoRow(
-                label: 'Total Stock',
+                label: t.totalStock,
                 value: '${product.totalStock} ${product.uom}',
                 isDark: isDark,
               ),
               if (product.barcode.isNotEmpty)
                 _InfoRow(
-                  label: 'Barcode',
+                  label: t.barcode,
                   value: product.barcode,
                   isDark: isDark,
                 ),
@@ -330,7 +335,7 @@ class _ProductDetailSheet extends StatelessWidget {
               if (product.stockByLocation.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  'Stock by Location',
+                  t.stockByLocation,
                   style: AppTypography.headline.copyWith(
                     color: isDark
                         ? AppColors.darkTextPrimary
@@ -340,8 +345,8 @@ class _ProductDetailSheet extends StatelessWidget {
                 const SizedBox(height: AppSpacing.sm),
                 ...product.stockByLocation.map((loc) => _InfoRow(
                       label: loc.locationName,
-                      value:
-                          '${loc.quantityAvailable} avail · ${loc.quantityOnHand} on hand',
+                      value: t.availOnHand(
+                          '${loc.quantityAvailable}', '${loc.quantityOnHand}'),
                       isDark: isDark,
                     )),
               ],
@@ -357,7 +362,7 @@ class _ProductDetailSheet extends StatelessWidget {
                     onAddToSale();
                   },
                   icon: const Icon(Icons.add_shopping_cart, size: 18),
-                  label: const Text('Add to Quick Sale'),
+                  label: Text(t.addToQuickSale),
                 ),
               ),
             ],
@@ -419,6 +424,8 @@ class _QuickSaleTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
+
     return BlocBuilder<TransactionsCubit, TransactionsState>(
       builder: (context, state) {
         if (state is QuickSaleCompleted) {
@@ -433,9 +440,9 @@ class _QuickSaleTab extends StatelessWidget {
         }
         return HisobEmptyState(
           icon: Icons.point_of_sale,
-          title: 'Quick Sale',
-          message: 'Create a quick sale by tapping the button below',
-          actionLabel: 'New Sale',
+          title: t.quickSale,
+          message: t.createQuickSaleHint,
+          actionLabel: t.newSale,
           onAction: () => AddSaleSheet.show(context),
         );
       },
@@ -457,6 +464,8 @@ class _SaleReceiptView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
+
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -481,7 +490,7 @@ class _SaleReceiptView extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             FadeScaleIn(
               delay: const Duration(milliseconds: 100),
-              child: Text('Sale Completed', style: AppTypography.title2),
+              child: Text(t.saleCompleted, style: AppTypography.title2),
             ),
             const SizedBox(height: AppSpacing.sm),
             FadeScaleIn(
@@ -519,24 +528,24 @@ class _SaleReceiptView extends StatelessWidget {
                 child: Column(
                   children: [
                     _ReceiptRow(
-                      label: 'Total',
+                      label: t.total,
                       value: Formatters.currency(transaction.totalAmount),
                       isBold: true,
                       isDark: isDark,
                     ),
                     _ReceiptRow(
-                      label: 'Paid',
+                      label: t.paid,
                       value: Formatters.currency(transaction.paidAmount),
                       isDark: isDark,
                     ),
                     if (transaction.changeAmount > 0)
                       _ReceiptRow(
-                        label: 'Change',
+                        label: t.change,
                         value: Formatters.currency(transaction.changeAmount),
                         isDark: isDark,
                       ),
                     _ReceiptRow(
-                      label: 'Status',
+                      label: t.status,
                       value: transaction.status,
                       color: transaction.isCompleted
                           ? AppColors.income
@@ -545,7 +554,7 @@ class _SaleReceiptView extends StatelessWidget {
                     ),
                     if (transaction.completedAt != null)
                       _ReceiptRow(
-                        label: 'Time',
+                        label: t.time,
                         value: Formatters.time(transaction.completedAt!),
                         isDark: isDark,
                       ),
@@ -562,7 +571,7 @@ class _SaleReceiptView extends StatelessWidget {
                   HapticFeedback.mediumImpact();
                   onNewSale();
                 },
-                child: const Text('New Sale'),
+                child: Text(t.newSale),
               ),
             ),
           ],
@@ -630,16 +639,17 @@ class _QuickCountTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
+
     return BlocBuilder<TransactionsCubit, TransactionsState>(
       builder: (context, state) {
         if (state is QuickCountCompleted) {
           return _QuickCountResult(result: state.result, isDark: isDark);
         }
-        return const HisobEmptyState(
+        return HisobEmptyState(
           icon: Icons.inventory,
-          title: 'Quick Count',
-          message:
-              'Search for a product in the Products tab, then perform a stock count',
+          title: t.quickCount,
+          message: t.quickCountHint,
         );
       },
     );
@@ -655,6 +665,8 @@ class _QuickCountResult extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -698,17 +710,17 @@ class _QuickCountResult extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
               _InfoRow(
-                label: 'System Qty',
+                label: t.systemQty,
                 value: '${result.systemQuantity}',
                 isDark: isDark,
               ),
               _InfoRow(
-                label: 'Counted Qty',
+                label: t.countedQty,
                 value: '${result.countedQuantity}',
                 isDark: isDark,
               ),
               _InfoRow(
-                label: 'Variance',
+                label: t.variance,
                 value:
                     '${result.variance} (${Formatters.percentage(result.variancePercent)})',
                 isDark: isDark,

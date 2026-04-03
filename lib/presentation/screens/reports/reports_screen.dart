@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
-import 'package:hisobnoma/core/constants/app_strings.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/data/models/dashboard/dashboard_models.dart';
+import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/reports/reports_cubit.dart';
 import 'package:hisobnoma/presentation/widgets/charts/income_expense_donut.dart';
 import 'package:hisobnoma/presentation/widgets/charts/revenue_bar_chart.dart';
@@ -31,11 +31,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppStrings.reports, style: AppTypography.headline),
+        title: Text(t.reports, style: AppTypography.headline),
       ),
       body: BlocBuilder<ReportsCubit, ReportsState>(
         builder: (context, state) {
@@ -55,6 +56,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildError(ReportsError state) {
+    final t = S.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -68,7 +70,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Unable to load reports',
+              t.unableToLoadReports,
               style: AppTypography.headline,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -82,7 +84,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             const SizedBox(height: AppSpacing.lg),
             ElevatedButton(
               onPressed: () => context.read<ReportsCubit>().loadReports(),
-              child: const Text(AppStrings.retry),
+              child: Text(t.retry),
             ),
           ],
         ),
@@ -91,6 +93,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildLoaded(ReportsLoaded state, bool isDark) {
+    final t = S.of(context);
     return RefreshIndicator(
       onRefresh: () async {
         HapticFeedback.mediumImpact();
@@ -108,10 +111,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
           // Period selector
           FadeScaleIn(
             child: HisobSegmentedControl<String>(
-              segments: const [
-                HisobSegment(value: 'daily', label: 'Week'),
-                HisobSegment(value: 'monthly', label: 'Month'),
-                HisobSegment(value: 'yearly', label: 'Year'),
+              segments: [
+                HisobSegment(value: 'daily', label: t.week),
+                HisobSegment(value: 'monthly', label: t.month),
+                HisobSegment(value: 'yearly', label: t.year),
               ],
               selectedValue: state.selectedPeriod,
               onChanged: (period) {
@@ -136,7 +139,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             delay: const Duration(milliseconds: 160),
             child: RevenueBarChart(
               data: state.chartData,
-              title: AppStrings.revenueOverview,
+              title: t.revenueOverview,
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -186,11 +189,12 @@ class _RevenueSummaryCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     return Row(
       children: [
         Expanded(
           child: _SummaryCard(
-            label: 'Today',
+            label: t.today,
             value: Formatters.compactCurrency(revenue.todayRevenue),
             change: revenue.todayChangePercent,
             isDark: isDark,
@@ -199,7 +203,7 @@ class _RevenueSummaryCards extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _SummaryCard(
-            label: 'This Week',
+            label: t.thisWeek,
             value: Formatters.compactCurrency(revenue.thisWeekRevenue),
             change: revenue.weekChangePercent,
             isDark: isDark,
@@ -208,7 +212,7 @@ class _RevenueSummaryCards extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _SummaryCard(
-            label: 'This Month',
+            label: t.thisMonthLabel,
             value: Formatters.compactCurrency(revenue.thisMonthRevenue),
             change: revenue.monthChangePercent,
             isDark: isDark,
@@ -306,6 +310,7 @@ class _TransactionStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -325,7 +330,7 @@ class _TransactionStats extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Transaction Stats',
+            t.transactionStats,
             style: AppTypography.headline.copyWith(
               color:
                   isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
@@ -336,7 +341,7 @@ class _TransactionStats extends StatelessWidget {
             children: [
               Expanded(
                 child: _StatItem(
-                  label: 'Today',
+                  label: t.today,
                   value: Formatters.integer(revenue.todayTransactionCount),
                   icon: Icons.receipt_long_outlined,
                   isDark: isDark,
@@ -344,7 +349,7 @@ class _TransactionStats extends StatelessWidget {
               ),
               Expanded(
                 child: _StatItem(
-                  label: 'This Week',
+                  label: t.thisWeek,
                   value:
                       Formatters.integer(revenue.thisWeekTransactionCount),
                   icon: Icons.date_range_outlined,
@@ -353,7 +358,7 @@ class _TransactionStats extends StatelessWidget {
               ),
               Expanded(
                 child: _StatItem(
-                  label: 'This Month',
+                  label: t.thisMonthLabel,
                   value:
                       Formatters.integer(revenue.thisMonthTransactionCount),
                   icon: Icons.calendar_month_outlined,
@@ -372,7 +377,7 @@ class _TransactionStats extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Average Transaction',
+                t.averageTransaction,
                 style: AppTypography.subheadline.copyWith(
                   color: isDark
                       ? AppColors.darkTextSecondary
@@ -445,6 +450,7 @@ class _PeriodComparison extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -464,7 +470,7 @@ class _PeriodComparison extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Period Comparison',
+            t.periodComparison,
             style: AppTypography.headline.copyWith(
               color:
                   isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
@@ -472,7 +478,7 @@ class _PeriodComparison extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           _ComparisonRow(
-            label: 'Today vs Yesterday',
+            label: t.todayVsYesterday,
             current: revenue.todayRevenue,
             previous: revenue.yesterdayRevenue,
             changePercent: revenue.todayChangePercent,
@@ -480,7 +486,7 @@ class _PeriodComparison extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           _ComparisonRow(
-            label: 'This Week vs Last',
+            label: t.thisWeekVsLast,
             current: revenue.thisWeekRevenue,
             previous: revenue.lastWeekRevenue,
             changePercent: revenue.weekChangePercent,
@@ -488,7 +494,7 @@ class _PeriodComparison extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           _ComparisonRow(
-            label: 'This Month vs Last',
+            label: t.thisMonthVsLast,
             current: revenue.thisMonthRevenue,
             previous: revenue.lastMonthRevenue,
             changePercent: revenue.monthChangePercent,

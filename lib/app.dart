@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hisobnoma/core/constants/app_strings.dart';
 import 'package:hisobnoma/core/di/injection.dart';
 import 'package:hisobnoma/core/router/app_router.dart';
 import 'package:hisobnoma/core/theme/app_theme.dart';
+import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/auth/auth_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/dashboard/dashboard_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
@@ -69,11 +69,14 @@ class _HisobnomaAppState extends State<HisobnomaApp> with WidgetsBindingObserver
       child: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, settingsState) {
           return MaterialApp.router(
-            title: AppStrings.appName,
+            title: 'Hisobnoma',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: settingsState.themeMode,
+            locale: settingsState.locale,
+            localizationsDelegates: S.localizationsDelegates,
+            supportedLocales: S.supportedLocales,
             routerConfig: _router,
           );
         },

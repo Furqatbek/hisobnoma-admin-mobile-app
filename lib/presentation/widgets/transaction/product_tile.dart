@@ -5,6 +5,7 @@ import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/data/models/transaction/transaction_models.dart';
+import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 
 /// Product list tile used in search results and quick sale.
 class ProductTile extends StatelessWidget {
@@ -163,9 +164,10 @@ class _StockBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     if (!trackInventory) {
       return Text(
-        'Untracked',
+        t.untracked,
         style: AppTypography.caption2.copyWith(
           color: AppColors.textTertiary,
         ),
@@ -182,7 +184,7 @@ class _StockBadge extends StatelessWidget {
     }
 
     return Text(
-      '$stock in stock',
+      t.inStock('$stock'),
       style: AppTypography.caption2.copyWith(
         color: color,
         fontWeight: FontWeight.w500,

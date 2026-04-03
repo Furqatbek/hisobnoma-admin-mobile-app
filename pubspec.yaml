@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # UI
   cupertino_icons: ^1.0.8
@@ -78,6 +80,7 @@ flutter_native_splash:
     image: "assets/icon/app_icon.png"
 
 flutter:
+  generate: true
   uses-material-design: true
 
   assets:

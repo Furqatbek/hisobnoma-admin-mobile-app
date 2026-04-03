@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
-import 'package:hisobnoma/core/constants/app_strings.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/data/models/alert/alert_models.dart';
+import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/alerts/alerts_cubit.dart';
 import 'package:hisobnoma/presentation/widgets/common/animations.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_empty_state.dart';
@@ -46,11 +46,12 @@ class _AlertsScreenState extends State<AlertsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final t = S.of(context);
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
-        title: Text(AppStrings.alerts, style: AppTypography.headline),
+        title: Text(t.alerts, style: AppTypography.headline),
         actions: [
           BlocBuilder<AlertsCubit, AlertsState>(
             builder: (context, state) {
@@ -58,7 +59,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
               return TextButton(
                 onPressed: hasUnread ? _onMarkAllRead : null,
                 child: Text(
-                  AppStrings.markAllRead,
+                  t.markAllRead,
                   style: AppTypography.subheadline.copyWith(
                     color: hasUnread
                         ? AppColors.royalBlue
@@ -79,9 +80,9 @@ class _AlertsScreenState extends State<AlertsScreen> {
               vertical: AppSpacing.sm,
             ),
             child: HisobSegmentedControl<_AlertFilter>(
-              segments: const [
-                HisobSegment(value: _AlertFilter.all, label: 'All'),
-                HisobSegment(value: _AlertFilter.unread, label: 'Unread'),
+              segments: [
+                HisobSegment(value: _AlertFilter.all, label: t.all),
+                HisobSegment(value: _AlertFilter.unread, label: t.unread),
               ],
               selectedValue: _filter,
               onChanged: _onFilterChanged,
@@ -97,9 +98,9 @@ class _AlertsScreenState extends State<AlertsScreen> {
                 if (state is AlertsError) {
                   return HisobEmptyState(
                     icon: Icons.error_outline,
-                    title: AppStrings.error,
+                    title: t.error,
                     message: state.message,
-                    actionLabel: AppStrings.retry,
+                    actionLabel: t.retry,
                     onAction: () => context.read<AlertsCubit>().loadAlerts(
                           unreadOnly: _filter == _AlertFilter.unread,
                         ),
@@ -109,10 +110,10 @@ class _AlertsScreenState extends State<AlertsScreen> {
                   if (state.alerts.isEmpty) {
                     return HisobEmptyState(
                       icon: Icons.notifications_off_outlined,
-                      title: AppStrings.noAlerts,
+                      title: t.noAlerts,
                       message: _filter == _AlertFilter.unread
-                          ? 'All caught up!'
-                          : 'No alerts to show',
+                          ? t.allCaughtUp
+                          : t.noAlertsToShow,
                     );
                   }
                   return _AlertList(
@@ -455,7 +456,7 @@ class _AlertTile extends StatelessWidget {
                           _PriorityBadge(priority: alert.priority),
                           const SizedBox(width: AppSpacing.sm),
                           Text(
-                            _alertTypeLabel(alert.alertType),
+                            _alertTypeLabel(context, alert.alertType),
                             style: AppTypography.caption1.copyWith(
                               color: AppColors.textTertiary,
                             ),
@@ -547,7 +548,7 @@ class _PriorityBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        _priorityLabel(priority),
+        _priorityLabel(context, priority),
         style: AppTypography.caption2.copyWith(
           color: color,
           fontWeight: FontWeight.w600,
@@ -650,27 +651,29 @@ Color _priorityColor(AlertPriority priority) {
   };
 }
 
-String _priorityLabel(AlertPriority priority) {
+String _priorityLabel(BuildContext context, AlertPriority priority) {
+  final t = S.of(context);
   return switch (priority) {
-    AlertPriority.low => 'Low',
-    AlertPriority.normal => 'Normal',
-    AlertPriority.high => 'High',
-    AlertPriority.urgent => 'Urgent',
+    AlertPriority.low => t.priorityLow,
+    AlertPriority.normal => t.priorityNormal,
+    AlertPriority.high => t.priorityHigh,
+    AlertPriority.urgent => t.priorityUrgent,
   };
 }
 
-String _alertTypeLabel(AlertType type) {
+String _alertTypeLabel(BuildContext context, AlertType type) {
+  final t = S.of(context);
   return switch (type) {
-    AlertType.lowStock => 'Low Stock',
-    AlertType.outOfStock => 'Out of Stock',
-    AlertType.expiringInventory => 'Expiring',
-    AlertType.largeTransaction => 'Transaction',
-    AlertType.dailySummary => 'Summary',
-    AlertType.priceChange => 'Price Change',
-    AlertType.newOrder => 'New Order',
-    AlertType.paymentReceived => 'Payment',
-    AlertType.paymentDue => 'Payment Due',
-    AlertType.paymentOverdue => 'Overdue',
-    AlertType.system => 'System',
+    AlertType.lowStock => t.alertLowStock,
+    AlertType.outOfStock => t.alertOutOfStock,
+    AlertType.expiringInventory => t.alertExpiring,
+    AlertType.largeTransaction => t.alertTransaction,
+    AlertType.dailySummary => t.alertSummary,
+    AlertType.priceChange => t.alertPriceChange,
+    AlertType.newOrder => t.alertNewOrder,
+    AlertType.paymentReceived => t.alertPayment,
+    AlertType.paymentDue => t.alertPaymentDue,
+    AlertType.paymentOverdue => t.alertOverdue,
+    AlertType.system => t.alertSystem,
   };
 }

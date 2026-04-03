@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
-import 'package:hisobnoma/core/constants/app_strings.dart';
+import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/router/app_router.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
@@ -33,20 +33,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
     context.read<AlertsCubit>().loadUnreadCount();
   }
 
-  String get _greeting {
+  String _greeting(BuildContext context) {
+    final t = S.of(context);
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
+    if (hour < 12) return t.goodMorning;
+    if (hour < 17) return t.goodAfternoon;
+    return t.goodEvening;
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final t = S.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppStrings.appName, style: AppTypography.headline),
+        title: Text(t.appName, style: AppTypography.headline),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
@@ -96,6 +98,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildErrorState(DashboardError state) {
+    final t = S.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -109,7 +112,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Unable to load dashboard',
+              t.unableToLoadDashboard,
               style: AppTypography.headline,
               textAlign: TextAlign.center,
             ),
@@ -125,7 +128,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ElevatedButton(
               onPressed: () =>
                   context.read<DashboardCubit>().loadDashboard(),
-              child: const Text(AppStrings.retry),
+              child: Text(t.retry),
             ),
           ],
         ),
@@ -157,7 +160,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    _greeting,
+                    _greeting(context),
                     style: AppTypography.title2.copyWith(
                       color: isDark
                           ? AppColors.darkTextPrimary
@@ -268,6 +271,7 @@ class _PartialErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -283,7 +287,7 @@ class _PartialErrorBanner extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
-              'Could not load: ${errors.join(', ')}',
+              t.couldNotLoad(errors.join(', ')),
               style: AppTypography.caption1.copyWith(
                 color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
               ),
@@ -292,7 +296,7 @@ class _PartialErrorBanner extends StatelessWidget {
           GestureDetector(
             onTap: onRetry,
             child: Text(
-              'Retry',
+              t.retry,
               style: AppTypography.caption1.copyWith(
                 color: AppColors.royalBlue,
                 fontWeight: FontWeight.w600,
@@ -325,6 +329,7 @@ class _BalanceHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -347,7 +352,7 @@ class _BalanceHeroCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            AppStrings.currentBalance,
+            t.currentBalance,
             style: AppTypography.subheadline.copyWith(
               color: Colors.white70,
             ),
@@ -393,7 +398,7 @@ class _BalanceHeroCard extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'this month',
+                t.thisMonth,
                 style: AppTypography.caption1.copyWith(color: Colors.white60),
               ),
             ],
@@ -412,15 +417,15 @@ class _BalanceHeroCard extends StatelessWidget {
             child: Row(
               children: [
                 _HeroMiniStat(
-                  label: 'Today',
+                  label: t.today,
                   value: Formatters.compactCurrency(todayRevenue),
-                  sub: '${Formatters.integer(transactionCount)} txn',
+                  sub: t.txnCount(Formatters.integer(transactionCount)),
                 ),
                 Container(width: 1, height: 30, color: Colors.white24),
                 _HeroMiniStat(
-                  label: 'This Week',
+                  label: t.thisWeek,
                   value: Formatters.compactCurrency(weekRevenue),
-                  sub: '${Formatters.integer(weekTransactions)} txn',
+                  sub: t.txnCount(Formatters.integer(weekTransactions)),
                 ),
               ],
             ),
@@ -488,11 +493,12 @@ class _SummaryPillRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     return Row(
       children: [
         Expanded(
           child: _SummaryPill(
-            label: AppStrings.revenue,
+            label: t.revenue,
             value: Formatters.compactCurrency(revenue),
             change: revenueChange,
             color: AppColors.income,
@@ -502,7 +508,7 @@ class _SummaryPillRow extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: _SummaryPill(
-            label: 'Avg. Transaction',
+            label: t.avgTransaction,
             value: Formatters.compactCurrency(avgTransaction),
             color: AppColors.royalBlue,
             isDark: isDark,
@@ -530,6 +536,7 @@ class _SummaryPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -582,7 +589,7 @@ class _SummaryPill extends StatelessWidget {
                 ),
                 const SizedBox(width: 2),
                 Text(
-                  '${Formatters.percentage(change!)} this month',
+                  '${Formatters.percentage(change!)} ${t.thisMonth}',
                   style: AppTypography.caption1.copyWith(
                     color: change! >= 0 ? AppColors.income : AppColors.expense,
                   ),
@@ -605,6 +612,7 @@ class _ChartSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     final cubit = context.read<DashboardCubit>();
     final selectedPeriod = cubit.chartPeriod;
 
@@ -615,7 +623,7 @@ class _ChartSection extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'Revenue Trend',
+                t.revenueTrend,
                 style: AppTypography.title3.copyWith(
                   color: isDark
                       ? AppColors.darkTextPrimary
@@ -624,21 +632,21 @@ class _ChartSection extends StatelessWidget {
               ),
             ),
             _PeriodChip(
-              label: 'Day',
+              label: t.day,
               selected: selectedPeriod == 'daily',
               onTap: () => cubit.changeChartPeriod('daily'),
               isDark: isDark,
             ),
             const SizedBox(width: 4),
             _PeriodChip(
-              label: 'Week',
+              label: t.week,
               selected: selectedPeriod == 'weekly',
               onTap: () => cubit.changeChartPeriod('weekly'),
               isDark: isDark,
             ),
             const SizedBox(width: 4),
             _PeriodChip(
-              label: 'Month',
+              label: t.month,
               selected: selectedPeriod == 'monthly',
               onTap: () => cubit.changeChartPeriod('monthly'),
               isDark: isDark,
@@ -655,7 +663,7 @@ class _ChartSection extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                'No chart data available',
+                t.noChartData,
                 style: AppTypography.subheadline.copyWith(
                   color: AppColors.textTertiary,
                 ),
@@ -725,11 +733,12 @@ class _InventorySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          AppStrings.inventoryOverview,
+          t.inventoryOverview,
           style: AppTypography.title3.copyWith(
             color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
           ),
@@ -740,7 +749,7 @@ class _InventorySection extends StatelessWidget {
             Expanded(
               child: _MetricCard(
                 value: Formatters.integer(inventory.activeSkuCount),
-                label: 'Active SKUs',
+                label: t.activeSkus,
                 icon: Icons.inventory_2_outlined,
                 isDark: isDark,
               ),
@@ -749,7 +758,7 @@ class _InventorySection extends StatelessWidget {
             Expanded(
               child: _MetricCard(
                 value: Formatters.integer(inventory.lowStockCount),
-                label: 'Low Stock',
+                label: t.lowStock,
                 icon: Icons.warning_amber_outlined,
                 color: inventory.lowStockCount > 0 ? AppColors.warning : null,
                 isDark: isDark,
@@ -759,7 +768,7 @@ class _InventorySection extends StatelessWidget {
             Expanded(
               child: _MetricCard(
                 value: Formatters.integer(inventory.outOfStockCount),
-                label: 'Out of Stock',
+                label: t.outOfStock,
                 icon: Icons.remove_shopping_cart_outlined,
                 color: inventory.outOfStockCount > 0 ? AppColors.error : null,
                 isDark: isDark,
@@ -774,7 +783,7 @@ class _InventorySection extends StatelessWidget {
               child: _MetricCard(
                 value: Formatters.compactCurrency(
                     inventory.totalInventoryValue),
-                label: 'Total Value',
+                label: t.totalValue,
                 icon: Icons.account_balance_wallet_outlined,
                 isDark: isDark,
               ),
@@ -783,7 +792,7 @@ class _InventorySection extends StatelessWidget {
             Expanded(
               child: _MetricCard(
                 value: Formatters.integer(inventory.expiringCount),
-                label: 'Expiring Soon',
+                label: t.expiringSoon,
                 icon: Icons.schedule_outlined,
                 color: inventory.expiringCount > 0
                     ? AppColors.warning
@@ -795,7 +804,7 @@ class _InventorySection extends StatelessWidget {
             Expanded(
               child: _MetricCard(
                 value: Formatters.integer(inventory.totalSkuCount),
-                label: 'Total SKUs',
+                label: t.totalSkus,
                 icon: Icons.category_outlined,
                 isDark: isDark,
               ),
@@ -819,11 +828,12 @@ class _FinancialSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Financial Overview',
+          t.financialOverview,
           style: AppTypography.title3.copyWith(
             color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
           ),
@@ -858,7 +868,7 @@ class _FinancialSection extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  'Net Cash Position',
+                  t.netCashPosition,
                   style: AppTypography.subheadline.copyWith(
                     color: isDark
                         ? AppColors.darkTextSecondary
@@ -896,21 +906,21 @@ class _FinancialSection extends StatelessWidget {
           child: Column(
             children: [
               _FinancialRow(
-                label: 'Bank Balance',
+                label: t.bankBalance,
                 value: Formatters.currency(financial.totalBankBalance),
                 icon: Icons.account_balance_outlined,
                 isDark: isDark,
               ),
               _buildDivider(isDark),
               _FinancialRow(
-                label: 'Cash Balance',
+                label: t.cashBalance,
                 value: Formatters.currency(financial.totalCashBalance),
                 icon: Icons.payments_outlined,
                 isDark: isDark,
               ),
               _buildDivider(isDark),
               _FinancialRow(
-                label: 'Receivable (AR)',
+                label: t.receivableAr,
                 value: Formatters.currency(financial.arOutstanding),
                 icon: Icons.call_received_outlined,
                 color: AppColors.income,
@@ -918,7 +928,7 @@ class _FinancialSection extends StatelessWidget {
               ),
               _buildDivider(isDark),
               _FinancialRow(
-                label: 'Payable (AP)',
+                label: t.payableAp,
                 value: Formatters.currency(financial.apOutstanding),
                 icon: Icons.call_made_outlined,
                 color: AppColors.expense,

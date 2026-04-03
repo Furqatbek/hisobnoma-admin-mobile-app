@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
-import 'package:hisobnoma/core/constants/app_strings.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/data/models/transaction/transaction_models.dart';
+import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_segmented_control.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_text_field.dart';
@@ -100,6 +100,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   }
 
   Widget _buildHeader(bool isDark) {
+    final t = S.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -110,7 +111,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
-              AppStrings.cancel,
+              t.cancel,
               style: AppTypography.body.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -118,7 +119,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
           ),
           Expanded(
             child: Text(
-              _cart.isEmpty ? 'Quick Sale' : 'Cart (${_cart.length})',
+              _cart.isEmpty ? t.quickSale : t.cartCount('${_cart.length}'),
               style: AppTypography.headline,
               textAlign: TextAlign.center,
             ),
@@ -127,7 +128,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
             TextButton(
               onPressed: _isSubmitting ? null : _submitSale,
               child: Text(
-                AppStrings.save,
+                t.save,
                 style: AppTypography.body.copyWith(
                   color: AppColors.royalBlue,
                   fontWeight: FontWeight.w600,
@@ -144,13 +145,14 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   // --- Product Search ---
 
   Widget _buildProductSearch(bool isDark) {
+    final t = S.of(context);
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: HisobTextField(
             controller: _searchController,
-            hint: 'Search products by name or SKU...',
+            hint: t.searchProductsByNameSku,
             prefixIcon: const Icon(Icons.search, size: 20),
             autofocus: true,
             focusNode: _searchFocus,
@@ -177,8 +179,8 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                       padding: const EdgeInsets.all(AppSpacing.xl),
                       child: Text(
                         _searchController.text.isEmpty
-                            ? 'Search for a product to add'
-                            : 'No products found',
+                            ? t.searchToAdd
+                            : t.noProductsFound,
                         style: AppTypography.subheadline.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -225,7 +227,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                       ),
                       const SizedBox(height: AppSpacing.md),
                       Text(
-                        'Search for a product to add',
+                        t.searchToAdd,
                         style: AppTypography.subheadline.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -261,6 +263,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   // --- Cart View ---
 
   Widget _buildCartView(bool isDark) {
+    final t = S.of(context);
     return Column(
       children: [
         // Back to search
@@ -285,7 +288,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Text(
-                      'Add more items',
+                      t.addMoreItems,
                       style: AppTypography.subheadline.copyWith(
                         color: AppColors.royalBlue,
                       ),
@@ -300,7 +303,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                   setState(() => _cart.clear());
                 },
                 child: Text(
-                  'Clear all',
+                  t.clearAll,
                   style: AppTypography.subheadline.copyWith(
                     color: AppColors.error,
                   ),
@@ -360,9 +363,9 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
               children: [
                 // Payment type
                 HisobSegmentedControl<String>(
-                  segments: const [
-                    HisobSegment(value: 'CASH', label: 'Cash'),
-                    HisobSegment(value: 'CARD', label: 'Card'),
+                  segments: [
+                    HisobSegment(value: 'CASH', label: t.cash),
+                    HisobSegment(value: 'CARD', label: t.card),
                   ],
                   selectedValue: _paymentType,
                   onChanged: (value) {
@@ -376,7 +379,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Total',
+                      t.total,
                       style: AppTypography.title3.copyWith(
                         color: isDark
                             ? AppColors.darkTextPrimary
@@ -408,7 +411,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                             ),
                           )
                         : Text(
-                            'Complete Sale · ${Formatters.currency(_totalAmount)}'),
+                            t.completeSale(Formatters.currency(_totalAmount))),
                   ),
                 ),
               ],
@@ -442,13 +445,14 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
       await context.read<TransactionsCubit>().createQuickSale(request);
       if (!mounted) return;
 
+      final t = S.of(context);
       HapticFeedback.heavyImpact();
       Navigator.of(context).pop();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Sale completed · ${Formatters.currency(_totalAmount)}',
+            t.saleCompletedAmount(Formatters.currency(_totalAmount)),
           ),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -459,10 +463,11 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
       );
     } catch (_) {
       if (!mounted) return;
+      final t = S.of(context);
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Failed to complete sale'),
+          content: Text(t.failedToCompleteSale),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),

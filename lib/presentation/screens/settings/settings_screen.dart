@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
-import 'package:hisobnoma/core/constants/app_strings.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
+import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/auth/auth_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/settings/settings_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/sync/sync_cubit.dart';
@@ -17,10 +17,11 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final t = S.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppStrings.settings, style: AppTypography.headline),
+        title: Text(t.settings, style: AppTypography.headline),
       ),
       body: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, state) {
@@ -28,15 +29,14 @@ class SettingsScreen extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.screenPadding),
             children: [
               // -- Appearance --
-              _SectionHeader(title: AppStrings.appearance),
+              _SectionHeader(title: t.appearance),
               _SettingsGroup(
                 isDark: isDark,
                 children: [
                   _ThemeTile(state: state, isDark: isDark),
                   HisobListTile(
-                    title: AppStrings.currency,
+                    title: t.currency,
                     showChevron: true,
-                    showDivider: false,
                     trailing: Text(
                       state.currency,
                       style: AppTypography.body.copyWith(
@@ -45,17 +45,29 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     onTap: () => _showCurrencyPicker(context, state.currency),
                   ),
+                  HisobListTile(
+                    title: t.language,
+                    showChevron: true,
+                    showDivider: false,
+                    trailing: Text(
+                      _languageLabel(state.locale),
+                      style: AppTypography.body.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    onTap: () => _showLanguagePicker(context, state.locale),
+                  ),
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
 
               // -- Data --
-              _SectionHeader(title: AppStrings.data),
+              _SectionHeader(title: t.data),
               _SettingsGroup(
                 isDark: isDark,
                 children: [
                   HisobListTile(
-                    title: AppStrings.syncData,
+                    title: t.syncData,
                     leading: Icon(
                       Icons.sync,
                       size: 22,
@@ -65,7 +77,7 @@ class SettingsScreen extends StatelessWidget {
                     onTap: () => _showSyncInfo(context, isDark),
                   ),
                   HisobListTile(
-                    title: AppStrings.clearCache,
+                    title: t.clearCache,
                     leading: Icon(
                       Icons.delete_sweep_outlined,
                       size: 22,
@@ -80,12 +92,12 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: AppSpacing.lg),
 
               // -- Notifications --
-              _SectionHeader(title: AppStrings.notifications),
+              _SectionHeader(title: t.notifications),
               _SettingsGroup(
                 isDark: isDark,
                 children: [
                   HisobListTile(
-                    title: AppStrings.alertPreferences,
+                    title: t.alertPreferences,
                     leading: Icon(
                       Icons.notifications_outlined,
                       size: 22,
@@ -97,7 +109,7 @@ class SettingsScreen extends StatelessWidget {
                     },
                   ),
                   HisobListTile(
-                    title: AppStrings.devices,
+                    title: t.devices,
                     leading: Icon(
                       Icons.devices_outlined,
                       size: 22,
@@ -114,12 +126,12 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: AppSpacing.lg),
 
               // -- Account --
-              _SectionHeader(title: AppStrings.account),
+              _SectionHeader(title: t.account),
               _SettingsGroup(
                 isDark: isDark,
                 children: [
                   HisobListTile.destructive(
-                    title: AppStrings.logout,
+                    title: t.logout,
                     leading: Icon(
                       Icons.logout,
                       size: 22,
@@ -135,7 +147,7 @@ class SettingsScreen extends StatelessWidget {
               // App version
               Center(
                 child: Text(
-                  'Hisobnoma v1.0.0',
+                  t.appVersion,
                   style: AppTypography.caption1.copyWith(
                     color: AppColors.textTertiary,
                   ),
@@ -144,6 +156,33 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
             ],
           );
+        },
+      ),
+    );
+  }
+
+  String _languageLabel(Locale? locale) {
+    if (locale == null) return 'System';
+    switch (locale.languageCode) {
+      case 'uz':
+        return 'Ўзбекча';
+      case 'ru':
+        return 'Русский';
+      default:
+        return 'English';
+    }
+  }
+
+  void _showLanguagePicker(BuildContext context, Locale? currentLocale) {
+    HapticFeedback.selectionClick();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _LanguagePickerSheet(
+        selectedLocale: currentLocale,
+        onSelected: (locale) {
+          context.read<SettingsCubit>().setLocale(locale);
+          Navigator.of(context).pop();
         },
       ),
     );
@@ -178,25 +217,24 @@ class SettingsScreen extends StatelessWidget {
 
   void _confirmClearCache(BuildContext context) {
     HapticFeedback.selectionClick();
+    final t = S.of(context);
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Clear Cache'),
-        content: const Text(
-          'This will remove cached data. You may need to sync again.',
-        ),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(t.clearCache),
+        content: Text(t.clearCacheConfirm),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text(AppStrings.cancel),
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(t.cancel),
           ),
           TextButton(
             onPressed: () {
               HapticFeedback.mediumImpact();
-              Navigator.of(context).pop();
+              Navigator.of(dialogContext).pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Text('Cache cleared'),
+                  content: Text(t.cacheCleared),
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
@@ -205,7 +243,7 @@ class SettingsScreen extends StatelessWidget {
               );
             },
             child: Text(
-              'Clear',
+              t.clear,
               style: TextStyle(color: AppColors.error),
             ),
           ),
@@ -216,15 +254,16 @@ class SettingsScreen extends StatelessWidget {
 
   void _confirmLogout(BuildContext context) {
     HapticFeedback.selectionClick();
+    final t = S.of(context);
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Log Out'),
-        content: const Text('Are you sure you want to log out?'),
+        title: Text(t.logout),
+        content: Text(t.logoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text(AppStrings.cancel),
+            child: Text(t.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -233,7 +272,7 @@ class SettingsScreen extends StatelessWidget {
               context.read<AuthCubit>().logout();
             },
             child: Text(
-              AppStrings.logout,
+              t.logout,
               style: TextStyle(color: AppColors.error),
             ),
           ),
@@ -306,6 +345,7 @@ class _ThemeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -324,7 +364,7 @@ class _ThemeTile extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
-                  AppStrings.darkMode,
+                  t.darkMode,
                   style: AppTypography.body.copyWith(
                     color: isDark
                         ? AppColors.darkTextPrimary
@@ -344,7 +384,7 @@ class _ThemeTile extends StatelessWidget {
             child: Row(
               children: [
                 _ThemeOption(
-                  label: 'System',
+                  label: t.themeSystem,
                   isSelected: state.themeMode == ThemeMode.system,
                   isDark: isDark,
                   onTap: () {
@@ -355,7 +395,7 @@ class _ThemeTile extends StatelessWidget {
                   },
                 ),
                 _ThemeOption(
-                  label: 'Light',
+                  label: t.themeLight,
                   isSelected: state.themeMode == ThemeMode.light,
                   isDark: isDark,
                   onTap: () {
@@ -366,7 +406,7 @@ class _ThemeTile extends StatelessWidget {
                   },
                 ),
                 _ThemeOption(
-                  label: 'Dark',
+                  label: t.themeDark,
                   isSelected: state.themeMode == ThemeMode.dark,
                   isDark: isDark,
                   onTap: () {
@@ -445,35 +485,26 @@ class _ThemeOption extends StatelessWidget {
   }
 }
 
-/// Currency picker bottom sheet.
-class _CurrencyPickerSheet extends StatelessWidget {
-  final List<String> currencies;
-  final String selected;
-  final ValueChanged<String> onSelected;
+/// Language picker bottom sheet.
+class _LanguagePickerSheet extends StatelessWidget {
+  final Locale? selectedLocale;
+  final ValueChanged<Locale> onSelected;
 
-  const _CurrencyPickerSheet({
-    required this.currencies,
-    required this.selected,
+  const _LanguagePickerSheet({
+    required this.selectedLocale,
     required this.onSelected,
   });
 
-  static const _currencyNames = {
-    'UZS': "Uzbekistani So'm",
-    'USD': 'US Dollar',
-    'EUR': 'Euro',
-    'RUB': 'Russian Ruble',
-  };
-
-  static const _currencySymbols = {
-    'UZS': "so'm",
-    'USD': '\$',
-    'EUR': '\u20AC',
-    'RUB': '\u20BD',
-  };
+  static const _languages = [
+    ('en', 'English', 'EN'),
+    ('uz', 'Ўзбекча', 'УЗ'),
+    ('ru', 'Русский', 'РУ'),
+  ];
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final t = S.of(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -502,7 +533,125 @@ class _CurrencyPickerSheet extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(AppSpacing.md),
-              child: Text('Select Currency', style: AppTypography.headline),
+              child: Text(t.selectLanguage, style: AppTypography.headline),
+            ),
+            const Divider(height: 1),
+            ..._languages.map((lang) {
+              final code = lang.$1;
+              final label = lang.$2;
+              final badge = lang.$3;
+              final isSelected = selectedLocale?.languageCode == code;
+              return ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.royalBlue.withValues(alpha: 0.1)
+                        : (isDark ? AppColors.darkFill : AppColors.fill),
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusSm),
+                  ),
+                  child: Center(
+                    child: Text(
+                      badge,
+                      style: AppTypography.headline.copyWith(
+                        color: isSelected
+                            ? AppColors.royalBlue
+                            : (isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+                title: Text(
+                  label,
+                  style: AppTypography.body.copyWith(
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.w400,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                  ),
+                ),
+                trailing: isSelected
+                    ? Icon(Icons.check_circle, color: AppColors.royalBlue)
+                    : null,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  onSelected(Locale(code));
+                },
+              );
+            }),
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Currency picker bottom sheet.
+class _CurrencyPickerSheet extends StatelessWidget {
+  final List<String> currencies;
+  final String selected;
+  final ValueChanged<String> onSelected;
+
+  const _CurrencyPickerSheet({
+    required this.currencies,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  static const _currencySymbols = {
+    'UZS': "so'm",
+    'USD': '\$',
+    'EUR': '\u20AC',
+    'RUB': '\u20BD',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final t = S.of(context);
+
+    final currencyNames = {
+      'UZS': t.currencyUzs,
+      'USD': t.currencyUsd,
+      'EUR': t.currencyEur,
+      'RUB': t.currencyRub,
+    };
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkElevated : AppColors.white,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLg),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: Container(
+                width: 36,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkSeparator
+                      : AppColors.separator,
+                  borderRadius: BorderRadius.circular(2.5),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Text(t.selectCurrency, style: AppTypography.headline),
             ),
             const Divider(height: 1),
             ...currencies.map((code) {
@@ -543,7 +692,7 @@ class _CurrencyPickerSheet extends StatelessWidget {
                   ),
                 ),
                 subtitle: Text(
-                  _currencyNames[code] ?? code,
+                  currencyNames[code] ?? code,
                   style: AppTypography.caption1.copyWith(
                     color: isDark
                         ? AppColors.darkTextSecondary
@@ -586,6 +735,7 @@ class _SyncInfoSheetState extends State<_SyncInfoSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     return BlocBuilder<SyncCubit, SyncState>(
       builder: (context, state) {
         final info = state.syncInfo;
@@ -629,7 +779,7 @@ class _SyncInfoSheetState extends State<_SyncInfoSheet> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    'Data Sync',
+                    t.dataSync,
                     style: AppTypography.title3.copyWith(
                       color: widget.isDark
                           ? AppColors.darkTextPrimary
@@ -638,7 +788,7 @@ class _SyncInfoSheetState extends State<_SyncInfoSheet> {
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    'Sync products, customers, and categories from the server for offline use.',
+                    t.syncDescription,
                     style: AppTypography.subheadline.copyWith(
                       color: widget.isDark
                           ? AppColors.darkTextSecondary
@@ -649,21 +799,21 @@ class _SyncInfoSheetState extends State<_SyncInfoSheet> {
                   const SizedBox(height: AppSpacing.lg),
                   _SyncItem(
                     icon: Icons.inventory_2_outlined,
-                    label: 'Products',
+                    label: t.products,
                     count: info?.productCount,
                     lastSync: info?.productsLastSync,
                     isDark: widget.isDark,
                   ),
                   _SyncItem(
                     icon: Icons.people_outline,
-                    label: 'Customers',
+                    label: t.customers,
                     count: info?.customerCount,
                     lastSync: info?.customersLastSync,
                     isDark: widget.isDark,
                   ),
                   _SyncItem(
                     icon: Icons.category_outlined,
-                    label: 'Categories',
+                    label: t.categories,
                     count: info?.categoryCount,
                     lastSync: info?.categoriesLastSync,
                     isDark: widget.isDark,
@@ -673,7 +823,7 @@ class _SyncInfoSheetState extends State<_SyncInfoSheet> {
                       padding:
                           const EdgeInsets.only(top: AppSpacing.sm),
                       child: Text(
-                        '${info.pendingActions} pending offline action(s)',
+                        t.pendingOfflineActions('${info.pendingActions}'),
                         style: AppTypography.footnote.copyWith(
                           color: AppColors.warning,
                         ),
@@ -690,7 +840,7 @@ class _SyncInfoSheetState extends State<_SyncInfoSheet> {
                               context.read<SyncCubit>().syncAll();
                             },
                       icon: const Icon(Icons.sync, size: 18),
-                      label: Text(isSyncing ? 'Syncing...' : 'Sync Now'),
+                      label: Text(isSyncing ? t.syncing : t.syncNow),
                     ),
                   ),
                 ],
@@ -720,6 +870,7 @@ class _SyncItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = S.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
@@ -746,7 +897,7 @@ class _SyncItem extends StatelessWidget {
                 ),
                 if (count != null)
                   Text(
-                    '$count items synced',
+                    t.itemsSynced('$count'),
                     style: AppTypography.caption2.copyWith(
                       color: AppColors.textTertiary,
                     ),
