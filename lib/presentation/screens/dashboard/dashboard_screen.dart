@@ -14,6 +14,7 @@ import 'package:hisobnoma/presentation/blocs/dashboard/dashboard_cubit.dart';
 import 'package:hisobnoma/presentation/widgets/charts/revenue_line_chart.dart';
 import 'package:hisobnoma/presentation/widgets/common/animations.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_badge.dart';
+import 'package:hisobnoma/presentation/screens/transactions/add_sale_sheet.dart';
 import 'package:hisobnoma/presentation/widgets/common/loading_shimmer.dart';
 
 /// Main dashboard / home screen
@@ -82,9 +83,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         },
       ),
       floatingActionButton: AnimatedFab(
-        onPressed: () {
-          // TODO: Open add transaction bottom sheet
-        },
+        onPressed: () => AddSaleSheet.show(context),
+        icon: Icons.point_of_sale,
       ),
     );
   }
