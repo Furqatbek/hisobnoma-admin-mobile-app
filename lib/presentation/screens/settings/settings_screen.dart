@@ -35,17 +35,6 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   _ThemeTile(state: state, isDark: isDark),
                   HisobListTile(
-                    title: t.currency,
-                    showChevron: true,
-                    trailing: Text(
-                      state.currency,
-                      style: AppTypography.body.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    onTap: () => _showCurrencyPicker(context, state.currency),
-                  ),
-                  HisobListTile(
                     title: t.language,
                     showChevron: true,
                     showDivider: false,
@@ -74,52 +63,8 @@ class SettingsScreen extends StatelessWidget {
                       color: AppColors.royalBlue,
                     ),
                     showChevron: true,
+                    showDivider: false,
                     onTap: () => _showSyncInfo(context, isDark),
-                  ),
-                  HisobListTile(
-                    title: t.clearCache,
-                    leading: Icon(
-                      Icons.delete_sweep_outlined,
-                      size: 22,
-                      color: AppColors.textSecondary,
-                    ),
-                    showChevron: true,
-                    showDivider: false,
-                    onTap: () => _confirmClearCache(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.lg),
-
-              // -- Notifications --
-              _SectionHeader(title: t.notifications),
-              _SettingsGroup(
-                isDark: isDark,
-                children: [
-                  HisobListTile(
-                    title: t.alertPreferences,
-                    leading: Icon(
-                      Icons.notifications_outlined,
-                      size: 22,
-                      color: AppColors.warning,
-                    ),
-                    showChevron: true,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                    },
-                  ),
-                  HisobListTile(
-                    title: t.devices,
-                    leading: Icon(
-                      Icons.devices_outlined,
-                      size: 22,
-                      color: AppColors.textSecondary,
-                    ),
-                    showChevron: true,
-                    showDivider: false,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                    },
                   ),
                 ],
               ),
@@ -188,67 +133,12 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showCurrencyPicker(BuildContext context, String currentCurrency) {
-    HapticFeedback.selectionClick();
-    final currencies = ['UZS', 'USD', 'EUR', 'RUB'];
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _CurrencyPickerSheet(
-        currencies: currencies,
-        selected: currentCurrency,
-        onSelected: (currency) {
-          context.read<SettingsCubit>().setCurrency(currency);
-          Navigator.of(context).pop();
-        },
-      ),
-    );
-  }
-
   void _showSyncInfo(BuildContext context, bool isDark) {
     HapticFeedback.selectionClick();
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (_) => _SyncInfoSheet(isDark: isDark),
-    );
-  }
-
-  void _confirmClearCache(BuildContext context) {
-    HapticFeedback.selectionClick();
-    final t = S.of(context);
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(t.clearCache),
-        content: Text(t.clearCacheConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(t.cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              Navigator.of(dialogContext).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(t.cacheCleared),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                  ),
-                ),
-              );
-            },
-            child: Text(
-              t.clear,
-              style: TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -582,129 +472,6 @@ class _LanguagePickerSheet extends StatelessWidget {
                 onTap: () {
                   HapticFeedback.selectionClick();
                   onSelected(Locale(code));
-                },
-              );
-            }),
-            const SizedBox(height: AppSpacing.md),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Currency picker bottom sheet.
-class _CurrencyPickerSheet extends StatelessWidget {
-  final List<String> currencies;
-  final String selected;
-  final ValueChanged<String> onSelected;
-
-  const _CurrencyPickerSheet({
-    required this.currencies,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  static const _currencySymbols = {
-    'UZS': "so'm",
-    'USD': '\$',
-    'EUR': '\u20AC',
-    'RUB': '\u20BD',
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final t = S.of(context);
-
-    final currencyNames = {
-      'UZS': t.currencyUzs,
-      'USD': t.currencyUsd,
-      'EUR': t.currencyEur,
-      'RUB': t.currencyRub,
-    };
-
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkElevated : AppColors.white,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusLg),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.sm),
-              child: Container(
-                width: 36,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.darkSeparator
-                      : AppColors.separator,
-                  borderRadius: BorderRadius.circular(2.5),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Text(t.selectCurrency, style: AppTypography.headline),
-            ),
-            const Divider(height: 1),
-            ...currencies.map((code) {
-              final isSelected = code == selected;
-              return ListTile(
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.royalBlue.withValues(alpha: 0.1)
-                        : (isDark ? AppColors.darkFill : AppColors.fill),
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusSm),
-                  ),
-                  child: Center(
-                    child: Text(
-                      _currencySymbols[code] ?? code,
-                      style: AppTypography.headline.copyWith(
-                        color: isSelected
-                            ? AppColors.royalBlue
-                            : (isDark
-                                ? AppColors.darkTextPrimary
-                                : AppColors.textPrimary),
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-                title: Text(
-                  code,
-                  style: AppTypography.body.copyWith(
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w400,
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.textPrimary,
-                  ),
-                ),
-                subtitle: Text(
-                  currencyNames[code] ?? code,
-                  style: AppTypography.caption1.copyWith(
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.textSecondary,
-                  ),
-                ),
-                trailing: isSelected
-                    ? Icon(Icons.check_circle, color: AppColors.royalBlue)
-                    : null,
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  onSelected(code);
                 },
               );
             }),
