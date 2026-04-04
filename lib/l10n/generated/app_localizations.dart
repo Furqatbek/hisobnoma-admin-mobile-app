@@ -410,6 +410,13 @@ abstract class S {
   String get creditors;
   String get balance;
   String get creditLimit;
+  String get unpaidInvoices;
+  String get invoice;
+  String get dueDate;
+  String get overdue;
+  String daysOverdueLabel(String days);
+  String get balanceDue;
+  String get noUnpaidInvoices;
   String get noDebtors;
   String get noDebtorsHint;
   String get noCreditors;

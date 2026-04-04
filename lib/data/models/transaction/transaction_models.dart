@@ -10,3 +10,4 @@ export 'quick_count_request.dart';
 export 'quick_count_response.dart';
 export 'sale_detail.dart';
 export 'sale_record.dart';
+export 'unpaid_invoice.dart';

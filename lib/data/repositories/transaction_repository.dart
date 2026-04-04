@@ -99,6 +99,17 @@ class TransactionRepository {
         .toList();
   }
 
+  /// Get unpaid invoices for a customer
+  Future<List<UnpaidInvoice>> getCustomerUnpaidInvoices(int customerId) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.arCustomerUnpaid(customerId),
+    );
+    final list = response.data as List? ?? [];
+    return list
+        .map((e) => UnpaidInvoice.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   /// Get transaction detail by ID
   Future<SaleDetail> getTransactionDetail(int id) async {
     final response = await _apiClient.get(

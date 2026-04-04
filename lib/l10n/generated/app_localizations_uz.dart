@@ -177,6 +177,22 @@ class SUz extends S {
   @override
   String get creditLimit => 'Кредит лимити';
   @override
+  @override
+  String get unpaidInvoices => 'Тўланмаган ҳисоб-фактуралар';
+  @override
+  String get invoice => 'Ҳисоб-фактура';
+  @override
+  String get dueDate => 'Тўлов муддати';
+  @override
+  String get overdue => 'Муддати ўтган';
+  @override
+  String daysOverdueLabel(String days) => '$days кун кечикиш';
+  @override
+  String get balanceDue => 'Қарз қолдиғи';
+  @override
+  String get noUnpaidInvoices => 'Тўланмаган ҳисоб-фактура йўқ';
+
+  @override
   String get noDebtors => 'Қарздорлар йўқ';
   @override
   String get noDebtorsHint => 'Тўланмаган қарзлар мавжуд эмас';

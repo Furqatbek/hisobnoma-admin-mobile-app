@@ -39,6 +39,8 @@ abstract final class ApiEndpoints {
   // Finance / AR
   static const String arCustomerBalance =
       '/finance/ar-reports/customer-balance';
+  static String arCustomerUnpaid(int customerId) =>
+      '/finance/ar-invoices/customer/$customerId/unpaid';
 
   // Sales history
   static const String posTransactions = '/pos/transactions';

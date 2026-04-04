@@ -177,6 +177,22 @@ class SRu extends S {
   @override
   String get creditLimit => 'Кредитный лимит';
   @override
+  @override
+  String get unpaidInvoices => 'Неоплаченные счета';
+  @override
+  String get invoice => 'Счёт';
+  @override
+  String get dueDate => 'Срок оплаты';
+  @override
+  String get overdue => 'Просрочено';
+  @override
+  String daysOverdueLabel(String days) => '$days дн. просрочки';
+  @override
+  String get balanceDue => 'К оплате';
+  @override
+  String get noUnpaidInvoices => 'Нет неоплаченных счетов';
+
+  @override
   String get noDebtors => 'Нет дебиторов';
   @override
   String get noDebtorsHint => 'Нет клиентов с задолженностью';

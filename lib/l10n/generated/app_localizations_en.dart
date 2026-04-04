@@ -177,6 +177,22 @@ class SEn extends S {
   @override
   String get creditLimit => 'Credit Limit';
   @override
+  @override
+  String get unpaidInvoices => 'Unpaid Invoices';
+  @override
+  String get invoice => 'Invoice';
+  @override
+  String get dueDate => 'Due Date';
+  @override
+  String get overdue => 'Overdue';
+  @override
+  String daysOverdueLabel(String days) => '$days days overdue';
+  @override
+  String get balanceDue => 'Balance Due';
+  @override
+  String get noUnpaidInvoices => 'No unpaid invoices';
+
+  @override
   String get noDebtors => 'No debtors';
   @override
   String get noDebtorsHint => 'No customers with outstanding balances';

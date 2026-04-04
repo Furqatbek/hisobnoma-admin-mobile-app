@@ -8,6 +8,7 @@ import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/data/models/transaction/customer_balance.dart';
 import 'package:hisobnoma/data/models/transaction/inventory_product.dart';
 import 'package:hisobnoma/data/models/transaction/sale_detail.dart';
+import 'package:hisobnoma/data/models/transaction/unpaid_invoice.dart';
 import 'package:hisobnoma/data/models/transaction/sale_record.dart';
 import 'package:hisobnoma/data/repositories/transaction_repository.dart';
 import 'package:hisobnoma/core/di/injection.dart';
@@ -360,7 +361,23 @@ class _DebtorsTab extends StatelessWidget {
         final debtor = debtors[index];
         return StaggeredListItem(
           index: index,
-          child: _DebtorTile(debtor: debtor, isDark: isDark),
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (_) => _DebtorDetailSheet(
+                  customerId: debtor.customerId,
+                  customerName: debtor.customerName,
+                  netBalance: debtor.netBalance,
+                  isDark: isDark,
+                ),
+              );
+            },
+            child: _DebtorTile(debtor: debtor, isDark: isDark),
+          ),
         );
       },
     );
@@ -1032,4 +1049,261 @@ class _TotalRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Debtor detail bottom sheet — shows unpaid invoices
+class _DebtorDetailSheet extends StatefulWidget {
+  final int customerId;
+  final String customerName;
+  final double netBalance;
+  final bool isDark;
+
+  const _DebtorDetailSheet({
+    required this.customerId,
+    required this.customerName,
+    required this.netBalance,
+    required this.isDark,
+  });
+
+  @override
+  State<_DebtorDetailSheet> createState() => _DebtorDetailSheetState();
+}
+
+class _DebtorDetailSheetState extends State<_DebtorDetailSheet> {
+  List<UnpaidInvoice>? _invoices;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final invoices = await getIt<TransactionRepository>()
+          .getCustomerUnpaidInvoices(widget.customerId);
+      if (mounted) setState(() { _invoices = invoices; _loading = false; });
+    } catch (e) {
+      if (mounted) setState(() { _error = e.toString(); _loading = false; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = S.of(context);
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      decoration: BoxDecoration(
+        color: widget.isDark ? AppColors.darkElevated : AppColors.white,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLg),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            child: Container(
+              width: 36, height: 5,
+              decoration: BoxDecoration(
+                color: widget.isDark ? AppColors.darkSeparator : AppColors.separator,
+                borderRadius: BorderRadius.circular(2.5),
+              ),
+            ),
+          ),
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              children: [
+                Container(
+                  width: 40, height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.expense.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      widget.customerName.isNotEmpty ? widget.customerName[0].toUpperCase() : '?',
+                      style: AppTypography.headline.copyWith(color: AppColors.expense),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.customerName, style: AppTypography.title3.copyWith(
+                        color: widget.isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                      )),
+                      Text(
+                        '${t.balanceDue}: ${Formatters.currency(widget.netBalance)}',
+                        style: AppTypography.caption1.copyWith(color: AppColors.expense),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: widget.isDark ? AppColors.darkSeparator : AppColors.separator),
+          if (_loading)
+            const Padding(
+              padding: EdgeInsets.all(AppSpacing.xxl),
+              child: CircularProgressIndicator.adaptive(),
+            )
+          else if (_error != null)
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Text(_error!, style: AppTypography.body.copyWith(color: AppColors.error)),
+            )
+          else if (_invoices != null && _invoices!.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.xxl),
+              child: Text(t.noUnpaidInvoices, style: AppTypography.subheadline.copyWith(
+                color: widget.isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              )),
+            )
+          else if (_invoices != null)
+            Flexible(
+              child: ListView.separated(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                itemCount: _invoices!.length,
+                separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+                itemBuilder: (_, index) => _InvoiceCard(
+                  invoice: _invoices![index],
+                  isDark: widget.isDark,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InvoiceCard extends StatelessWidget {
+  final UnpaidInvoice invoice;
+  final bool isDark;
+
+  const _InvoiceCard({required this.invoice, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = S.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        boxShadow: isDark ? null : [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Invoice header
+          Row(
+            children: [
+              Expanded(
+                child: Text(invoice.invoiceNumber, style: AppTypography.body.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                )),
+              ),
+              if (invoice.overdue)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    t.daysOverdueLabel('${invoice.daysOverdue}'),
+                    style: AppTypography.caption2.copyWith(
+                      color: AppColors.error,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          // Date row
+          Row(
+            children: [
+              Icon(Icons.calendar_today, size: 12,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textTertiary),
+              const SizedBox(width: 4),
+              Text(invoice.invoiceDate, style: AppTypography.caption1.copyWith(
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              )),
+              const SizedBox(width: AppSpacing.md),
+              Icon(Icons.event, size: 12,
+                color: invoice.overdue ? AppColors.error : AppColors.textTertiary),
+              const SizedBox(width: 4),
+              Text('${t.dueDate}: ${invoice.dueDate}', style: AppTypography.caption1.copyWith(
+                color: invoice.overdue ? AppColors.error : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+              )),
+            ],
+          ),
+          // Line items
+          if (invoice.lines.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Divider(height: 1, color: isDark ? AppColors.darkSeparator : AppColors.separator),
+            const SizedBox(height: AppSpacing.sm),
+            ...invoice.lines.map((line) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(line.productName, style: AppTypography.caption1.copyWith(
+                      color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                    )),
+                  ),
+                  Text(
+                    '${_fmtQty(line.quantity)} × ${Formatters.currency(line.unitPrice)}',
+                    style: AppTypography.caption2.copyWith(
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            )),
+          ],
+          const SizedBox(height: AppSpacing.sm),
+          // Total row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(t.balanceDue, style: AppTypography.subheadline.copyWith(
+                fontWeight: FontWeight.w600,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              )),
+              Text(Formatters.currency(invoice.balanceDue), style: AppTypography.headline.copyWith(
+                color: AppColors.expense,
+              )),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _fmtQty(double qty) =>
+      qty == qty.roundToDouble() ? qty.toInt().toString() : qty.toStringAsFixed(2);
 }
