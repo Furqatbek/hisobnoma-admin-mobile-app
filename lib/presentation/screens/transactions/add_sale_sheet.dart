@@ -455,7 +455,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
       items: _cart
           .map((item) => QuickSaleItem(
                 productId: item.product.productId,
-                quantity: item.quantity,
+                quantity: item.quantity.toDouble(),
                 unitPrice: item.product.sellingPrice,
               ))
           .toList(),
