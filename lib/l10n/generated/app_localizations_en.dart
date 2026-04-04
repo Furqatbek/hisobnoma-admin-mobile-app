@@ -196,6 +196,22 @@ class SEn extends S {
   String get completed => 'Completed';
   @override
   String get pending => 'Pending';
+  @override
+  String get transactionDetails => 'Transaction Details';
+  @override
+  String get items => 'Items';
+  @override
+  String get subtotal => 'Subtotal';
+  @override
+  String get discount => 'Discount';
+  @override
+  String get tax => 'Tax';
+  @override
+  String get cashier => 'Cashier';
+  @override
+  String get terminal => 'Terminal';
+  @override
+  String get payment => 'Payment';
 
   @override
   String get searchProducts => 'Search Products';

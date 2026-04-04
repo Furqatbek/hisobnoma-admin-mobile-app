@@ -99,6 +99,15 @@ class TransactionRepository {
         .toList();
   }
 
+  /// Get transaction detail by ID
+  Future<SaleDetail> getTransactionDetail(int id) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.posTransactionDetail(id),
+    );
+    return SaleDetail.fromJson(
+        response.data['data'] as Map<String, dynamic>);
+  }
+
   /// Search customers (paginated)
   Future<PaginatedResponse<Map<String, dynamic>>> searchCustomers({
     required String query,

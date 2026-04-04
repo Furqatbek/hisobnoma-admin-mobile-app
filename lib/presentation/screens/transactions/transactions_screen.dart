@@ -7,7 +7,10 @@ import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/data/models/transaction/customer_balance.dart';
 import 'package:hisobnoma/data/models/transaction/inventory_product.dart';
+import 'package:hisobnoma/data/models/transaction/sale_detail.dart';
 import 'package:hisobnoma/data/models/transaction/sale_record.dart';
+import 'package:hisobnoma/data/repositories/transaction_repository.dart';
+import 'package:hisobnoma/core/di/injection.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
 import 'package:hisobnoma/presentation/screens/transactions/add_sale_sheet.dart';
@@ -509,7 +512,21 @@ class _TransactionsTab extends StatelessWidget {
         final sale = sales[index];
         return StaggeredListItem(
           index: index,
-          child: _SaleTile(sale: sale, isDark: isDark),
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (_) => _TransactionDetailSheet(
+                  transactionId: sale.id,
+                  isDark: isDark,
+                ),
+              );
+            },
+            child: _SaleTile(sale: sale, isDark: isDark),
+          ),
         );
       },
     );
@@ -668,6 +685,349 @@ class _SaleTile extends StatelessWidget {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Transaction detail bottom sheet — fetches and displays full transaction
+class _TransactionDetailSheet extends StatefulWidget {
+  final int transactionId;
+  final bool isDark;
+
+  const _TransactionDetailSheet({
+    required this.transactionId,
+    required this.isDark,
+  });
+
+  @override
+  State<_TransactionDetailSheet> createState() =>
+      _TransactionDetailSheetState();
+}
+
+class _TransactionDetailSheetState extends State<_TransactionDetailSheet> {
+  SaleDetail? _detail;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final detail = await getIt<TransactionRepository>()
+          .getTransactionDetail(widget.transactionId);
+      if (mounted) setState(() { _detail = detail; _loading = false; });
+    } catch (e) {
+      if (mounted) setState(() { _error = e.toString(); _loading = false; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = S.of(context);
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      decoration: BoxDecoration(
+        color: widget.isDark ? AppColors.darkElevated : AppColors.white,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLg),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            child: Container(
+              width: 36,
+              height: 5,
+              decoration: BoxDecoration(
+                color: widget.isDark
+                    ? AppColors.darkSeparator
+                    : AppColors.separator,
+                borderRadius: BorderRadius.circular(2.5),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Text(t.transactionDetails, style: AppTypography.headline),
+          ),
+          const Divider(height: 1),
+          if (_loading)
+            const Padding(
+              padding: EdgeInsets.all(AppSpacing.xxl),
+              child: CircularProgressIndicator.adaptive(),
+            )
+          else if (_error != null)
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Text(
+                _error!,
+                style: AppTypography.body.copyWith(color: AppColors.error),
+              ),
+            )
+          else if (_detail != null)
+            Flexible(
+              child: _TransactionDetailContent(
+                detail: _detail!,
+                isDark: widget.isDark,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TransactionDetailContent extends StatelessWidget {
+  final SaleDetail detail;
+  final bool isDark;
+
+  const _TransactionDetailContent({
+    required this.detail,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final t = S.of(context);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      detail.transactionNumber,
+                      style: AppTypography.title3.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                    if (detail.customerName != null)
+                      Text(
+                        detail.customerName!,
+                        style: AppTypography.subheadline.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: (detail.isCompleted
+                          ? AppColors.income
+                          : AppColors.warning)
+                      .withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  detail.status,
+                  style: AppTypography.caption1.copyWith(
+                    color: detail.isCompleted
+                        ? AppColors.income
+                        : AppColors.warning,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          // Meta chips
+          Wrap(
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.xs,
+            children: [
+              if (detail.cashierName != null)
+                _MetaChip(icon: Icons.person_outline, label: detail.cashierName!, isDark: isDark),
+              if (detail.terminalName != null)
+                _MetaChip(icon: Icons.point_of_sale, label: detail.terminalName!, isDark: isDark),
+              _MetaChip(icon: Icons.access_time, label: Formatters.time(detail.completedAt ?? detail.createdAt), isDark: isDark),
+              _MetaChip(icon: Icons.calendar_today, label: Formatters.shortDate(detail.completedAt ?? detail.createdAt), isDark: isDark),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Line items
+          if (detail.lines.isNotEmpty) ...[
+            Text(t.items, style: AppTypography.headline.copyWith(
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+            )),
+            const SizedBox(height: AppSpacing.sm),
+            ...detail.lines.map((line) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: _LineItemRow(line: line, isDark: isDark),
+            )),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+
+          // Totals
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard : AppColors.cardBackground,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            ),
+            child: Column(
+              children: [
+                if (detail.discountAmount > 0)
+                  _TotalRow(label: t.discount, value: '-${Formatters.currency(detail.discountAmount)}', color: AppColors.expense, isDark: isDark),
+                if (detail.taxAmount > 0)
+                  _TotalRow(label: t.tax, value: Formatters.currency(detail.taxAmount), isDark: isDark),
+                _TotalRow(label: t.total, value: Formatters.currency(detail.totalAmount), isBold: true, isDark: isDark),
+                _TotalRow(label: t.paid, value: Formatters.currency(detail.paidAmount), isDark: isDark),
+                if (detail.changeAmount > 0)
+                  _TotalRow(label: t.change, value: Formatters.currency(detail.changeAmount), isDark: isDark),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Payments
+          if (detail.payments.isNotEmpty) ...[
+            Text(t.payment, style: AppTypography.headline.copyWith(
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+            )),
+            const SizedBox(height: AppSpacing.sm),
+            ...detail.payments.map((p) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              child: Row(
+                children: [
+                  Icon(
+                    switch (p.paymentType) { 'CREDIT' => Icons.credit_score, 'CARD' => Icons.credit_card, _ => Icons.payments_outlined },
+                    size: 18,
+                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(p.paymentType, style: AppTypography.subheadline.copyWith(
+                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  )),
+                  const Spacer(),
+                  Text(Formatters.currency(p.amount), style: AppTypography.subheadline.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                  )),
+                ],
+              ),
+            )),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isDark;
+
+  const _MetaChip({required this.icon, required this.label, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: isDark ? AppColors.darkTextSecondary : AppColors.textTertiary),
+        const SizedBox(width: 4),
+        Text(label, style: AppTypography.caption1.copyWith(
+          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+        )),
+      ],
+    );
+  }
+}
+
+class _LineItemRow extends StatelessWidget {
+  final SaleDetailLine line;
+  final bool isDark;
+
+  const _LineItemRow({required this.line, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final qtyLabel = line.saleQuantity != null && line.saleUomName != null
+        ? '${_fmtQty(line.saleQuantity!)} ${line.saleUomName}'
+        : '${_fmtQty(line.quantity)} ${line.uomName ?? ''}';
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(line.productName, style: AppTypography.body.copyWith(
+                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+              )),
+              Text('$qtyLabel × ${Formatters.currency(line.unitPrice)}',
+                style: AppTypography.caption1.copyWith(
+                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              )),
+            ],
+          ),
+        ),
+        Text(Formatters.currency(line.lineTotal), style: AppTypography.subheadline.copyWith(
+          fontWeight: FontWeight.w500,
+          color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+        )),
+      ],
+    );
+  }
+
+  String _fmtQty(double qty) =>
+      qty == qty.roundToDouble() ? qty.toInt().toString() : qty.toStringAsFixed(2);
+}
+
+class _TotalRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool isBold;
+  final Color? color;
+  final bool isDark;
+
+  const _TotalRow({required this.label, required this.value, this.isBold = false, this.color, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: (isBold ? AppTypography.headline : AppTypography.subheadline).copyWith(
+            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+          )),
+          Text(value, style: (isBold ? AppTypography.headline : AppTypography.subheadline).copyWith(
+            fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+            color: color ?? (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
+          )),
         ],
       ),
     );

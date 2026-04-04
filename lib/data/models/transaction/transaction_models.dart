@@ -8,4 +8,5 @@ export 'quick_sale_request.dart';
 export 'quick_sale_response.dart';
 export 'quick_count_request.dart';
 export 'quick_count_response.dart';
+export 'sale_detail.dart';
 export 'sale_record.dart';

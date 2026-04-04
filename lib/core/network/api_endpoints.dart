@@ -42,6 +42,7 @@ abstract final class ApiEndpoints {
 
   // Sales history
   static const String posTransactions = '/pos/transactions';
+  static String posTransactionDetail(int id) => '/pos/transactions/$id';
 
   // Sync
   static const String syncProducts = '/mobile/sync/products';

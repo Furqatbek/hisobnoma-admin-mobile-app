@@ -196,6 +196,22 @@ class SUz extends S {
   String get completed => 'Тугалланган';
   @override
   String get pending => 'Кутилмоқда';
+  @override
+  String get transactionDetails => 'Амалиёт тафсилоти';
+  @override
+  String get items => 'Товарлар';
+  @override
+  String get subtotal => 'Ораоқ жами';
+  @override
+  String get discount => 'Чегирма';
+  @override
+  String get tax => 'Солиқ';
+  @override
+  String get cashier => 'Кассир';
+  @override
+  String get terminal => 'Терминал';
+  @override
+  String get payment => 'Тўлов';
 
   @override
   String get searchProducts => 'Товарларни қидириш';

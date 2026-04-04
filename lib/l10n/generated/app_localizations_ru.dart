@@ -196,6 +196,22 @@ class SRu extends S {
   String get completed => 'Завершено';
   @override
   String get pending => 'Ожидает';
+  @override
+  String get transactionDetails => 'Детали операции';
+  @override
+  String get items => 'Товары';
+  @override
+  String get subtotal => 'Подытог';
+  @override
+  String get discount => 'Скидка';
+  @override
+  String get tax => 'Налог';
+  @override
+  String get cashier => 'Кассир';
+  @override
+  String get terminal => 'Терминал';
+  @override
+  String get payment => 'Оплата';
 
   @override
   String get searchProducts => 'Поиск товаров';

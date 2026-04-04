@@ -420,6 +420,14 @@ abstract class S {
   String get noTransactionsHint;
   String get completed;
   String get pending;
+  String get transactionDetails;
+  String get items;
+  String get subtotal;
+  String get discount;
+  String get tax;
+  String get cashier;
+  String get terminal;
+  String get payment;
 
   /// No description provided for @searchProducts.
   ///
