@@ -87,7 +87,10 @@ Future<void> configureDependencies() async {
     () => DashboardCubit(dashboardRepository: getIt()),
   );
   getIt.registerFactory<TransactionsCubit>(
-    () => TransactionsCubit(transactionRepository: getIt()),
+    () => TransactionsCubit(
+      transactionRepository: getIt(),
+      syncRepository: getIt(),
+    ),
   );
   getIt.registerFactory<ReportsCubit>(
     () => ReportsCubit(dashboardRepository: getIt()),

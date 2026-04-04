@@ -405,6 +405,18 @@ abstract class S {
   /// **'Cancel'**
   String get cancel;
 
+  String get inventory;
+  String get debtors;
+  String get creditors;
+  String get balance;
+  String get creditLimit;
+  String get noDebtors;
+  String get noDebtorsHint;
+  String get noCreditors;
+  String get noCreditorsHint;
+  String get noInventory;
+  String get noInventoryHint;
+
   /// No description provided for @searchProducts.
   ///
   /// In en, this message translates to:

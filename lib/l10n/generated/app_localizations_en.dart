@@ -166,6 +166,30 @@ class SEn extends S {
   String get cancel => 'Cancel';
 
   @override
+  @override
+  String get inventory => 'Inventory';
+  @override
+  String get debtors => 'Debtors';
+  @override
+  String get creditors => 'Creditors';
+  @override
+  String get balance => 'Balance';
+  @override
+  String get creditLimit => 'Credit Limit';
+  @override
+  String get noDebtors => 'No debtors';
+  @override
+  String get noDebtorsHint => 'No customers with outstanding balances';
+  @override
+  String get noCreditors => 'No creditors';
+  @override
+  String get noCreditorsHint => 'No outstanding payables';
+  @override
+  String get noInventory => 'No inventory items';
+  @override
+  String get noInventoryHint => 'Sync data from the server to see inventory';
+
+  @override
   String get searchProducts => 'Search Products';
 
   @override

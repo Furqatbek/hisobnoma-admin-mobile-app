@@ -166,6 +166,30 @@ class SUz extends S {
   String get cancel => 'Бекор қилиш';
 
   @override
+  @override
+  String get inventory => 'Омбор';
+  @override
+  String get debtors => 'Қарздорлар';
+  @override
+  String get creditors => 'Кредиторлар';
+  @override
+  String get balance => 'Баланс';
+  @override
+  String get creditLimit => 'Кредит лимити';
+  @override
+  String get noDebtors => 'Қарздорлар йўқ';
+  @override
+  String get noDebtorsHint => 'Тўланмаган қарзлар мавжуд эмас';
+  @override
+  String get noCreditors => 'Кредиторлар йўқ';
+  @override
+  String get noCreditorsHint => 'Тўланмаган мажбуриятлар йўқ';
+  @override
+  String get noInventory => 'Омбор бўш';
+  @override
+  String get noInventoryHint => 'Омборни кўриш учун серверга уланинг';
+
+  @override
   String get searchProducts => 'Товарларни қидириш';
 
   @override

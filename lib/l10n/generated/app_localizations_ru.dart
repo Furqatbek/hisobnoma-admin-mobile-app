@@ -166,6 +166,30 @@ class SRu extends S {
   String get cancel => 'Отмена';
 
   @override
+  @override
+  String get inventory => 'Склад';
+  @override
+  String get debtors => 'Дебиторы';
+  @override
+  String get creditors => 'Кредиторы';
+  @override
+  String get balance => 'Баланс';
+  @override
+  String get creditLimit => 'Кредитный лимит';
+  @override
+  String get noDebtors => 'Нет дебиторов';
+  @override
+  String get noDebtorsHint => 'Нет клиентов с задолженностью';
+  @override
+  String get noCreditors => 'Нет кредиторов';
+  @override
+  String get noCreditorsHint => 'Нет непогашенных обязательств';
+  @override
+  String get noInventory => 'Склад пуст';
+  @override
+  String get noInventoryHint => 'Синхронизируйте данные для отображения товаров';
+
+  @override
   String get searchProducts => 'Поиск товаров';
 
   @override
