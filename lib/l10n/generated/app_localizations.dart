@@ -747,6 +747,60 @@ abstract class S {
   /// **'Yesterday'**
   String get yesterday;
 
+  /// No description provided for @monthlyRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Revenue'**
+  String get monthlyRevenue;
+
+  /// No description provided for @vsLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'vs last month'**
+  String get vsLastMonth;
+
+  /// No description provided for @cashFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Flow'**
+  String get cashFlow;
+
+  /// No description provided for @inflows.
+  ///
+  /// In en, this message translates to:
+  /// **'Inflows'**
+  String get inflows;
+
+  /// No description provided for @outflows.
+  ///
+  /// In en, this message translates to:
+  /// **'Outflows'**
+  String get outflows;
+
+  /// No description provided for @inventoryReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory Report'**
+  String get inventoryReport;
+
+  /// No description provided for @stockHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Health'**
+  String get stockHealth;
+
+  /// No description provided for @healthy.
+  ///
+  /// In en, this message translates to:
+  /// **'Healthy'**
+  String get healthy;
+
+  /// No description provided for @inventoryValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory Value'**
+  String get inventoryValue;
+
   /// No description provided for @appearance.
   ///
   /// In en, this message translates to:

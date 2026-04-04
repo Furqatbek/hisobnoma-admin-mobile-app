@@ -355,6 +355,33 @@ class SEn extends S {
   String get yesterday => 'Yesterday';
 
   @override
+  String get monthlyRevenue => 'Monthly Revenue';
+
+  @override
+  String get vsLastMonth => 'vs last month';
+
+  @override
+  String get cashFlow => 'Cash Flow';
+
+  @override
+  String get inflows => 'Inflows';
+
+  @override
+  String get outflows => 'Outflows';
+
+  @override
+  String get inventoryReport => 'Inventory Report';
+
+  @override
+  String get stockHealth => 'Stock Health';
+
+  @override
+  String get healthy => 'Healthy';
+
+  @override
+  String get inventoryValue => 'Inventory Value';
+
+  @override
   String get appearance => 'Appearance';
 
   @override

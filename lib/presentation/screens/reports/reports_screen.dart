@@ -101,79 +101,272 @@ class _ReportsScreenState extends State<ReportsScreen> {
             .read<ReportsCubit>()
             .loadReports(period: state.selectedPeriod);
       },
-      child: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.screenPadding,
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: ListView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenPadding,
+          ),
+          children: [
+            const SizedBox(height: AppSpacing.sm),
+
+            // Period selector
+            FadeScaleIn(
+              child: HisobSegmentedControl<String>(
+                segments: [
+                  HisobSegment(value: 'daily', label: t.week),
+                  HisobSegment(value: 'monthly', label: t.month),
+                  HisobSegment(value: 'yearly', label: t.year),
+                ],
+                selectedValue: state.selectedPeriod,
+                onChanged: (period) {
+                  context.read<ReportsCubit>().changePeriod(period);
+                },
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+
+            // Revenue hero card
+            FadeScaleIn(
+              delay: const Duration(milliseconds: 60),
+              child: _RevenueHeroCard(
+                revenue: state.revenueSummary,
+                isDark: isDark,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+
+            // Revenue summary cards
+            FadeScaleIn(
+              delay: const Duration(milliseconds: 120),
+              child: _RevenueSummaryCards(
+                revenue: state.revenueSummary,
+                isDark: isDark,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+
+            // Revenue bar chart
+            FadeScaleIn(
+              delay: const Duration(milliseconds: 180),
+              child: RevenueBarChart(
+                data: state.chartData,
+                title: t.revenueOverview,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+
+            // Income vs Expense donut
+            FadeScaleIn(
+              delay: const Duration(milliseconds: 240),
+              child: IncomeExpenseDonut(
+                income: state.revenueSummary.thisMonthRevenue,
+                expense: state.financial?.apOutstanding ?? 0,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+
+            // Cash flow section
+            if (state.financial != null)
+              FadeScaleIn(
+                delay: const Duration(milliseconds: 300),
+                child: _CashFlowSection(
+                  financial: state.financial!,
+                  isDark: isDark,
+                ),
+              ),
+            if (state.financial != null)
+              const SizedBox(height: AppSpacing.lg),
+
+            // Transaction stats
+            FadeScaleIn(
+              delay: const Duration(milliseconds: 360),
+              child: _TransactionStats(
+                revenue: state.revenueSummary,
+                isDark: isDark,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+
+            // Inventory report
+            if (state.inventory != null)
+              FadeScaleIn(
+                delay: const Duration(milliseconds: 420),
+                child: _InventoryReport(
+                  inventory: state.inventory!,
+                  isDark: isDark,
+                ),
+              ),
+            if (state.inventory != null)
+              const SizedBox(height: AppSpacing.lg),
+
+            // Period comparison
+            FadeScaleIn(
+              delay: const Duration(milliseconds: 480),
+              child: _PeriodComparison(
+                revenue: state.revenueSummary,
+                isDark: isDark,
+              ),
+            ),
+
+            const SizedBox(height: AppSpacing.xxl),
+          ],
         ),
+      ),
+    );
+  }
+}
+
+/// Revenue hero card with monthly total and change indicator
+class _RevenueHeroCard extends StatelessWidget {
+  final RevenueSummary revenue;
+  final bool isDark;
+
+  const _RevenueHeroCard({required this.revenue, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = S.of(context);
+    final isPositive = revenue.monthChangePercent >= 0;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.royalBlue, AppColors.royalBlueLight],
+        ),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.royalBlue.withValues(alpha: 0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            t.monthlyRevenue,
+            style: AppTypography.subheadline.copyWith(
+              color: Colors.white70,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            Formatters.currency(revenue.thisMonthRevenue),
+            style: AppTypography.largeTitle.copyWith(
+              color: AppColors.white,
+              fontSize: 28,
+            ),
+          ),
           const SizedBox(height: AppSpacing.sm),
-
-          // Period selector
-          FadeScaleIn(
-            child: HisobSegmentedControl<String>(
-              segments: [
-                HisobSegment(value: 'daily', label: t.week),
-                HisobSegment(value: 'monthly', label: t.month),
-                HisobSegment(value: 'yearly', label: t.year),
+          Row(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: (isPositive ? AppColors.income : AppColors.expense)
+                      .withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isPositive
+                          ? Icons.trending_up
+                          : Icons.trending_down,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      Formatters.percentage(revenue.monthChangePercent),
+                      style: AppTypography.caption1.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                t.vsLastMonth,
+                style:
+                    AppTypography.caption1.copyWith(color: Colors.white60),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          // Mini stats row
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            ),
+            child: Row(
+              children: [
+                _HeroMiniStat(
+                  label: t.today,
+                  value: Formatters.compactCurrency(revenue.todayRevenue),
+                ),
+                Container(width: 1, height: 30, color: Colors.white24),
+                _HeroMiniStat(
+                  label: t.thisWeek,
+                  value:
+                      Formatters.compactCurrency(revenue.thisWeekRevenue),
+                ),
+                Container(width: 1, height: 30, color: Colors.white24),
+                _HeroMiniStat(
+                  label: t.yesterday,
+                  value: Formatters.compactCurrency(
+                      revenue.yesterdayRevenue),
+                ),
               ],
-              selectedValue: state.selectedPeriod,
-              onChanged: (period) {
-                context.read<ReportsCubit>().changePeriod(period);
-              },
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+        ],
+      ),
+    );
+  }
+}
 
-          // Revenue summary cards
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 80),
-            child: _RevenueSummaryCards(
-              revenue: state.revenueSummary,
-              isDark: isDark,
+class _HeroMiniStat extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _HeroMiniStat({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: AppTypography.headline.copyWith(
+              color: AppColors.white,
+              fontSize: 14,
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Revenue bar chart
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 160),
-            child: RevenueBarChart(
-              data: state.chartData,
-              title: t.revenueOverview,
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: AppTypography.caption2.copyWith(
+              color: Colors.white60,
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Income vs Expense donut
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 240),
-            child: IncomeExpenseDonut(
-              income: state.revenueSummary.thisMonthRevenue,
-              expense: state.revenueSummary.lastMonthRevenue * 0.23,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Transaction stats
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 320),
-            child: _TransactionStats(
-              revenue: state.revenueSummary,
-              isDark: isDark,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Period comparison
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 400),
-            child: _PeriodComparison(
-              revenue: state.revenueSummary,
-              isDark: isDark,
-            ),
-          ),
-
-          const SizedBox(height: AppSpacing.xxl),
         ],
       ),
     );
@@ -297,6 +490,181 @@ class _SummaryCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Cash flow section showing inflows vs outflows
+class _CashFlowSection extends StatelessWidget {
+  final FinancialSummary financial;
+  final bool isDark;
+
+  const _CashFlowSection({
+    required this.financial,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final t = S.of(context);
+    final inflows = financial.totalBankBalance + financial.totalCashBalance;
+    final outflows = financial.apOutstanding;
+    final total = inflows + outflows;
+    final inflowFraction = total > 0 ? inflows / total : 0.5;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            t.cashFlow,
+            style: AppTypography.headline.copyWith(
+              color:
+                  isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          // Stacked bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: SizedBox(
+              height: 12,
+              child: Row(
+                children: [
+                  Flexible(
+                    flex: (inflowFraction * 100).round().clamp(1, 99),
+                    child: Container(color: AppColors.income),
+                  ),
+                  Flexible(
+                    flex:
+                        ((1 - inflowFraction) * 100).round().clamp(1, 99),
+                    child: Container(color: AppColors.expense),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          // Legend row
+          Row(
+            children: [
+              Expanded(
+                child: _CashFlowItem(
+                  color: AppColors.income,
+                  label: t.inflows,
+                  value: Formatters.compactCurrency(inflows),
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: _CashFlowItem(
+                  color: AppColors.expense,
+                  label: t.outflows,
+                  value: Formatters.compactCurrency(outflows),
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Divider(
+            color: isDark ? AppColors.darkSeparator : AppColors.separator,
+            height: 1,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                t.netCashPosition,
+                style: AppTypography.subheadline.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+              ),
+              Text(
+                Formatters.currency(financial.netCashPosition),
+                style: AppTypography.headline.copyWith(
+                  color: financial.netCashPosition >= 0
+                      ? AppColors.income
+                      : AppColors.expense,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CashFlowItem extends StatelessWidget {
+  final Color color;
+  final String label;
+  final String value;
+  final bool isDark;
+
+  const _CashFlowItem({
+    required this.color,
+    required this.label,
+    required this.value,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: AppTypography.caption1.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+              ),
+              Text(
+                value,
+                style: AppTypography.subheadline.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -437,6 +805,246 @@ class _StatItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Inventory report section with stock health and value
+class _InventoryReport extends StatelessWidget {
+  final InventorySummary inventory;
+  final bool isDark;
+
+  const _InventoryReport({required this.inventory, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = S.of(context);
+    final total = inventory.totalSkuCount;
+    final healthy =
+        total - inventory.lowStockCount - inventory.outOfStockCount;
+    final healthyPercent = total > 0 ? (healthy / total * 100) : 0.0;
+    final lowPercent =
+        total > 0 ? (inventory.lowStockCount / total * 100) : 0.0;
+    final outPercent =
+        total > 0 ? (inventory.outOfStockCount / total * 100) : 0.0;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            t.inventoryReport,
+            style: AppTypography.headline.copyWith(
+              color:
+                  isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Stock health bar
+          Text(
+            t.stockHealth,
+            style: AppTypography.caption1.copyWith(
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: SizedBox(
+              height: 12,
+              child: Row(
+                children: [
+                  if (healthyPercent > 0)
+                    Flexible(
+                      flex: healthyPercent.round().clamp(1, 100),
+                      child: Container(color: AppColors.income),
+                    ),
+                  if (lowPercent > 0)
+                    Flexible(
+                      flex: lowPercent.round().clamp(1, 100),
+                      child: Container(color: AppColors.warning),
+                    ),
+                  if (outPercent > 0)
+                    Flexible(
+                      flex: outPercent.round().clamp(1, 100),
+                      child: Container(color: AppColors.expense),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Legend
+          Row(
+            children: [
+              _InventoryLegendItem(
+                color: AppColors.income,
+                label: t.healthy,
+                value: '$healthy',
+                isDark: isDark,
+              ),
+              const SizedBox(width: AppSpacing.md),
+              _InventoryLegendItem(
+                color: AppColors.warning,
+                label: t.lowStock,
+                value: '${inventory.lowStockCount}',
+                isDark: isDark,
+              ),
+              const SizedBox(width: AppSpacing.md),
+              _InventoryLegendItem(
+                color: AppColors.expense,
+                label: t.outOfStock,
+                value: '${inventory.outOfStockCount}',
+                isDark: isDark,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Divider(
+            color: isDark ? AppColors.darkSeparator : AppColors.separator,
+            height: 1,
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Inventory metrics
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t.inventoryValue,
+                      style: AppTypography.caption1.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      Formatters.compactCurrency(
+                          inventory.totalInventoryValue),
+                      style: AppTypography.headline.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t.activeSkus,
+                      style: AppTypography.caption1.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${inventory.activeSkuCount} / ${inventory.totalSkuCount}',
+                      style: AppTypography.headline.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (inventory.expiringCount > 0)
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t.expiringSoon,
+                        style: AppTypography.caption1.copyWith(
+                          color: AppColors.warning,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${inventory.expiringCount}',
+                        style: AppTypography.headline.copyWith(
+                          color: AppColors.warning,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InventoryLegendItem extends StatelessWidget {
+  final Color color;
+  final String label;
+  final String value;
+  final bool isDark;
+
+  const _InventoryLegendItem({
+    required this.color,
+    required this.label,
+    required this.value,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              '$value $label',
+              style: AppTypography.caption2.copyWith(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -658,7 +1266,9 @@ class _ReportsShimmer extends StatelessWidget {
       child: Column(
         children: [
           LoadingShimmer(height: 36, borderRadius: AppSpacing.radiusSm),
-          SizedBox(height: AppSpacing.lg),
+          SizedBox(height: AppSpacing.md),
+          LoadingShimmer(height: 160, borderRadius: AppSpacing.radiusLg),
+          SizedBox(height: AppSpacing.md),
           Row(
             children: [
               Expanded(child: LoadingShimmer.card()),
@@ -671,7 +1281,7 @@ class _ReportsShimmer extends StatelessWidget {
           SizedBox(height: AppSpacing.lg),
           LoadingShimmer(height: 240, borderRadius: AppSpacing.radiusCard),
           SizedBox(height: AppSpacing.lg),
-          LoadingShimmer(height: 240, borderRadius: AppSpacing.radiusCard),
+          LoadingShimmer(height: 180, borderRadius: AppSpacing.radiusCard),
         ],
       ),
     );

@@ -355,6 +355,33 @@ class SUz extends S {
   String get yesterday => 'Кеча';
 
   @override
+  String get monthlyRevenue => 'Ойлик тушум';
+
+  @override
+  String get vsLastMonth => 'ўтган ойга нисбатан';
+
+  @override
+  String get cashFlow => 'Пул оқими';
+
+  @override
+  String get inflows => 'Кирим';
+
+  @override
+  String get outflows => 'Чиқим';
+
+  @override
+  String get inventoryReport => 'Омбор ҳисоботи';
+
+  @override
+  String get stockHealth => 'Захира ҳолати';
+
+  @override
+  String get healthy => 'Яхши';
+
+  @override
+  String get inventoryValue => 'Омбор қиймати';
+
+  @override
   String get appearance => 'Кўриниш';
 
   @override

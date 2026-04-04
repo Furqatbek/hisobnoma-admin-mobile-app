@@ -355,6 +355,33 @@ class SRu extends S {
   String get yesterday => 'Вчера';
 
   @override
+  String get monthlyRevenue => 'Выручка за месяц';
+
+  @override
+  String get vsLastMonth => 'к прошлому месяцу';
+
+  @override
+  String get cashFlow => 'Денежный поток';
+
+  @override
+  String get inflows => 'Поступления';
+
+  @override
+  String get outflows => 'Расходы';
+
+  @override
+  String get inventoryReport => 'Отчёт по складу';
+
+  @override
+  String get stockHealth => 'Состояние товаров';
+
+  @override
+  String get healthy => 'В норме';
+
+  @override
+  String get inventoryValue => 'Стоимость склада';
+
+  @override
   String get appearance => 'Оформление';
 
   @override
