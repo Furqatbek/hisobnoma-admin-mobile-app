@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hisobnoma/data/models/dashboard/dashboard_models.dart';
 import 'package:hisobnoma/data/repositories/dashboard_repository.dart';
+import 'package:intl/intl.dart';
 
 part 'dashboard_state.dart';
 
@@ -41,6 +43,8 @@ class DashboardCubit extends Cubit<DashboardState> {
     InventorySummary? inventory;
     FinancialSummary? financial;
     List<RevenueChartData>? chartData;
+    String? usdRate;
+    String? usdDiff;
     final errors = <String>[];
 
     // Fetch all independently — don't let one failure block others
@@ -65,6 +69,10 @@ class DashboardCubit extends Cubit<DashboardState> {
       }).catchError((Object e) {
         errors.add('Chart');
       }),
+      _fetchUsdRate().then((v) {
+        usdRate = v?.$1;
+        usdDiff = v?.$2;
+      }),
     ]);
 
     // If all failed, show error
@@ -82,7 +90,27 @@ class DashboardCubit extends Cubit<DashboardState> {
       chartData: chartData ?? [],
       lastUpdated: DateTime.now(),
       partialErrors: errors.isEmpty ? null : errors,
+      usdRate: usdRate,
+      usdDiff: usdDiff,
     ));
+  }
+
+  Future<(String, String)?> _fetchUsdRate() async {
+    try {
+      final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      final dio = Dio();
+      final response = await dio.get<List<dynamic>>(
+        'https://cbu.uz/uz/arkhiv-kursov-valyut/json/usd/$today',
+      );
+      final data = response.data;
+      if (data != null && data.isNotEmpty) {
+        final item = data[0] as Map<String, dynamic>;
+        return (item['Rate'] as String, item['Diff'] as String);
+      }
+    } catch (_) {
+      // Currency rate is non-critical, silently ignore
+    }
+    return null;
   }
 
   static const _emptyRevenue = RevenueSummary(

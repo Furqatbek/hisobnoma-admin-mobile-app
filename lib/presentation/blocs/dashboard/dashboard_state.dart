@@ -22,6 +22,8 @@ class DashboardLoaded extends DashboardState {
   final List<RevenueChartData> chartData;
   final DateTime? lastUpdated;
   final List<String>? partialErrors;
+  final String? usdRate;
+  final String? usdDiff;
 
   const DashboardLoaded({
     required this.revenue,
@@ -30,6 +32,8 @@ class DashboardLoaded extends DashboardState {
     required this.chartData,
     this.lastUpdated,
     this.partialErrors,
+    this.usdRate,
+    this.usdDiff,
   });
 
   DashboardLoaded copyWith({
@@ -39,6 +43,8 @@ class DashboardLoaded extends DashboardState {
     List<RevenueChartData>? chartData,
     DateTime? lastUpdated,
     List<String>? partialErrors,
+    String? usdRate,
+    String? usdDiff,
   }) {
     return DashboardLoaded(
       revenue: revenue ?? this.revenue,
@@ -47,12 +53,14 @@ class DashboardLoaded extends DashboardState {
       chartData: chartData ?? this.chartData,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       partialErrors: partialErrors ?? this.partialErrors,
+      usdRate: usdRate ?? this.usdRate,
+      usdDiff: usdDiff ?? this.usdDiff,
     );
   }
 
   @override
   List<Object?> get props =>
-      [revenue, inventory, financial, chartData, lastUpdated, partialErrors];
+      [revenue, inventory, financial, chartData, lastUpdated, partialErrors, usdRate, usdDiff];
 }
 
 class DashboardError extends DashboardState {

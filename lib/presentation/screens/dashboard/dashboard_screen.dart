@@ -31,14 +31,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     context.read<AlertsCubit>().loadUnreadCount();
   }
 
-  String _greeting(BuildContext context) {
-    final t = S.of(context);
-    final hour = DateTime.now().hour;
-    if (hour < 12) return t.goodMorning;
-    if (hour < 17) return t.goodAfternoon;
-    return t.goodEvening;
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -127,32 +119,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           const SizedBox(height: AppSpacing.sm),
 
-          // Greeting + last updated
-          FadeScaleIn(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _greeting(context),
-                    style: AppTypography.title2.copyWith(
-                      color: isDark
-                          ? AppColors.darkTextPrimary
-                          : AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                if (state.lastUpdated != null)
-                  Text(
-                    Formatters.time(state.lastUpdated!),
-                    style: AppTypography.caption2.copyWith(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textTertiary,
-                    ),
-                  ),
-              ],
+          // USD/UZS rate + last updated
+          if (state.usdRate != null)
+            FadeScaleIn(
+              child: _CurrencyRateBanner(
+                rate: state.usdRate!,
+                diff: state.usdDiff,
+                lastUpdated: state.lastUpdated,
+                isDark: isDark,
+              ),
             ),
-          ),
 
           // Partial error banner
           if (state.partialErrors != null) ...[
@@ -276,6 +252,114 @@ class _PartialErrorBanner extends StatelessWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// USD/UZS exchange rate banner
+class _CurrencyRateBanner extends StatelessWidget {
+  final String rate;
+  final String? diff;
+  final DateTime? lastUpdated;
+  final bool isDark;
+
+  const _CurrencyRateBanner({
+    required this.rate,
+    this.diff,
+    this.lastUpdated,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final diffValue = double.tryParse(diff ?? '') ?? 0;
+    final isPositive = diffValue >= 0;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.attach_money,
+            size: 20,
+            color: AppColors.royalBlue,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            'USD',
+            style: AppTypography.subheadline.copyWith(
+              fontWeight: FontWeight.w600,
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            '$rate UZS',
+            style: AppTypography.headline.copyWith(
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.textPrimary,
+            ),
+          ),
+          if (diff != null) ...[
+            const SizedBox(width: AppSpacing.sm),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: (isPositive ? AppColors.income : AppColors.expense)
+                    .withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isPositive ? Icons.arrow_upward : Icons.arrow_downward,
+                    size: 12,
+                    color: isPositive ? AppColors.income : AppColors.expense,
+                  ),
+                  const SizedBox(width: 2),
+                  Text(
+                    diff!,
+                    style: AppTypography.caption1.copyWith(
+                      color: isPositive ? AppColors.income : AppColors.expense,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const Spacer(),
+          if (lastUpdated != null)
+            Text(
+              Formatters.time(lastUpdated!),
+              style: AppTypography.caption2.copyWith(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textTertiary,
+              ),
+            ),
         ],
       ),
     );
