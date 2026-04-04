@@ -26,6 +26,7 @@ class DashboardRepository {
     final data = response.data['data'] as Map<String, dynamic>;
     // API returns data under a key matching the period
     final key = switch (period) {
+      'weekly' => 'weeklyRevenue',
       'monthly' => 'monthlyRevenue',
       'yearly' => 'yearlyRevenue',
       _ => 'dailyRevenue',
