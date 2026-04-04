@@ -7,6 +7,7 @@ import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/data/models/transaction/customer_balance.dart';
 import 'package:hisobnoma/data/models/transaction/inventory_product.dart';
+import 'package:hisobnoma/data/models/transaction/sale_record.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
 import 'package:hisobnoma/presentation/screens/transactions/add_sale_sheet.dart';
@@ -15,9 +16,9 @@ import 'package:hisobnoma/presentation/widgets/common/hisob_empty_state.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_segmented_control.dart';
 import 'package:hisobnoma/presentation/widgets/common/loading_shimmer.dart';
 
-enum _TabFilter { inventory, debtors }
+enum _TabFilter { inventory, debtors, transactions }
 
-/// Transactions screen with inventory and debtors lists.
+/// Transactions screen with inventory, debtors, and transaction history.
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
 
@@ -60,6 +61,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 HisobSegment(
                   value: _TabFilter.debtors,
                   label: t.debtors,
+                ),
+                HisobSegment(
+                  value: _TabFilter.transactions,
+                  label: t.transactions,
                 ),
               ],
               selectedValue: _activeTab,
@@ -123,6 +128,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         return _DebtorsTab(
           key: const ValueKey('debtors'),
           debtors: state.debtors,
+          isDark: isDark,
+        );
+      case _TabFilter.transactions:
+        return _TransactionsTab(
+          key: const ValueKey('transactions'),
+          sales: state.sales,
           isDark: isDark,
         );
     }
@@ -455,6 +466,190 @@ class _DebtorTile extends StatelessWidget {
               fontWeight: FontWeight.w600,
               color: AppColors.expense,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Transaction history list
+class _TransactionsTab extends StatelessWidget {
+  final List<SaleRecord> sales;
+  final bool isDark;
+
+  const _TransactionsTab({
+    super.key,
+    required this.sales,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final t = S.of(context);
+
+    if (sales.isEmpty) {
+      return ListView(
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+          HisobEmptyState(
+            icon: Icons.receipt_long_outlined,
+            title: t.noTransactions,
+            message: t.noTransactionsHint,
+          ),
+        ],
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.all(AppSpacing.screenPadding),
+      itemCount: sales.length,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (context, index) {
+        final sale = sales[index];
+        return StaggeredListItem(
+          index: index,
+          child: _SaleTile(sale: sale, isDark: isDark),
+        );
+      },
+    );
+  }
+}
+
+/// Individual sale transaction tile
+class _SaleTile extends StatelessWidget {
+  final SaleRecord sale;
+  final bool isDark;
+
+  const _SaleTile({required this.sale, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = S.of(context);
+    final statusColor =
+        sale.isCompleted ? AppColors.income : AppColors.warning;
+    final statusLabel = sale.isCompleted ? t.completed : t.pending;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: Row(
+        children: [
+          // Status icon
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Icon(
+                sale.isCompleted
+                    ? Icons.check_circle_outline
+                    : Icons.schedule,
+                color: statusColor,
+                size: 22,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          // Transaction details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  sale.transactionNumber,
+                  style: AppTypography.body.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    if (sale.customerName != null &&
+                        sale.customerName!.isNotEmpty) ...[
+                      Flexible(
+                        child: Text(
+                          sale.customerName!,
+                          style: AppTypography.caption1.copyWith(
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        ' · ',
+                        style: AppTypography.caption1.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                    ],
+                    Text(
+                      Formatters.relativeDate(sale.createdAt),
+                      style: AppTypography.caption1.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          // Amount + status
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                Formatters.currency(sale.totalAmount),
+                style: AppTypography.subheadline.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 1,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  statusLabel,
+                  style: AppTypography.caption2.copyWith(
+                    color: statusColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

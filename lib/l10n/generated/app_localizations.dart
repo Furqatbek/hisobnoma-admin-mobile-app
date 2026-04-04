@@ -416,6 +416,10 @@ abstract class S {
   String get noCreditorsHint;
   String get noInventory;
   String get noInventoryHint;
+  String get noTransactions;
+  String get noTransactionsHint;
+  String get completed;
+  String get pending;
 
   /// No description provided for @searchProducts.
   ///

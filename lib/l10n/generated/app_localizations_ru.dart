@@ -188,6 +188,14 @@ class SRu extends S {
   String get noInventory => 'Склад пуст';
   @override
   String get noInventoryHint => 'Синхронизируйте данные для отображения товаров';
+  @override
+  String get noTransactions => 'Нет операций';
+  @override
+  String get noTransactionsHint => 'Завершённые продажи появятся здесь';
+  @override
+  String get completed => 'Завершено';
+  @override
+  String get pending => 'Ожидает';
 
   @override
   String get searchProducts => 'Поиск товаров';

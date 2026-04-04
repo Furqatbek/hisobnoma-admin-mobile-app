@@ -188,6 +188,14 @@ class SEn extends S {
   String get noInventory => 'No inventory items';
   @override
   String get noInventoryHint => 'Sync data from the server to see inventory';
+  @override
+  String get noTransactions => 'No transactions yet';
+  @override
+  String get noTransactionsHint => 'Completed sales will appear here';
+  @override
+  String get completed => 'Completed';
+  @override
+  String get pending => 'Pending';
 
   @override
   String get searchProducts => 'Search Products';

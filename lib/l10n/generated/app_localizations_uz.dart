@@ -188,6 +188,14 @@ class SUz extends S {
   String get noInventory => 'Омбор бўш';
   @override
   String get noInventoryHint => 'Омборни кўриш учун серверга уланинг';
+  @override
+  String get noTransactions => 'Амалиётлар йўқ';
+  @override
+  String get noTransactionsHint => 'Тугалланган сотувлар шу ерда кўринади';
+  @override
+  String get completed => 'Тугалланган';
+  @override
+  String get pending => 'Кутилмоқда';
 
   @override
   String get searchProducts => 'Товарларни қидириш';

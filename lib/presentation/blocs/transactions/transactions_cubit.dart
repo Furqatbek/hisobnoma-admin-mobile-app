@@ -15,12 +15,13 @@ class TransactionsCubit extends Cubit<TransactionsState> {
 
   void reset() => emit(const TransactionsInitial());
 
-  /// Load inventory and debtors in parallel
+  /// Load inventory, debtors, and sales history in parallel
   Future<void> loadData() async {
     emit(const TransactionsLoading());
     try {
       List<InventoryProduct> products = [];
       List<CustomerBalance> debtors = [];
+      List<SaleRecord> sales = [];
 
       await Future.wait([
         _transactionRepository.getInventoryProducts().then((r) {
@@ -31,11 +32,15 @@ class TransactionsCubit extends Cubit<TransactionsState> {
               .where((c) => c.netBalance > 0)
               .toList();
         }),
+        _transactionRepository.getSalesHistory().then((r) {
+          sales = r;
+        }).catchError((Object _) {}),
       ]);
 
       emit(TransactionsDataLoaded(
         products: products,
         debtors: debtors,
+        sales: sales,
       ));
     } catch (e) {
       emit(TransactionsError(message: e.toString()));
