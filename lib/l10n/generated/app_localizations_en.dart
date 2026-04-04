@@ -305,6 +305,20 @@ class SEn extends S {
   String get failedToCompleteSale => 'Failed to complete sale';
 
   @override
+  String productsFound(String count) {
+    return '$count products found';
+  }
+
+  @override
+  String get scanBarcode => 'Scan barcode';
+
+  @override
+  String get profitMargin => 'Profit Margin';
+
+  @override
+  String get swipeToRemove => 'Swipe to remove';
+
+  @override
   String get revenueOverview => 'Revenue Overview';
 
   @override

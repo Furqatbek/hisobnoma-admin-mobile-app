@@ -107,6 +107,11 @@
   "saleCompletedAmount": "Sale completed · {amount}",
   "@saleCompletedAmount": { "placeholders": { "amount": { "type": "String" } } },
   "failedToCompleteSale": "Failed to complete sale",
+  "productsFound": "{count} products found",
+  "@productsFound": { "placeholders": { "count": { "type": "String" } } },
+  "scanBarcode": "Scan barcode",
+  "profitMargin": "Profit Margin",
+  "swipeToRemove": "Swipe to remove",
 
   "revenueOverview": "Revenue Overview",
   "incomeVsExpense": "Income vs Expense",

@@ -99,6 +99,10 @@
   "completeSale": "Сотувни тасдиқлаш · {amount}",
   "saleCompletedAmount": "Сотилди · {amount}",
   "failedToCompleteSale": "Сотувда хатолик юз берди",
+  "productsFound": "{count} та товар топилди",
+  "scanBarcode": "Штрихкод сканерлаш",
+  "profitMargin": "Фойда маржаси",
+  "swipeToRemove": "Ўчириш учун суринг",
 
   "revenueOverview": "Тушум кўриниши",
   "incomeVsExpense": "Кирим ва Чиқим",

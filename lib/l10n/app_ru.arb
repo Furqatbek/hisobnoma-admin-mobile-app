@@ -99,6 +99,10 @@
   "completeSale": "Оформить · {amount}",
   "saleCompletedAmount": "Продано · {amount}",
   "failedToCompleteSale": "Ошибка при оформлении продажи",
+  "productsFound": "Найдено: {count}",
+  "scanBarcode": "Сканировать штрихкод",
+  "profitMargin": "Маржа",
+  "swipeToRemove": "Проведите для удаления",
 
   "revenueOverview": "Обзор выручки",
   "incomeVsExpense": "Приход и Расход",

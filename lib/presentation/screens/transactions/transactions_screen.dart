@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,6 +14,7 @@ import 'package:hisobnoma/presentation/screens/transactions/add_sale_sheet.dart'
 import 'package:hisobnoma/presentation/widgets/common/animations.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_empty_state.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_segmented_control.dart';
+import 'package:hisobnoma/presentation/widgets/common/loading_shimmer.dart';
 import 'package:hisobnoma/presentation/widgets/transaction/product_tile.dart';
 
 enum _TabFilter { products, quickSale, quickCount }
@@ -29,12 +32,62 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   final _searchFocus = FocusNode();
   _TabFilter _activeTab = _TabFilter.products;
   bool _isSearching = false;
+  Timer? _debounce;
 
   @override
   void dispose() {
     _searchController.dispose();
     _searchFocus.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      context.read<TransactionsCubit>().searchProducts(value);
+    });
+  }
+
+  void _onBarcodePressed() {
+    HapticFeedback.lightImpact();
+    _showBarcodeDialog();
+  }
+
+  Future<void> _showBarcodeDialog() async {
+    final t = S.of(context);
+    final controller = TextEditingController();
+    final barcode = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.scanBarcode),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: t.barcode,
+            prefixIcon: const Icon(Icons.qr_code_scanner, size: 20),
+          ),
+          onSubmitted: (v) => Navigator.of(ctx).pop(v),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(t.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text),
+            child: Text(t.search),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (barcode != null && barcode.trim().isNotEmpty && mounted) {
+      context.read<TransactionsCubit>().lookupBarcode(barcode.trim());
+      setState(() => _activeTab = _TabFilter.products);
+    }
   }
 
   @override
@@ -48,6 +101,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             ? _buildSearchField(isDark)
             : Text(t.transactions, style: AppTypography.headline),
         actions: [
+          // Barcode scan button
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner, size: 22),
+            tooltip: t.scanBarcode,
+            onPressed: _onBarcodePressed,
+          ),
           if (!_isSearching)
             IconButton(
               icon: const Icon(Icons.search),
@@ -63,6 +122,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               onPressed: () {
                 HapticFeedback.lightImpact();
                 _searchController.clear();
+                _debounce?.cancel();
                 context.read<TransactionsCubit>().reset();
                 setState(() => _isSearching = false);
               },
@@ -99,9 +159,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             ),
           ),
 
-          // Content
+          // Content with animated transition
           Expanded(
-            child: _buildContent(isDark),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              child: _buildContent(isDark),
+            ),
           ),
         ],
       ),
@@ -130,9 +195,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
       ),
-      onChanged: (value) {
-        context.read<TransactionsCubit>().searchProducts(value);
-      },
+      onChanged: _onSearchChanged,
     );
   }
 
@@ -140,12 +203,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     switch (_activeTab) {
       case _TabFilter.products:
         return _ProductsTab(
+          key: const ValueKey('products'),
           onAddToSale: (_) => AddSaleSheet.show(context),
         );
       case _TabFilter.quickSale:
-        return _QuickSaleTab(isDark: isDark);
+        return _QuickSaleTab(key: const ValueKey('quickSale'), isDark: isDark);
       case _TabFilter.quickCount:
-        return _QuickCountTab(isDark: isDark);
+        return _QuickCountTab(
+            key: const ValueKey('quickCount'), isDark: isDark);
     }
   }
 }
@@ -154,7 +219,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 class _ProductsTab extends StatelessWidget {
   final ValueChanged<ProductLookup> onAddToSale;
 
-  const _ProductsTab({required this.onAddToSale});
+  const _ProductsTab({super.key, required this.onAddToSale});
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +228,31 @@ class _ProductsTab extends StatelessWidget {
     return BlocBuilder<TransactionsCubit, TransactionsState>(
       builder: (context, state) {
         if (state is TransactionsLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const ListShimmer();
+        }
+        // Handle barcode lookup result
+        if (state is BarcodeLookupLoaded) {
+          final product = state.product;
+          return ListView(
+            padding: const EdgeInsets.all(AppSpacing.screenPadding),
+            children: [
+              StaggeredListItem(
+                index: 0,
+                child: ProductTile(
+                  product: product,
+                  onTap: () => _showProductDetail(context, product),
+                  trailing: IconButton(
+                    icon: Icon(
+                      Icons.add_shopping_cart,
+                      size: 20,
+                      color: AppColors.royalBlue,
+                    ),
+                    onPressed: () => onAddToSale(product),
+                  ),
+                ),
+              ),
+            ],
+          );
         }
         if (state is ProductsSearchLoaded) {
           if (state.products.isEmpty) {
@@ -180,29 +269,64 @@ class _ProductsTab extends StatelessWidget {
               message: t.noProductsFoundFor(state.query),
             );
           }
-          return ListView.separated(
-            padding: const EdgeInsets.all(AppSpacing.screenPadding),
-            itemCount: state.products.length,
-            separatorBuilder: (_, __) =>
-                const SizedBox(height: AppSpacing.sm),
-            itemBuilder: (context, index) {
-              final product = state.products[index];
-              return StaggeredListItem(
-                index: index,
-                child: ProductTile(
-                  product: product,
-                  onTap: () => _showProductDetail(context, product),
-                  trailing: IconButton(
-                    icon: Icon(
-                      Icons.add_shopping_cart,
-                      size: 20,
-                      color: AppColors.royalBlue,
-                    ),
-                    onPressed: () => onAddToSale(product),
-                  ),
+          return Column(
+            children: [
+              // Result count header
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                  vertical: AppSpacing.xs,
                 ),
-              );
-            },
+                child: Row(
+                  children: [
+                    Text(
+                      t.productsFound('${state.products.length}'),
+                      style: AppTypography.caption1.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (state.query.isNotEmpty)
+                      Text(
+                        '"${state.query}"',
+                        style: AppTypography.caption2.copyWith(
+                          color: AppColors.royalBlue,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenPadding,
+                    vertical: AppSpacing.xs,
+                  ),
+                  itemCount: state.products.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppSpacing.sm),
+                  itemBuilder: (context, index) {
+                    final product = state.products[index];
+                    return StaggeredListItem(
+                      index: index,
+                      child: ProductTile(
+                        product: product,
+                        onTap: () => _showProductDetail(context, product),
+                        trailing: IconButton(
+                          icon: Icon(
+                            Icons.add_shopping_cart,
+                            size: 20,
+                            color: AppColors.royalBlue,
+                          ),
+                          onPressed: () => onAddToSale(product),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         }
         if (state is TransactionsError) {
@@ -257,6 +381,9 @@ class _ProductDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = S.of(context);
+    final margin = product.sellingPrice - product.costPrice;
+    final marginPercent =
+        product.costPrice > 0 ? (margin / product.costPrice) * 100 : 0.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -288,37 +415,131 @@ class _ProductDetailSheet extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Product name
-              Text(
-                product.name,
-                style: AppTypography.title2.copyWith(
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                '${product.sku} · ${product.category}',
-                style: AppTypography.subheadline.copyWith(
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.textSecondary,
-                ),
+              // Product name + icon
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: AppColors.royalBlue.withValues(alpha: 0.1),
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusSm),
+                    ),
+                    child: Center(
+                      child: Text(
+                        product.name.isNotEmpty
+                            ? product.name[0].toUpperCase()
+                            : '?',
+                        style: AppTypography.title2.copyWith(
+                          color: AppColors.royalBlue,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product.name,
+                          style: AppTypography.title3.copyWith(
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${product.sku} · ${product.category}',
+                          style: AppTypography.caption1.copyWith(
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Price row
-              _InfoRow(
-                label: t.sellingPrice,
-                value: Formatters.currency(product.sellingPrice),
-                isDark: isDark,
+              // Price cards row
+              Row(
+                children: [
+                  Expanded(
+                    child: _PriceCard(
+                      label: t.sellingPrice,
+                      value: Formatters.currency(product.sellingPrice),
+                      color: AppColors.income,
+                      isDark: isDark,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: _PriceCard(
+                      label: t.costPrice,
+                      value: Formatters.currency(product.costPrice),
+                      color: AppColors.expense,
+                      isDark: isDark,
+                    ),
+                  ),
+                ],
               ),
-              _InfoRow(
-                label: t.costPrice,
-                value: Formatters.currency(product.costPrice),
-                isDark: isDark,
+              const SizedBox(height: AppSpacing.sm),
+
+              // Profit margin card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: (margin >= 0 ? AppColors.income : AppColors.expense)
+                      .withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                  border: Border.all(
+                    color:
+                        (margin >= 0 ? AppColors.income : AppColors.expense)
+                            .withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      margin >= 0
+                          ? Icons.trending_up
+                          : Icons.trending_down,
+                      size: 18,
+                      color: margin >= 0
+                          ? AppColors.income
+                          : AppColors.expense,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      t.profitMargin,
+                      style: AppTypography.subheadline.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${Formatters.currency(margin)} (${Formatters.percentage(marginPercent)})',
+                      style: AppTypography.subheadline.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: margin >= 0
+                            ? AppColors.income
+                            : AppColors.expense,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(height: AppSpacing.md),
+
+              // Stock & barcode
               _InfoRow(
                 label: t.totalStock,
                 value: '${product.totalStock} ${product.uom}',
@@ -373,6 +594,76 @@ class _ProductDetailSheet extends StatelessWidget {
   }
 }
 
+/// Price card for product detail sheet
+class _PriceCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+  final bool isDark;
+
+  const _PriceCard({
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                label,
+                style: AppTypography.caption1.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            value,
+            style: AppTypography.headline.copyWith(
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
@@ -420,7 +711,7 @@ class _InfoRow extends StatelessWidget {
 class _QuickSaleTab extends StatelessWidget {
   final bool isDark;
 
-  const _QuickSaleTab({required this.isDark});
+  const _QuickSaleTab({super.key, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -635,7 +926,7 @@ class _ReceiptRow extends StatelessWidget {
 class _QuickCountTab extends StatelessWidget {
   final bool isDark;
 
-  const _QuickCountTab({required this.isDark});
+  const _QuickCountTab({super.key, required this.isDark});
 
   @override
   Widget build(BuildContext context) {

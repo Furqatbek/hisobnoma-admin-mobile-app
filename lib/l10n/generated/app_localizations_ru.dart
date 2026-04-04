@@ -305,6 +305,20 @@ class SRu extends S {
   String get failedToCompleteSale => 'Ошибка при оформлении продажи';
 
   @override
+  String productsFound(String count) {
+    return 'Найдено: $count';
+  }
+
+  @override
+  String get scanBarcode => 'Сканировать штрихкод';
+
+  @override
+  String get profitMargin => 'Маржа';
+
+  @override
+  String get swipeToRemove => 'Проведите для удаления';
+
+  @override
   String get revenueOverview => 'Обзор выручки';
 
   @override

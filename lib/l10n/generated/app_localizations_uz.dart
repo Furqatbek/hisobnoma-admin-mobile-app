@@ -305,6 +305,20 @@ class SUz extends S {
   String get failedToCompleteSale => 'Сотувда хатолик юз берди';
 
   @override
+  String productsFound(String count) {
+    return '$count та товар топилди';
+  }
+
+  @override
+  String get scanBarcode => 'Штрихкод сканерлаш';
+
+  @override
+  String get profitMargin => 'Фойда маржаси';
+
+  @override
+  String get swipeToRemove => 'Ўчириш учун суринг';
+
+  @override
   String get revenueOverview => 'Тушум кўриниши';
 
   @override

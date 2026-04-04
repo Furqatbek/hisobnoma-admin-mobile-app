@@ -651,6 +651,30 @@ abstract class S {
   /// **'Failed to complete sale'**
   String get failedToCompleteSale;
 
+  /// No description provided for @productsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} products found'**
+  String productsFound(String count);
+
+  /// No description provided for @scanBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan barcode'**
+  String get scanBarcode;
+
+  /// No description provided for @profitMargin.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit Margin'**
+  String get profitMargin;
+
+  /// No description provided for @swipeToRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe to remove'**
+  String get swipeToRemove;
+
   /// No description provided for @revenueOverview.
   ///
   /// In en, this message translates to:
