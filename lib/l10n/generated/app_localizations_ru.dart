@@ -166,6 +166,70 @@ class SRu extends S {
   String get cancel => 'Отмена';
 
   @override
+  @override
+  String get inventory => 'Склад';
+  @override
+  String get debtors => 'Дебиторы';
+  @override
+  String get creditors => 'Кредиторы';
+  @override
+  String get balance => 'Баланс';
+  @override
+  String get creditLimit => 'Кредитный лимит';
+  @override
+  @override
+  String get unpaidInvoices => 'Неоплаченные счета';
+  @override
+  String get invoice => 'Счёт';
+  @override
+  String get dueDate => 'Срок оплаты';
+  @override
+  String get overdue => 'Просрочено';
+  @override
+  String daysOverdueLabel(String days) => '$days дн. просрочки';
+  @override
+  String get balanceDue => 'К оплате';
+  @override
+  String get noUnpaidInvoices => 'Нет неоплаченных счетов';
+
+  @override
+  String get noDebtors => 'Нет дебиторов';
+  @override
+  String get noDebtorsHint => 'Нет клиентов с задолженностью';
+  @override
+  String get noCreditors => 'Нет кредиторов';
+  @override
+  String get noCreditorsHint => 'Нет непогашенных обязательств';
+  @override
+  String get noInventory => 'Склад пуст';
+  @override
+  String get noInventoryHint => 'Синхронизируйте данные для отображения товаров';
+  @override
+  String get noTransactions => 'Нет операций';
+  @override
+  String get noTransactionsHint => 'Завершённые продажи появятся здесь';
+  @override
+  String get completed => 'Завершено';
+  @override
+  String get pending => 'Ожидает';
+  @override
+  String get transactionDetails => 'Детали операции';
+  @override
+  String get items => 'Товары';
+  @override
+  String get subtotal => 'Подытог';
+  @override
+  String get discount => 'Скидка';
+  @override
+  String get tax => 'Налог';
+  @override
+  String get cashier => 'Кассир';
+  @override
+  String get terminal => 'Терминал';
+  @override
+  String get payment => 'Оплата';
+
+  @override
   String get searchProducts => 'Поиск товаров';
 
   @override
@@ -305,6 +369,20 @@ class SRu extends S {
   String get failedToCompleteSale => 'Ошибка при оформлении продажи';
 
   @override
+  String productsFound(String count) {
+    return 'Найдено: $count';
+  }
+
+  @override
+  String get scanBarcode => 'Сканировать штрихкод';
+
+  @override
+  String get profitMargin => 'Маржа';
+
+  @override
+  String get swipeToRemove => 'Проведите для удаления';
+
+  @override
   String get revenueOverview => 'Обзор выручки';
 
   @override
@@ -339,6 +417,33 @@ class SRu extends S {
 
   @override
   String get yesterday => 'Вчера';
+
+  @override
+  String get monthlyRevenue => 'Выручка за месяц';
+
+  @override
+  String get vsLastMonth => 'к прошлому месяцу';
+
+  @override
+  String get cashFlow => 'Денежный поток';
+
+  @override
+  String get inflows => 'Поступления';
+
+  @override
+  String get outflows => 'Расходы';
+
+  @override
+  String get inventoryReport => 'Отчёт по складу';
+
+  @override
+  String get stockHealth => 'Состояние товаров';
+
+  @override
+  String get healthy => 'В норме';
+
+  @override
+  String get inventoryValue => 'Стоимость склада';
 
   @override
   String get appearance => 'Оформление';

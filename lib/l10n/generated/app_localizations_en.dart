@@ -166,6 +166,70 @@ class SEn extends S {
   String get cancel => 'Cancel';
 
   @override
+  @override
+  String get inventory => 'Inventory';
+  @override
+  String get debtors => 'Debtors';
+  @override
+  String get creditors => 'Creditors';
+  @override
+  String get balance => 'Balance';
+  @override
+  String get creditLimit => 'Credit Limit';
+  @override
+  @override
+  String get unpaidInvoices => 'Unpaid Invoices';
+  @override
+  String get invoice => 'Invoice';
+  @override
+  String get dueDate => 'Due Date';
+  @override
+  String get overdue => 'Overdue';
+  @override
+  String daysOverdueLabel(String days) => '$days days overdue';
+  @override
+  String get balanceDue => 'Balance Due';
+  @override
+  String get noUnpaidInvoices => 'No unpaid invoices';
+
+  @override
+  String get noDebtors => 'No debtors';
+  @override
+  String get noDebtorsHint => 'No customers with outstanding balances';
+  @override
+  String get noCreditors => 'No creditors';
+  @override
+  String get noCreditorsHint => 'No outstanding payables';
+  @override
+  String get noInventory => 'No inventory items';
+  @override
+  String get noInventoryHint => 'Sync data from the server to see inventory';
+  @override
+  String get noTransactions => 'No transactions yet';
+  @override
+  String get noTransactionsHint => 'Completed sales will appear here';
+  @override
+  String get completed => 'Completed';
+  @override
+  String get pending => 'Pending';
+  @override
+  String get transactionDetails => 'Transaction Details';
+  @override
+  String get items => 'Items';
+  @override
+  String get subtotal => 'Subtotal';
+  @override
+  String get discount => 'Discount';
+  @override
+  String get tax => 'Tax';
+  @override
+  String get cashier => 'Cashier';
+  @override
+  String get terminal => 'Terminal';
+  @override
+  String get payment => 'Payment';
+
+  @override
   String get searchProducts => 'Search Products';
 
   @override
@@ -305,6 +369,20 @@ class SEn extends S {
   String get failedToCompleteSale => 'Failed to complete sale';
 
   @override
+  String productsFound(String count) {
+    return '$count products found';
+  }
+
+  @override
+  String get scanBarcode => 'Scan barcode';
+
+  @override
+  String get profitMargin => 'Profit Margin';
+
+  @override
+  String get swipeToRemove => 'Swipe to remove';
+
+  @override
   String get revenueOverview => 'Revenue Overview';
 
   @override
@@ -339,6 +417,33 @@ class SEn extends S {
 
   @override
   String get yesterday => 'Yesterday';
+
+  @override
+  String get monthlyRevenue => 'Monthly Revenue';
+
+  @override
+  String get vsLastMonth => 'vs last month';
+
+  @override
+  String get cashFlow => 'Cash Flow';
+
+  @override
+  String get inflows => 'Inflows';
+
+  @override
+  String get outflows => 'Outflows';
+
+  @override
+  String get inventoryReport => 'Inventory Report';
+
+  @override
+  String get stockHealth => 'Stock Health';
+
+  @override
+  String get healthy => 'Healthy';
+
+  @override
+  String get inventoryValue => 'Inventory Value';
 
   @override
   String get appearance => 'Appearance';

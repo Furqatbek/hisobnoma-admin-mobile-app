@@ -166,6 +166,70 @@ class SUz extends S {
   String get cancel => 'Бекор қилиш';
 
   @override
+  @override
+  String get inventory => 'Омбор';
+  @override
+  String get debtors => 'Қарздорлар';
+  @override
+  String get creditors => 'Кредиторлар';
+  @override
+  String get balance => 'Баланс';
+  @override
+  String get creditLimit => 'Кредит лимити';
+  @override
+  @override
+  String get unpaidInvoices => 'Тўланмаган ҳисоб-фактуралар';
+  @override
+  String get invoice => 'Ҳисоб-фактура';
+  @override
+  String get dueDate => 'Тўлов муддати';
+  @override
+  String get overdue => 'Муддати ўтган';
+  @override
+  String daysOverdueLabel(String days) => '$days кун кечикиш';
+  @override
+  String get balanceDue => 'Қарз қолдиғи';
+  @override
+  String get noUnpaidInvoices => 'Тўланмаган ҳисоб-фактура йўқ';
+
+  @override
+  String get noDebtors => 'Қарздорлар йўқ';
+  @override
+  String get noDebtorsHint => 'Тўланмаган қарзлар мавжуд эмас';
+  @override
+  String get noCreditors => 'Кредиторлар йўқ';
+  @override
+  String get noCreditorsHint => 'Тўланмаган мажбуриятлар йўқ';
+  @override
+  String get noInventory => 'Омбор бўш';
+  @override
+  String get noInventoryHint => 'Омборни кўриш учун серверга уланинг';
+  @override
+  String get noTransactions => 'Амалиётлар йўқ';
+  @override
+  String get noTransactionsHint => 'Тугалланган сотувлар шу ерда кўринади';
+  @override
+  String get completed => 'Тугалланган';
+  @override
+  String get pending => 'Кутилмоқда';
+  @override
+  String get transactionDetails => 'Амалиёт тафсилоти';
+  @override
+  String get items => 'Товарлар';
+  @override
+  String get subtotal => 'Ораоқ жами';
+  @override
+  String get discount => 'Чегирма';
+  @override
+  String get tax => 'Солиқ';
+  @override
+  String get cashier => 'Кассир';
+  @override
+  String get terminal => 'Терминал';
+  @override
+  String get payment => 'Тўлов';
+
+  @override
   String get searchProducts => 'Товарларни қидириш';
 
   @override
@@ -305,6 +369,20 @@ class SUz extends S {
   String get failedToCompleteSale => 'Сотувда хатолик юз берди';
 
   @override
+  String productsFound(String count) {
+    return '$count та товар топилди';
+  }
+
+  @override
+  String get scanBarcode => 'Штрихкод сканерлаш';
+
+  @override
+  String get profitMargin => 'Фойда маржаси';
+
+  @override
+  String get swipeToRemove => 'Ўчириш учун суринг';
+
+  @override
   String get revenueOverview => 'Тушум кўриниши';
 
   @override
@@ -339,6 +417,33 @@ class SUz extends S {
 
   @override
   String get yesterday => 'Кеча';
+
+  @override
+  String get monthlyRevenue => 'Ойлик тушум';
+
+  @override
+  String get vsLastMonth => 'ўтган ойга нисбатан';
+
+  @override
+  String get cashFlow => 'Пул оқими';
+
+  @override
+  String get inflows => 'Кирим';
+
+  @override
+  String get outflows => 'Чиқим';
+
+  @override
+  String get inventoryReport => 'Омбор ҳисоботи';
+
+  @override
+  String get stockHealth => 'Захира ҳолати';
+
+  @override
+  String get healthy => 'Яхши';
+
+  @override
+  String get inventoryValue => 'Омбор қиймати';
 
   @override
   String get appearance => 'Кўриниш';

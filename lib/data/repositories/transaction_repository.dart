@@ -55,6 +55,70 @@ class TransactionRepository {
     );
   }
 
+  /// Get inventory products (paginated)
+  Future<List<InventoryProduct>> getInventoryProducts({
+    int page = 0,
+    int size = 100,
+  }) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.inventoryProducts,
+      queryParameters: {'page': page, 'size': size},
+    );
+    final data = response.data as Map<String, dynamic>;
+    return (data['content'] as List)
+        .map((e) => InventoryProduct.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Get customer balance report (debtors)
+  Future<CustomerBalanceReport> getCustomerBalances() async {
+    final response = await _apiClient.get(
+      ApiEndpoints.arCustomerBalance,
+    );
+    return CustomerBalanceReport.fromJson(
+        response.data as Map<String, dynamic>);
+  }
+
+  /// Get POS transactions (paginated, optionally filtered by date)
+  Future<List<SaleRecord>> getTransactions({
+    int page = 0,
+    int size = 50,
+    String? date,
+  }) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.posTransactions,
+      queryParameters: {
+        'page': page,
+        'size': size,
+        if (date != null) 'date': date,
+      },
+    );
+    final data = response.data as Map<String, dynamic>;
+    return (data['content'] as List)
+        .map((e) => SaleRecord.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Get unpaid invoices for a customer
+  Future<List<UnpaidInvoice>> getCustomerUnpaidInvoices(int customerId) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.arCustomerUnpaid(customerId),
+    );
+    final list = response.data as List? ?? [];
+    return list
+        .map((e) => UnpaidInvoice.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Get transaction detail by ID
+  Future<SaleDetail> getTransactionDetail(int id) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.posTransactionDetail(id),
+    );
+    return SaleDetail.fromJson(
+        response.data['data'] as Map<String, dynamic>);
+  }
+
   /// Search customers (paginated)
   Future<PaginatedResponse<Map<String, dynamic>>> searchCustomers({
     required String query,

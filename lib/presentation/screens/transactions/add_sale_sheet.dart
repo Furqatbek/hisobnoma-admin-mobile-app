@@ -314,7 +314,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
         ),
         const Divider(height: 1),
 
-        // Cart items
+        // Cart items with swipe-to-delete
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(AppSpacing.md),
@@ -323,22 +323,44 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
               final item = _cart[index];
               return Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: _CartItemTile(
-                  item: item,
-                  isDark: isDark,
-                  onQuantityChanged: (qty) {
-                    setState(() {
-                      if (qty <= 0) {
-                        _cart.removeAt(index);
-                      } else {
-                        _cart[index] = item.copyWith(quantity: qty);
-                      }
-                    });
-                  },
-                  onRemoved: () {
+                child: Dismissible(
+                  key: ValueKey(item.product.productId),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (_) {
                     HapticFeedback.mediumImpact();
                     setState(() => _cart.removeAt(index));
                   },
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding:
+                        const EdgeInsets.only(right: AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: AppColors.expense.withValues(alpha: 0.12),
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.radiusCard),
+                    ),
+                    child: Icon(
+                      Icons.delete_outline,
+                      color: AppColors.expense,
+                    ),
+                  ),
+                  child: _CartItemTile(
+                    item: item,
+                    isDark: isDark,
+                    onQuantityChanged: (qty) {
+                      setState(() {
+                        if (qty <= 0) {
+                          _cart.removeAt(index);
+                        } else {
+                          _cart[index] = item.copyWith(quantity: qty);
+                        }
+                      });
+                    },
+                    onRemoved: () {
+                      HapticFeedback.mediumImpact();
+                      setState(() => _cart.removeAt(index));
+                    },
+                  ),
                 ),
               );
             },
@@ -433,7 +455,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
       items: _cart
           .map((item) => QuickSaleItem(
                 productId: item.product.productId,
-                quantity: item.quantity,
+                quantity: item.quantity.toDouble(),
                 unitPrice: item.product.sellingPrice,
               ))
           .toList(),

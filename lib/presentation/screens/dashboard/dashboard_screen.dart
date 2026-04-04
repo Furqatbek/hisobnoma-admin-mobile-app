@@ -24,19 +24,13 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  bool _hasAnimated = false;
+
   @override
   void initState() {
     super.initState();
     context.read<DashboardCubit>().loadDashboard();
     context.read<AlertsCubit>().loadUnreadCount();
-  }
-
-  String _greeting(BuildContext context) {
-    final t = S.of(context);
-    final hour = DateTime.now().hour;
-    if (hour < 12) return t.goodMorning;
-    if (hour < 17) return t.goodAfternoon;
-    return t.goodEvening;
   }
 
   @override
@@ -109,8 +103,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _animate(Widget child, {Duration delay = Duration.zero}) {
+    if (_hasAnimated) return child;
+    return FadeScaleIn(delay: delay, child: child);
+  }
+
   Widget _buildLoadedContent(DashboardLoaded state, bool isDark) {
-    return RefreshIndicator(
+    final content = RefreshIndicator(
       onRefresh: () async {
         HapticFeedback.mediumImpact();
         await context.read<DashboardCubit>().refresh();
@@ -127,32 +126,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           const SizedBox(height: AppSpacing.sm),
 
-          // Greeting + last updated
-          FadeScaleIn(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _greeting(context),
-                    style: AppTypography.title2.copyWith(
-                      color: isDark
-                          ? AppColors.darkTextPrimary
-                          : AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                if (state.lastUpdated != null)
-                  Text(
-                    Formatters.time(state.lastUpdated!),
-                    style: AppTypography.caption2.copyWith(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textTertiary,
-                    ),
-                  ),
-              ],
+          // USD/UZS rate + last updated
+          if (state.usdRate != null)
+            _animate(
+              _CurrencyRateBanner(
+                rate: state.usdRate!,
+                diff: state.usdDiff,
+                lastUpdated: state.lastUpdated,
+                isDark: isDark,
+              ),
             ),
-          ),
 
           // Partial error banner
           if (state.partialErrors != null) ...[
@@ -166,9 +149,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: AppSpacing.md),
 
           // Hero balance card
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 80),
-            child: _BalanceHeroCard(
+          _animate(
+            _BalanceHeroCard(
               balance: state.financial.netCashPosition,
               changePercent: state.revenue.monthChangePercent,
               todayRevenue: state.revenue.todayRevenue,
@@ -176,49 +158,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
               weekRevenue: state.revenue.thisWeekRevenue,
               weekTransactions: state.revenue.thisWeekTransactionCount,
             ),
+            delay: const Duration(milliseconds: 80),
           ),
           const SizedBox(height: AppSpacing.md),
 
           // Revenue / Expenses summary pills
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 160),
-            child: _SummaryPillRow(
+          _animate(
+            _SummaryPillRow(
               revenue: state.revenue.thisMonthRevenue,
               revenueChange: state.revenue.monthChangePercent,
               expenses: state.financial.apOutstanding,
               avgTransaction: state.revenue.averageTransactionValue,
               isDark: isDark,
             ),
+            delay: const Duration(milliseconds: 160),
           ),
           const SizedBox(height: AppSpacing.lg),
 
           // Revenue chart with period selector
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 240),
-            child: _ChartSection(
+          _animate(
+            _ChartSection(
               chartData: state.chartData,
               isDark: isDark,
             ),
+            delay: const Duration(milliseconds: 240),
           ),
           const SizedBox(height: AppSpacing.lg),
 
           // Inventory overview
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 320),
-            child: _InventorySection(
+          _animate(
+            _InventorySection(
               inventory: state.inventory,
               isDark: isDark,
             ),
+            delay: const Duration(milliseconds: 320),
           ),
 
           // Financial overview
           const SizedBox(height: AppSpacing.lg),
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 400),
-            child: _FinancialSection(
+          _animate(
+            _FinancialSection(
               financial: state.financial,
               isDark: isDark,
             ),
+            delay: const Duration(milliseconds: 400),
           ),
 
           // Bottom padding for FAB
@@ -227,6 +210,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       ),
     );
+
+    if (!_hasAnimated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _hasAnimated = true;
+      });
+    }
+    return content;
   }
 }
 
@@ -276,6 +266,114 @@ class _PartialErrorBanner extends StatelessWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// USD/UZS exchange rate banner
+class _CurrencyRateBanner extends StatelessWidget {
+  final String rate;
+  final String? diff;
+  final DateTime? lastUpdated;
+  final bool isDark;
+
+  const _CurrencyRateBanner({
+    required this.rate,
+    this.diff,
+    this.lastUpdated,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final diffValue = double.tryParse(diff ?? '') ?? 0;
+    final isPositive = diffValue >= 0;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.attach_money,
+            size: 20,
+            color: AppColors.royalBlue,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            'USD',
+            style: AppTypography.subheadline.copyWith(
+              fontWeight: FontWeight.w600,
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            '$rate UZS',
+            style: AppTypography.headline.copyWith(
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.textPrimary,
+            ),
+          ),
+          if (diff != null) ...[
+            const SizedBox(width: AppSpacing.sm),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: (isPositive ? AppColors.income : AppColors.expense)
+                    .withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isPositive ? Icons.arrow_upward : Icons.arrow_downward,
+                    size: 12,
+                    color: isPositive ? AppColors.income : AppColors.expense,
+                  ),
+                  const SizedBox(width: 2),
+                  Text(
+                    diff!,
+                    style: AppTypography.caption1.copyWith(
+                      color: isPositive ? AppColors.income : AppColors.expense,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const Spacer(),
+          if (lastUpdated != null)
+            Text(
+              Formatters.time(lastUpdated!),
+              style: AppTypography.caption2.copyWith(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textTertiary,
+              ),
+            ),
         ],
       ),
     );
@@ -467,27 +565,30 @@ class _SummaryPillRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = S.of(context);
-    return Row(
-      children: [
-        Expanded(
-          child: _SummaryPill(
-            label: t.revenue,
-            value: Formatters.compactCurrency(revenue),
-            change: revenueChange,
-            color: AppColors.income,
-            isDark: isDark,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _SummaryPill(
+              label: t.revenue,
+              value: Formatters.compactCurrency(revenue),
+              change: revenueChange,
+              color: AppColors.income,
+              isDark: isDark,
+            ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: _SummaryPill(
-            label: t.avgTransaction,
-            value: Formatters.compactCurrency(avgTransaction),
-            color: AppColors.royalBlue,
-            isDark: isDark,
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: _SummaryPill(
+              label: t.avgTransaction,
+              value: Formatters.compactCurrency(avgTransaction),
+              color: AppColors.royalBlue,
+              isDark: isDark,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -551,8 +652,8 @@ class _SummaryPill extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(value, style: AppTypography.headline),
-          if (change != null) ...[
-            const SizedBox(height: AppSpacing.xs),
+          const Spacer(),
+          if (change != null)
             Row(
               children: [
                 Icon(
@@ -561,15 +662,17 @@ class _SummaryPill extends StatelessWidget {
                   color: change! >= 0 ? AppColors.income : AppColors.expense,
                 ),
                 const SizedBox(width: 2),
-                Text(
-                  '${Formatters.percentage(change!)} ${t.thisMonth}',
-                  style: AppTypography.caption1.copyWith(
-                    color: change! >= 0 ? AppColors.income : AppColors.expense,
+                Flexible(
+                  child: Text(
+                    '${Formatters.percentage(change!)} ${t.thisMonth}',
+                    style: AppTypography.caption1.copyWith(
+                      color: change! >= 0 ? AppColors.income : AppColors.expense,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-          ],
         ],
       ),
     );
@@ -717,72 +820,78 @@ class _InventorySection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                value: Formatters.integer(inventory.activeSkuCount),
-                label: t.activeSkus,
-                icon: Icons.inventory_2_outlined,
-                isDark: isDark,
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _MetricCard(
+                  value: Formatters.integer(inventory.activeSkuCount),
+                  label: t.activeSkus,
+                  icon: Icons.inventory_2_outlined,
+                  isDark: isDark,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: _MetricCard(
-                value: Formatters.integer(inventory.lowStockCount),
-                label: t.lowStock,
-                icon: Icons.warning_amber_outlined,
-                color: inventory.lowStockCount > 0 ? AppColors.warning : null,
-                isDark: isDark,
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _MetricCard(
+                  value: Formatters.integer(inventory.lowStockCount),
+                  label: t.lowStock,
+                  icon: Icons.warning_amber_outlined,
+                  color: inventory.lowStockCount > 0 ? AppColors.warning : null,
+                  isDark: isDark,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: _MetricCard(
-                value: Formatters.integer(inventory.outOfStockCount),
-                label: t.outOfStock,
-                icon: Icons.remove_shopping_cart_outlined,
-                color: inventory.outOfStockCount > 0 ? AppColors.error : null,
-                isDark: isDark,
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _MetricCard(
+                  value: Formatters.integer(inventory.outOfStockCount),
+                  label: t.outOfStock,
+                  icon: Icons.remove_shopping_cart_outlined,
+                  color: inventory.outOfStockCount > 0 ? AppColors.error : null,
+                  isDark: isDark,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                value: Formatters.compactCurrency(
-                    inventory.totalInventoryValue),
-                label: t.totalValue,
-                icon: Icons.account_balance_wallet_outlined,
-                isDark: isDark,
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _MetricCard(
+                  value: Formatters.compactCurrency(
+                      inventory.totalInventoryValue),
+                  label: t.totalValue,
+                  icon: Icons.account_balance_wallet_outlined,
+                  isDark: isDark,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: _MetricCard(
-                value: Formatters.integer(inventory.expiringCount),
-                label: t.expiringSoon,
-                icon: Icons.schedule_outlined,
-                color: inventory.expiringCount > 0
-                    ? AppColors.warning
-                    : null,
-                isDark: isDark,
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _MetricCard(
+                  value: Formatters.integer(inventory.expiringCount),
+                  label: t.expiringSoon,
+                  icon: Icons.schedule_outlined,
+                  color: inventory.expiringCount > 0
+                      ? AppColors.warning
+                      : null,
+                  isDark: isDark,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: _MetricCard(
-                value: Formatters.integer(inventory.totalSkuCount),
-                label: t.totalSkus,
-                icon: Icons.category_outlined,
-                isDark: isDark,
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _MetricCard(
+                  value: Formatters.integer(inventory.totalSkuCount),
+                  label: t.totalSkus,
+                  icon: Icons.category_outlined,
+                  isDark: isDark,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

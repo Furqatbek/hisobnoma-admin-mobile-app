@@ -27,10 +27,10 @@ class ProductLookup {
 
   factory ProductLookup.fromJson(Map<String, dynamic> json) {
     return ProductLookup(
-      productId: json['productId'] as int,
-      sku: json['sku'] as String,
+      productId: (json['productId'] ?? json['id']) as int,
+      sku: json['sku'] as String? ?? '',
       barcode: json['barcode'] as String? ?? '',
-      name: json['name'] as String,
+      name: json['name'] as String? ?? '',
       sellingPrice: (json['sellingPrice'] as num?)?.toDouble() ?? 0,
       costPrice: (json['costPrice'] as num?)?.toDouble() ?? 0,
       totalStock: (json['totalStock'] as num?)?.toInt() ?? 0,

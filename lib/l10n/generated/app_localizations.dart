@@ -405,6 +405,37 @@ abstract class S {
   /// **'Cancel'**
   String get cancel;
 
+  String get inventory;
+  String get debtors;
+  String get creditors;
+  String get balance;
+  String get creditLimit;
+  String get unpaidInvoices;
+  String get invoice;
+  String get dueDate;
+  String get overdue;
+  String daysOverdueLabel(String days);
+  String get balanceDue;
+  String get noUnpaidInvoices;
+  String get noDebtors;
+  String get noDebtorsHint;
+  String get noCreditors;
+  String get noCreditorsHint;
+  String get noInventory;
+  String get noInventoryHint;
+  String get noTransactions;
+  String get noTransactionsHint;
+  String get completed;
+  String get pending;
+  String get transactionDetails;
+  String get items;
+  String get subtotal;
+  String get discount;
+  String get tax;
+  String get cashier;
+  String get terminal;
+  String get payment;
+
   /// No description provided for @searchProducts.
   ///
   /// In en, this message translates to:
@@ -651,6 +682,30 @@ abstract class S {
   /// **'Failed to complete sale'**
   String get failedToCompleteSale;
 
+  /// No description provided for @productsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} products found'**
+  String productsFound(String count);
+
+  /// No description provided for @scanBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan barcode'**
+  String get scanBarcode;
+
+  /// No description provided for @profitMargin.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit Margin'**
+  String get profitMargin;
+
+  /// No description provided for @swipeToRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe to remove'**
+  String get swipeToRemove;
+
   /// No description provided for @revenueOverview.
   ///
   /// In en, this message translates to:
@@ -722,6 +777,60 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Yesterday'**
   String get yesterday;
+
+  /// No description provided for @monthlyRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Revenue'**
+  String get monthlyRevenue;
+
+  /// No description provided for @vsLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'vs last month'**
+  String get vsLastMonth;
+
+  /// No description provided for @cashFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Flow'**
+  String get cashFlow;
+
+  /// No description provided for @inflows.
+  ///
+  /// In en, this message translates to:
+  /// **'Inflows'**
+  String get inflows;
+
+  /// No description provided for @outflows.
+  ///
+  /// In en, this message translates to:
+  /// **'Outflows'**
+  String get outflows;
+
+  /// No description provided for @inventoryReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory Report'**
+  String get inventoryReport;
+
+  /// No description provided for @stockHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Health'**
+  String get stockHealth;
+
+  /// No description provided for @healthy.
+  ///
+  /// In en, this message translates to:
+  /// **'Healthy'**
+  String get healthy;
+
+  /// No description provided for @inventoryValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory Value'**
+  String get inventoryValue;
 
   /// No description provided for @appearance.
   ///

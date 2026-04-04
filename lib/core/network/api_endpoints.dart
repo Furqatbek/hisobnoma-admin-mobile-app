@@ -29,9 +29,22 @@ abstract final class ApiEndpoints {
   // Quick Actions
   static String barcodeLookup(String barcode) => '/mobile/barcode/$barcode';
   static const String quickCount = '/mobile/quick-count';
-  static const String quickSale = '/mobile/quick-sale';
+  static const String quickSale = '/mobile/pos/quick-sale';
   static const String searchProducts = '/mobile/products/search';
   static const String searchCustomers = '/mobile/customers/search';
+
+  // Inventory
+  static const String inventoryProducts = '/inventory/products';
+
+  // Finance / AR
+  static const String arCustomerBalance =
+      '/finance/ar-reports/customer-balance';
+  static String arCustomerUnpaid(int customerId) =>
+      '/finance/ar-invoices/customer/$customerId/unpaid';
+
+  // Sales history
+  static const String posTransactions = '/pos/transactions';
+  static String posTransactionDetail(int id) => '/pos/transactions/$id';
 
   // Sync
   static const String syncProducts = '/mobile/sync/products';

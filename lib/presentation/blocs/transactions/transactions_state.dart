@@ -15,6 +15,21 @@ class TransactionsLoading extends TransactionsState {
   const TransactionsLoading();
 }
 
+class TransactionsDataLoaded extends TransactionsState {
+  final List<InventoryProduct> products;
+  final List<CustomerBalance> debtors;
+  final List<SaleRecord> sales;
+
+  const TransactionsDataLoaded({
+    required this.products,
+    required this.debtors,
+    required this.sales,
+  });
+
+  @override
+  List<Object?> get props => [products, debtors, sales];
+}
+
 class ProductsSearchLoaded extends TransactionsState {
   final List<ProductLookup> products;
   final String query;

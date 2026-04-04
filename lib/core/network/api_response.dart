@@ -54,14 +54,34 @@ class PaginatedResponse<T> {
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromJsonT,
   ) {
+    final pageRaw = json['page'];
+    final int parsedPage;
+    final int parsedSize;
+    final int parsedTotalElements;
+    final int parsedTotalPages;
+
+    if (pageRaw is Map<String, dynamic>) {
+      // Nested page object: { "number": 0, "size": 20, "totalElements": 14, ... }
+      parsedPage = pageRaw['number'] as int? ?? 0;
+      parsedSize = pageRaw['size'] as int? ?? 20;
+      parsedTotalElements = pageRaw['totalElements'] as int? ?? 0;
+      parsedTotalPages = pageRaw['totalPages'] as int? ?? 0;
+    } else {
+      // Flat format: { "page": 0, "size": 20, "totalElements": 14, ... }
+      parsedPage = pageRaw as int? ?? 0;
+      parsedSize = json['size'] as int? ?? 20;
+      parsedTotalElements = json['totalElements'] as int? ?? 0;
+      parsedTotalPages = json['totalPages'] as int? ?? 0;
+    }
+
     return PaginatedResponse(
       content: (json['content'] as List)
           .map((e) => fromJsonT(e as Map<String, dynamic>))
           .toList(),
-      page: json['page'] as int? ?? 0,
-      size: json['size'] as int? ?? 20,
-      totalElements: json['totalElements'] as int? ?? 0,
-      totalPages: json['totalPages'] as int? ?? 0,
+      page: parsedPage,
+      size: parsedSize,
+      totalElements: parsedTotalElements,
+      totalPages: parsedTotalPages,
     );
   }
 

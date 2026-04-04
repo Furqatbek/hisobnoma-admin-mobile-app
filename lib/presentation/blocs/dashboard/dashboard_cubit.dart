@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hisobnoma/data/models/dashboard/dashboard_models.dart';
 import 'package:hisobnoma/data/repositories/dashboard_repository.dart';
+import 'package:intl/intl.dart';
 
 part 'dashboard_state.dart';
 
@@ -20,7 +22,10 @@ class DashboardCubit extends Cubit<DashboardState> {
     await _fetchData();
   }
 
-  Future<void> refresh() async => _fetchData();
+  Future<void> refresh() async {
+    final prev = state;
+    await _fetchData(previous: prev is DashboardLoaded ? prev : null);
+  }
 
   Future<void> changeChartPeriod(String period) async {
     _chartPeriod = period;
@@ -36,11 +41,13 @@ class DashboardCubit extends Cubit<DashboardState> {
     }
   }
 
-  Future<void> _fetchData() async {
+  Future<void> _fetchData({DashboardLoaded? previous}) async {
     RevenueSummary? revenue;
     InventorySummary? inventory;
     FinancialSummary? financial;
     List<RevenueChartData>? chartData;
+    String? usdRate;
+    String? usdDiff;
     final errors = <String>[];
 
     // Fetch all independently — don't let one failure block others
@@ -65,24 +72,63 @@ class DashboardCubit extends Cubit<DashboardState> {
       }).catchError((Object e) {
         errors.add('Chart');
       }),
+      _fetchUsdRate().then((v) {
+        usdRate = v?.$1;
+        usdDiff = v?.$2;
+      }),
     ]);
 
-    // If all failed, show error
+    // If all failed and no previous data, show error
     if (revenue == null && inventory == null && financial == null) {
-      emit(DashboardError(
-        message: 'Unable to load dashboard data. Check your connection.',
+      if (previous == null) {
+        emit(DashboardError(
+          message: 'Unable to load dashboard data. Check your connection.',
+        ));
+        return;
+      }
+      // On refresh failure, keep previous data with error banner
+      emit(DashboardLoaded(
+        revenue: previous.revenue,
+        inventory: previous.inventory,
+        financial: previous.financial,
+        chartData: previous.chartData,
+        lastUpdated: previous.lastUpdated,
+        partialErrors: errors,
+        usdRate: previous.usdRate,
+        usdDiff: previous.usdDiff,
       ));
       return;
     }
 
+    // On refresh, fall back to previous data for any failed section
     emit(DashboardLoaded(
-      revenue: revenue ?? _emptyRevenue,
-      inventory: inventory ?? _emptyInventory,
-      financial: financial ?? _emptyFinancial,
-      chartData: chartData ?? [],
+      revenue: revenue ?? previous?.revenue ?? _emptyRevenue,
+      inventory: inventory ?? previous?.inventory ?? _emptyInventory,
+      financial: financial ?? previous?.financial ?? _emptyFinancial,
+      chartData: chartData ?? previous?.chartData ?? [],
       lastUpdated: DateTime.now(),
       partialErrors: errors.isEmpty ? null : errors,
+      usdRate: usdRate ?? previous?.usdRate,
+      usdDiff: usdDiff ?? previous?.usdDiff,
     ));
+  }
+
+  Future<(String, String)?> _fetchUsdRate() async {
+    try {
+      final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      final dio = Dio();
+      final response = await dio.get<List<dynamic>>(
+        'https://cbu.uz/uz/arkhiv-kursov-valyut/json/usd/$today',
+      );
+      final data = response.data;
+      if (data != null && data.isNotEmpty) {
+        final item = data[0] as Map<String, dynamic>;
+        return (item['Rate'] as String, item['Diff'] as String);
+      }
+    } catch (_) {
+      // Currency rate is non-critical, silently ignore
+    }
+    return null;
   }
 
   static const _emptyRevenue = RevenueSummary(

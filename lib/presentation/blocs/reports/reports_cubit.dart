@@ -15,15 +15,37 @@ class ReportsCubit extends Cubit<ReportsState> {
   Future<void> loadReports({String period = 'daily'}) async {
     emit(const ReportsLoading());
     try {
-      final results = await Future.wait([
-        _dashboardRepository.getRevenueChart(period: period),
-        _dashboardRepository.getRevenueSummary(),
+      List<RevenueChartData>? chartData;
+      RevenueSummary? revenueSummary;
+      InventorySummary? inventory;
+      FinancialSummary? financial;
+
+      await Future.wait([
+        _dashboardRepository.getRevenueChart(period: period).then((v) {
+          chartData = v;
+        }).catchError((Object _) {}),
+        _dashboardRepository.getRevenueSummary().then((v) {
+          revenueSummary = v;
+        }).catchError((Object _) {}),
+        _dashboardRepository.getInventorySummary().then((v) {
+          inventory = v;
+        }).catchError((Object _) {}),
+        _dashboardRepository.getFinancialSummary().then((v) {
+          financial = v;
+        }).catchError((Object _) {}),
       ]);
 
+      if (revenueSummary == null) {
+        emit(const ReportsError(message: 'Unable to load report data.'));
+        return;
+      }
+
       emit(ReportsLoaded(
-        chartData: results[0] as List<RevenueChartData>,
-        revenueSummary: results[1] as RevenueSummary,
+        chartData: chartData ?? [],
+        revenueSummary: revenueSummary!,
         selectedPeriod: period,
+        inventory: inventory,
+        financial: financial,
       ));
     } catch (e) {
       emit(ReportsError(message: e.toString()));

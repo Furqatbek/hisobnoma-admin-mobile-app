@@ -8,11 +8,44 @@ part 'transactions_state.dart';
 class TransactionsCubit extends Cubit<TransactionsState> {
   final TransactionRepository _transactionRepository;
 
-  TransactionsCubit({required TransactionRepository transactionRepository})
-      : _transactionRepository = transactionRepository,
+  TransactionsCubit({
+    required TransactionRepository transactionRepository,
+  })  : _transactionRepository = transactionRepository,
         super(const TransactionsInitial());
 
   void reset() => emit(const TransactionsInitial());
+
+  /// Load inventory, debtors, and sales history in parallel
+  Future<void> loadData() async {
+    emit(const TransactionsLoading());
+    try {
+      List<InventoryProduct> products = [];
+      List<CustomerBalance> debtors = [];
+      List<SaleRecord> sales = [];
+
+      await Future.wait([
+        _transactionRepository.getInventoryProducts().then((r) {
+          products = r.where((p) => p.active).toList();
+        }),
+        _transactionRepository.getCustomerBalances().then((report) {
+          debtors = report.customerBalances
+              .where((c) => c.netBalance > 0)
+              .toList();
+        }),
+        _transactionRepository.getTransactions().then((r) {
+          sales = r;
+        }).catchError((Object _) {}),
+      ]);
+
+      emit(TransactionsDataLoaded(
+        products: products,
+        debtors: debtors,
+        sales: sales,
+      ));
+    } catch (e) {
+      emit(TransactionsError(message: e.toString()));
+    }
+  }
 
   Future<void> searchProducts(String query) async {
     if (query.trim().isEmpty) {
