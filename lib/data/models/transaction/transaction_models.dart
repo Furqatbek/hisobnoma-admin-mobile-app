@@ -1,6 +1,7 @@
 /// Barrel export for transaction models
 library;
 
+export 'inventory_product.dart';
 export 'product_lookup.dart';
 export 'quick_sale_request.dart';
 export 'quick_sale_response.dart';

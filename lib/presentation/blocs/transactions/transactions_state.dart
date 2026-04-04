@@ -16,7 +16,7 @@ class TransactionsLoading extends TransactionsState {
 }
 
 class TransactionsDataLoaded extends TransactionsState {
-  final List<SyncProduct> products;
+  final List<InventoryProduct> products;
   final List<SyncCustomer> debtors;
   final List<SyncCustomer> creditors;
 

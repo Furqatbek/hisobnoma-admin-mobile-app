@@ -33,6 +33,9 @@ abstract final class ApiEndpoints {
   static const String searchProducts = '/mobile/products/search';
   static const String searchCustomers = '/mobile/customers/search';
 
+  // Inventory
+  static const String inventoryProducts = '/inventory/products';
+
   // Sync
   static const String syncProducts = '/mobile/sync/products';
   static const String syncCustomers = '/mobile/sync/customers';

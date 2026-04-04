@@ -5,7 +5,8 @@ import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
-import 'package:hisobnoma/data/models/sync/sync_models.dart';
+import 'package:hisobnoma/data/models/sync/sync_customer.dart';
+import 'package:hisobnoma/data/models/transaction/inventory_product.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
 import 'package:hisobnoma/presentation/screens/transactions/add_sale_sheet.dart';
@@ -142,7 +143,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
 /// Inventory items list
 class _InventoryTab extends StatelessWidget {
-  final List<SyncProduct> products;
+  final List<InventoryProduct> products;
   final bool isDark;
 
   const _InventoryTab({
@@ -185,7 +186,7 @@ class _InventoryTab extends StatelessWidget {
 
 /// Individual inventory product tile
 class _InventoryTile extends StatelessWidget {
-  final SyncProduct product;
+  final InventoryProduct product;
   final bool isDark;
 
   const _InventoryTile({required this.product, required this.isDark});
@@ -282,7 +283,7 @@ class _InventoryTile extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          // Price
+          // Price + stock
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -296,12 +297,23 @@ class _InventoryTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                product.unitOfMeasure,
-                style: AppTypography.caption2.copyWith(
-                  color: AppColors.textTertiary,
+              if (product.trackInventory)
+                Text(
+                  '${Formatters.integer(product.stockQuantity.toInt())} ${product.baseUomName}',
+                  style: AppTypography.caption2.copyWith(
+                    color: product.stockQuantity > 0
+                        ? AppColors.income
+                        : AppColors.expense,
+                    fontWeight: FontWeight.w500,
+                  ),
+                )
+              else
+                Text(
+                  product.baseUomName,
+                  style: AppTypography.caption2.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
                 ),
-              ),
             ],
           ),
         ],

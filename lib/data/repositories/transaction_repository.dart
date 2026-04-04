@@ -55,6 +55,21 @@ class TransactionRepository {
     );
   }
 
+  /// Get inventory products (paginated)
+  Future<List<InventoryProduct>> getInventoryProducts({
+    int page = 0,
+    int size = 100,
+  }) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.inventoryProducts,
+      queryParameters: {'page': page, 'size': size},
+    );
+    final data = response.data as Map<String, dynamic>;
+    return (data['content'] as List)
+        .map((e) => InventoryProduct.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   /// Search customers (paginated)
   Future<PaginatedResponse<Map<String, dynamic>>> searchCustomers({
     required String query,

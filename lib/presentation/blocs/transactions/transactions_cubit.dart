@@ -24,13 +24,13 @@ class TransactionsCubit extends Cubit<TransactionsState> {
   Future<void> loadData() async {
     emit(const TransactionsLoading());
     try {
-      List<SyncProduct> products = [];
+      List<InventoryProduct> products = [];
       List<SyncCustomer> debtors = [];
       List<SyncCustomer> creditors = [];
 
       await Future.wait([
-        _syncRepository.syncProducts().then((r) {
-          products = r.items.where((p) => p.active).toList();
+        _transactionRepository.getInventoryProducts().then((r) {
+          products = r.where((p) => p.active).toList();
         }),
         _syncRepository.syncCustomers().then((r) {
           final active = r.items.where((c) => c.active).toList();
