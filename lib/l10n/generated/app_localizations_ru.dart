@@ -15,7 +15,7 @@ class SRu extends S {
   String get home => 'Главная';
 
   @override
-  String get transactions => 'Транзакции';
+  String get transactions => 'Операции';
 
   @override
   String get reports => 'Отчёты';
@@ -33,28 +33,28 @@ class SRu extends S {
   String get selectAccount => 'Выберите аккаунт';
 
   @override
-  String get enterPin => 'Введите PIN';
+  String get enterPin => 'Введите PIN-код';
 
   @override
   String get pleaseEnterPin => 'Пожалуйста, введите ваш PIN-код';
 
   @override
-  String get financialTrackingTagline => 'Финансовый учёт стал проще';
+  String get financialTrackingTagline => 'Финансовый учёт — просто и удобно';
 
   @override
   String get currentBalance => 'Текущий баланс';
 
   @override
-  String get revenue => 'Доход';
+  String get revenue => 'Выручка';
 
   @override
   String get expenses => 'Расходы';
 
   @override
-  String get inventoryOverview => 'Обзор склада';
+  String get inventoryOverview => 'Состояние склада';
 
   @override
-  String get financialOverview => 'Финансовый обзор';
+  String get financialOverview => 'Финансы';
 
   @override
   String get goodMorning => 'Доброе утро';
@@ -80,10 +80,10 @@ class SRu extends S {
   String get today => 'Сегодня';
 
   @override
-  String get thisWeek => 'Эта неделя';
+  String get thisWeek => 'За неделю';
 
   @override
-  String get revenueTrend => 'Тренд доходов';
+  String get revenueTrend => 'Динамика выручки';
 
   @override
   String get day => 'День';
@@ -101,10 +101,10 @@ class SRu extends S {
   String get noChartData => 'Нет данных для графика';
 
   @override
-  String get avgTransaction => 'Сред. транзакция';
+  String get avgTransaction => 'Сред. чек';
 
   @override
-  String get activeSkus => 'Активные SKU';
+  String get activeSkus => 'Активные товары';
 
   @override
   String get lowStock => 'Мало на складе';
@@ -119,33 +119,33 @@ class SRu extends S {
   String get expiringSoon => 'Скоро истекает';
 
   @override
-  String get totalSkus => 'Всего SKU';
+  String get totalSkus => 'Всего товаров';
 
   @override
-  String get netCashPosition => 'Чистая денежная позиция';
+  String get netCashPosition => 'Чистый остаток';
 
   @override
-  String get bankBalance => 'Банковский баланс';
+  String get bankBalance => 'На счетах';
 
   @override
-  String get cashBalance => 'Остаток наличных';
+  String get cashBalance => 'Наличные';
 
   @override
-  String get receivableAr => 'Дебиторская задолж.';
+  String get receivableAr => 'Дебиторка';
 
   @override
-  String get payableAp => 'Кредиторская задолж.';
+  String get payableAp => 'Кредиторка';
 
   @override
   String txnCount(String count) {
-    return '$count транз.';
+    return '$count опер.';
   }
 
   @override
-  String get addTransaction => 'Добавить транзакцию';
+  String get addTransaction => 'Новая операция';
 
   @override
-  String get income => 'Доход';
+  String get income => 'Приход';
 
   @override
   String get expense => 'Расход';
@@ -157,7 +157,7 @@ class SRu extends S {
   String get amount => 'Сумма';
 
   @override
-  String get notes => 'Заметки';
+  String get notes => 'Заметка';
 
   @override
   String get save => 'Сохранить';
@@ -172,7 +172,7 @@ class SRu extends S {
   String get searchProductsHint => 'Поиск товаров...';
 
   @override
-  String get searchProductsByNameSku => 'Поиск товаров по названию или SKU...';
+  String get searchProductsByNameSku => 'Поиск по названию или SKU...';
 
   @override
   String get products => 'Товары';
@@ -181,23 +181,23 @@ class SRu extends S {
   String get quickSale => 'Быстрая продажа';
 
   @override
-  String get quickCount => 'Быстрый подсчёт';
+  String get quickCount => 'Инвентаризация';
 
   @override
   String get tapSearchToFind =>
-      'Нажмите на поиск для поиска товаров по названию, SKU или штрихкоду';
+      'Используйте поиск для нахождения товаров по названию, SKU или штрихкоду';
 
   @override
-  String get noResults => 'Нет результатов';
+  String get noResults => 'Ничего не найдено';
 
   @override
   String noProductsFoundFor(String query) {
-    return 'Товары не найдены для \"$query\"';
+    return 'По запросу \"$query\" ничего не найдено';
   }
 
   @override
   String get searchForProducts =>
-      'Ищите товары по названию, SKU или сканируйте штрихкод';
+      'Найдите товар по названию, SKU или отсканируйте штрихкод';
 
   @override
   String get sellingPrice => 'Цена продажи';
@@ -206,13 +206,13 @@ class SRu extends S {
   String get costPrice => 'Себестоимость';
 
   @override
-  String get totalStock => 'Общий запас';
+  String get totalStock => 'На складе';
 
   @override
   String get barcode => 'Штрихкод';
 
   @override
-  String get stockByLocation => 'Запас по локации';
+  String get stockByLocation => 'Остатки по складам';
 
   @override
   String availOnHand(String available, String onHand) {
@@ -223,11 +223,11 @@ class SRu extends S {
   String get addToQuickSale => 'Добавить в продажу';
 
   @override
-  String get saleCompleted => 'Продажа завершена';
+  String get saleCompleted => 'Продажа оформлена!';
 
   @override
   String get createQuickSaleHint =>
-      'Создайте быструю продажу нажав кнопку ниже';
+      'Нажмите кнопку ниже чтобы оформить продажу';
 
   @override
   String get newSale => 'Новая продажа';
@@ -249,23 +249,23 @@ class SRu extends S {
 
   @override
   String get quickCountHint =>
-      'Выберите товар во вкладке Товары, затем выполните подсчёт';
+      'Выберите товар во вкладке Товары, затем проведите подсчёт';
 
   @override
-  String get systemQty => 'Системное кол-во';
+  String get systemQty => 'По системе';
 
   @override
   String get countedQty => 'Подсчитано';
 
   @override
-  String get variance => 'Разница';
+  String get variance => 'Расхождение';
 
   @override
-  String get untracked => 'Не отслеживается';
+  String get untracked => 'Без учёта';
 
   @override
   String inStock(String stock) {
-    return '$stock на складе';
+    return 'На складе: $stock';
   }
 
   @override
@@ -283,7 +283,7 @@ class SRu extends S {
   String get addMoreItems => 'Добавить ещё';
 
   @override
-  String get clearAll => 'Очистить всё';
+  String get clearAll => 'Очистить';
 
   @override
   String get cash => 'Наличные';
@@ -293,22 +293,22 @@ class SRu extends S {
 
   @override
   String completeSale(String amount) {
-    return 'Завершить продажу · $amount';
+    return 'Оформить · $amount';
   }
 
   @override
   String saleCompletedAmount(String amount) {
-    return 'Продажа завершена · $amount';
+    return 'Продано · $amount';
   }
 
   @override
-  String get failedToCompleteSale => 'Не удалось завершить продажу';
+  String get failedToCompleteSale => 'Ошибка при оформлении продажи';
 
   @override
-  String get revenueOverview => 'Обзор доходов';
+  String get revenueOverview => 'Обзор выручки';
 
   @override
-  String get incomeVsExpense => 'Доходы и Расходы';
+  String get incomeVsExpense => 'Приход и Расход';
 
   @override
   String get categoryBreakdown => 'По категориям';
@@ -317,13 +317,13 @@ class SRu extends S {
   String get unableToLoadReports => 'Не удалось загрузить отчёты';
 
   @override
-  String get thisMonthLabel => 'Этот месяц';
+  String get thisMonthLabel => 'За месяц';
 
   @override
-  String get transactionStats => 'Статистика транзакций';
+  String get transactionStats => 'Статистика операций';
 
   @override
-  String get averageTransaction => 'Средняя транзакция';
+  String get averageTransaction => 'Средний чек';
 
   @override
   String get periodComparison => 'Сравнение периодов';
@@ -332,22 +332,22 @@ class SRu extends S {
   String get todayVsYesterday => 'Сегодня и Вчера';
 
   @override
-  String get thisWeekVsLast => 'Эта неделя и Прошлая';
+  String get thisWeekVsLast => 'Эта и прошлая неделя';
 
   @override
-  String get thisMonthVsLast => 'Этот месяц и Прошлый';
+  String get thisMonthVsLast => 'Этот и прошлый месяц';
 
   @override
   String get yesterday => 'Вчера';
 
   @override
-  String get appearance => 'Внешний вид';
+  String get appearance => 'Оформление';
 
   @override
-  String get darkMode => 'Тёмный режим';
+  String get darkMode => 'Тёмная тема';
 
   @override
-  String get themeSystem => 'Системная';
+  String get themeSystem => 'Авто';
 
   @override
   String get themeLight => 'Светлая';
@@ -372,7 +372,7 @@ class SRu extends S {
 
   @override
   String get clearCacheConfirm =>
-      'Кешированные данные будут удалены. Возможно потребуется повторная синхронизация.';
+      'Кешированные данные будут удалены. Потребуется повторная синхронизация.';
 
   @override
   String get clear => 'Очистить';
@@ -414,11 +414,11 @@ class SRu extends S {
   String get languageRu => 'Русский';
 
   @override
-  String get dataSync => 'Синхронизация данных';
+  String get dataSync => 'Синхронизация';
 
   @override
   String get syncDescription =>
-      'Синхронизируйте товары, клиентов и категории с сервера для автономной работы.';
+      'Загрузите товары, клиентов и категории для работы без интернета.';
 
   @override
   String get syncNow => 'Синхронизировать';
@@ -428,12 +428,12 @@ class SRu extends S {
 
   @override
   String itemsSynced(String count) {
-    return '$count синхронизировано';
+    return 'Загружено: $count';
   }
 
   @override
   String pendingOfflineActions(String count) {
-    return '$count ожидающих офлайн действий';
+    return 'Ожидает отправки: $count';
   }
 
   @override
@@ -452,7 +452,7 @@ class SRu extends S {
   String get alerts => 'Оповещения';
 
   @override
-  String get markAllRead => 'Отметить все как прочитанные';
+  String get markAllRead => 'Прочитать все';
 
   @override
   String get noAlerts => 'Нет оповещений';
@@ -464,7 +464,7 @@ class SRu extends S {
   String get allCaughtUp => 'Всё прочитано!';
 
   @override
-  String get noAlertsToShow => 'Нет оповещений для показа';
+  String get noAlertsToShow => 'Нет оповещений';
 
   @override
   String get alertLowStock => 'Мало на складе';
@@ -473,10 +473,10 @@ class SRu extends S {
   String get alertOutOfStock => 'Нет в наличии';
 
   @override
-  String get alertExpiring => 'Истекает';
+  String get alertExpiring => 'Истекает срок';
 
   @override
-  String get alertTransaction => 'Транзакция';
+  String get alertTransaction => 'Операция';
 
   @override
   String get alertSummary => 'Сводка';
@@ -516,6 +516,79 @@ class SRu extends S {
 
   @override
   String get categories => 'Категории';
+
+  @override
+  String get somethingWentWrong => 'Что-то пошло не так';
+
+  @override
+  String get tryAgain => 'Попробуйте ещё раз';
+
+  @override
+  String get noInternetConnection => 'Нет подключения к интернету';
+
+  @override
+  String get checkConnection =>
+      'Проверьте подключение к интернету и попробуйте снова';
+
+  @override
+  String get sessionExpired => 'Сессия истекла';
+
+  @override
+  String get pleaseLoginAgain => 'Пожалуйста, войдите заново';
+
+  @override
+  String get success => 'Готово';
+
+  @override
+  String get confirm => 'Подтвердить';
+
+  @override
+  String get delete => 'Удалить';
+
+  @override
+  String get edit => 'Изменить';
+
+  @override
+  String get close => 'Закрыть';
+
+  @override
+  String get search => 'Поиск';
+
+  @override
+  String get filter => 'Фильтр';
+
+  @override
+  String get sortBy => 'Сортировка';
+
+  @override
+  String get date => 'Дата';
+
+  @override
+  String get from => 'С';
+
+  @override
+  String get to => 'По';
+
+  @override
+  String get quantity => 'Количество';
+
+  @override
+  String get price => 'Цена';
+
+  @override
+  String get description => 'Описание';
+
+  @override
+  String get name => 'Название';
+
+  @override
+  String get phone => 'Телефон';
+
+  @override
+  String get email => 'Эл. почта';
+
+  @override
+  String get address => 'Адрес';
 
   @override
   String get loading => 'Загрузка...';

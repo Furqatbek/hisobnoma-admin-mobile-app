@@ -5,6 +5,7 @@ import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/data/models/dashboard/dashboard_models.dart';
+import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 
 /// Smooth curved revenue line chart for the dashboard.
 class RevenueLineChart extends StatelessWidget {
@@ -27,7 +28,7 @@ class RevenueLineChart extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Revenue Trend',
+          S.of(context).revenueTrend,
           style: AppTypography.title3.copyWith(
             color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
           ),

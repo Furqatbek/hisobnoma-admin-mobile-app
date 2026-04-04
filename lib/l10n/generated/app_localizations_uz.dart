@@ -15,7 +15,7 @@ class SUz extends S {
   String get home => 'Бош саҳифа';
 
   @override
-  String get transactions => 'Транзакциялар';
+  String get transactions => 'Амалиётлар';
 
   @override
   String get reports => 'Ҳисоботлар';
@@ -39,22 +39,22 @@ class SUz extends S {
   String get pleaseEnterPin => 'Илтимос, PIN кодингизни киритинг';
 
   @override
-  String get financialTrackingTagline => 'Молиявий бошқарув осонлашди';
+  String get financialTrackingTagline => 'Молиявий бошқарув — осон ва қулай';
 
   @override
   String get currentBalance => 'Жорий баланс';
 
   @override
-  String get revenue => 'Даромад';
+  String get revenue => 'Тушум';
 
   @override
   String get expenses => 'Харажатлар';
 
   @override
-  String get inventoryOverview => 'Инвентар кўриниши';
+  String get inventoryOverview => 'Омбор ҳолати';
 
   @override
-  String get financialOverview => 'Молиявий кўриниш';
+  String get financialOverview => 'Молиявий ҳолат';
 
   @override
   String get goodMorning => 'Хайрли тонг';
@@ -74,16 +74,16 @@ class SUz extends S {
   }
 
   @override
-  String get thisMonth => 'бу ой';
+  String get thisMonth => 'шу ой';
 
   @override
   String get today => 'Бугун';
 
   @override
-  String get thisWeek => 'Бу ҳафта';
+  String get thisWeek => 'Шу ҳафта';
 
   @override
-  String get revenueTrend => 'Даромад тренди';
+  String get revenueTrend => 'Тушум динамикаси';
 
   @override
   String get day => 'Кун';
@@ -98,13 +98,13 @@ class SUz extends S {
   String get year => 'Йил';
 
   @override
-  String get noChartData => 'Диаграмма маълумотлари мавжуд эмас';
+  String get noChartData => 'Диаграмма учун маълумот йўқ';
 
   @override
-  String get avgTransaction => 'Ўрт. транзакция';
+  String get avgTransaction => 'Ўрт. амалиёт';
 
   @override
-  String get activeSkus => 'Фаол SKU';
+  String get activeSkus => 'Фаол товарлар';
 
   @override
   String get lowStock => 'Кам қолган';
@@ -116,19 +116,19 @@ class SUz extends S {
   String get totalValue => 'Умумий қиймат';
 
   @override
-  String get expiringSoon => 'Муддати тугаяпти';
+  String get expiringSoon => 'Муддати тугамоқда';
 
   @override
-  String get totalSkus => 'Жами SKU';
+  String get totalSkus => 'Жами товарлар';
 
   @override
-  String get netCashPosition => 'Соф пул ҳолати';
+  String get netCashPosition => 'Соф пул қолдиғи';
 
   @override
-  String get bankBalance => 'Банк баланси';
+  String get bankBalance => 'Банк ҳисоби';
 
   @override
-  String get cashBalance => 'Нақд пул баланси';
+  String get cashBalance => 'Нақд пул';
 
   @override
   String get receivableAr => 'Олинадиган қарз';
@@ -138,11 +138,11 @@ class SUz extends S {
 
   @override
   String txnCount(String count) {
-    return '$count транз.';
+    return '$count та амалиёт';
   }
 
   @override
-  String get addTransaction => 'Транзакция қўшиш';
+  String get addTransaction => 'Амалиёт қўшиш';
 
   @override
   String get income => 'Кирим';
@@ -154,10 +154,10 @@ class SUz extends S {
   String get all => 'Ҳаммаси';
 
   @override
-  String get amount => 'Миқдор';
+  String get amount => 'Сумма';
 
   @override
-  String get notes => 'Изоҳлар';
+  String get notes => 'Изоҳ';
 
   @override
   String get save => 'Сақлаш';
@@ -166,17 +166,16 @@ class SUz extends S {
   String get cancel => 'Бекор қилиш';
 
   @override
-  String get searchProducts => 'Маҳсулотларни қидириш';
+  String get searchProducts => 'Товарларни қидириш';
 
   @override
-  String get searchProductsHint => 'Маҳсулотларни қидириш...';
+  String get searchProductsHint => 'Товарларни қидириш...';
 
   @override
-  String get searchProductsByNameSku =>
-      'Маҳсулотларни номи ёки SKU бўйича қидириш...';
+  String get searchProductsByNameSku => 'Номи ёки SKU бўйича қидириш...';
 
   @override
-  String get products => 'Маҳсулотлар';
+  String get products => 'Товарлар';
 
   @override
   String get quickSale => 'Тезкор сотув';
@@ -186,19 +185,19 @@ class SUz extends S {
 
   @override
   String get tapSearchToFind =>
-      'Маҳсулотни номи, SKU ёки штрихкод бўйича қидиринг';
+      'Товарни номи, SKU ёки штрихкод бўйича қидиринг';
 
   @override
-  String get noResults => 'Натижа йўқ';
+  String get noResults => 'Натижа топилмади';
 
   @override
   String noProductsFoundFor(String query) {
-    return '\"$query\" бўйича маҳсулот топилмади';
+    return '\"$query\" бўйича товар топилмади';
   }
 
   @override
   String get searchForProducts =>
-      'Маҳсулотни номи, SKU бўйича қидиринг ёки штрихкод сканерланг';
+      'Товарни номи, SKU бўйича қидиринг ёки штрихкод сканерланг';
 
   @override
   String get sellingPrice => 'Сотиш нархи';
@@ -213,7 +212,7 @@ class SUz extends S {
   String get barcode => 'Штрихкод';
 
   @override
-  String get stockByLocation => 'Жойлашув бўйича захира';
+  String get stockByLocation => 'Жой бўйича захира';
 
   @override
   String availOnHand(String available, String onHand) {
@@ -221,10 +220,10 @@ class SUz extends S {
   }
 
   @override
-  String get addToQuickSale => 'Тезкор сотувга қўшиш';
+  String get addToQuickSale => 'Сотувга қўшиш';
 
   @override
-  String get saleCompleted => 'Сотув якунланди';
+  String get saleCompleted => 'Сотув муваффақиятли!';
 
   @override
   String get createQuickSaleHint =>
@@ -250,41 +249,41 @@ class SUz extends S {
 
   @override
   String get quickCountHint =>
-      'Маҳсулотлар бўлимидан маҳсулотни танланг, сўнг захирани сананг';
+      'Товарлар бўлимидан товарни танланг, сўнг захирани сананг';
 
   @override
-  String get systemQty => 'Тизим миқдори';
+  String get systemQty => 'Тизимдаги';
 
   @override
-  String get countedQty => 'Саналган миқдор';
+  String get countedQty => 'Ҳисобланган';
 
   @override
   String get variance => 'Фарқ';
 
   @override
-  String get untracked => 'Кузатилмайди';
+  String get untracked => 'Ҳисобга олинмайди';
 
   @override
   String inStock(String stock) {
-    return '$stock та захирада';
+    return 'Захирада: $stock та';
   }
 
   @override
   String cartCount(String count) {
-    return 'Саватча ($count)';
+    return 'Савати ($count)';
   }
 
   @override
-  String get searchToAdd => 'Қўшиш учун маҳсулотни қидиринг';
+  String get searchToAdd => 'Қўшиш учун товарни қидиринг';
 
   @override
-  String get noProductsFound => 'Маҳсулотлар топилмади';
+  String get noProductsFound => 'Товар топилмади';
 
   @override
   String get addMoreItems => 'Яна қўшиш';
 
   @override
-  String get clearAll => 'Ҳаммасини тозалаш';
+  String get clearAll => 'Тозалаш';
 
   @override
   String get cash => 'Нақд';
@@ -294,19 +293,19 @@ class SUz extends S {
 
   @override
   String completeSale(String amount) {
-    return 'Сотувни якунлаш · $amount';
+    return 'Сотувни тасдиқлаш · $amount';
   }
 
   @override
   String saleCompletedAmount(String amount) {
-    return 'Сотув якунланди · $amount';
+    return 'Сотилди · $amount';
   }
 
   @override
-  String get failedToCompleteSale => 'Сотувни якунлаб бўлмади';
+  String get failedToCompleteSale => 'Сотувда хатолик юз берди';
 
   @override
-  String get revenueOverview => 'Даромад кўриниши';
+  String get revenueOverview => 'Тушум кўриниши';
 
   @override
   String get incomeVsExpense => 'Кирим ва Чиқим';
@@ -318,25 +317,25 @@ class SUz extends S {
   String get unableToLoadReports => 'Ҳисоботларни юклаб бўлмади';
 
   @override
-  String get thisMonthLabel => 'Бу ой';
+  String get thisMonthLabel => 'Шу ой';
 
   @override
-  String get transactionStats => 'Транзакция статистикаси';
+  String get transactionStats => 'Амалиёт статистикаси';
 
   @override
-  String get averageTransaction => 'Ўртача транзакция';
+  String get averageTransaction => 'Ўртача амалиёт';
 
   @override
-  String get periodComparison => 'Давр солиштирмаси';
+  String get periodComparison => 'Давр таққослаш';
 
   @override
   String get todayVsYesterday => 'Бугун ва Кеча';
 
   @override
-  String get thisWeekVsLast => 'Бу ҳафта ва Ўтган';
+  String get thisWeekVsLast => 'Шу ҳафта ва Ўтган';
 
   @override
-  String get thisMonthVsLast => 'Бу ой ва Ўтган';
+  String get thisMonthVsLast => 'Шу ой ва Ўтган';
 
   @override
   String get yesterday => 'Кеча';
@@ -345,16 +344,16 @@ class SUz extends S {
   String get appearance => 'Кўриниш';
 
   @override
-  String get darkMode => 'Қоронғу режим';
+  String get darkMode => 'Тунги режим';
 
   @override
   String get themeSystem => 'Тизим';
 
   @override
-  String get themeLight => 'Ёруғ';
+  String get themeLight => 'Кундузги';
 
   @override
-  String get themeDark => 'Қоронғу';
+  String get themeDark => 'Тунги';
 
   @override
   String get currency => 'Валюта';
@@ -366,14 +365,14 @@ class SUz extends S {
   String get data => 'Маълумотлар';
 
   @override
-  String get syncData => 'Маълумотларни синхронлаш';
+  String get syncData => 'Синхронлаш';
 
   @override
   String get clearCache => 'Кешни тозалаш';
 
   @override
   String get clearCacheConfirm =>
-      'Кешланган маълумотлар ўчирилади. Қайта синхронлаш керак бўлиши мумкин.';
+      'Кешдаги маълумотлар ўчирилади. Кейин қайта синхронлаш талаб қилинади.';
 
   @override
   String get clear => 'Тозалаш';
@@ -394,7 +393,7 @@ class SUz extends S {
   String get account => 'Ҳисоб';
 
   @override
-  String get logoutConfirm => 'Ростдан ҳам чиқмоқчимисиз?';
+  String get logoutConfirm => 'Ҳақиқатан ҳам чиқмоқчимисиз?';
 
   @override
   String get appVersion => 'Ҳисобнома v1.0.0';
@@ -419,7 +418,7 @@ class SUz extends S {
 
   @override
   String get syncDescription =>
-      'Маҳсулотлар, мижозлар ва тоифаларни сервердан оффлайн ишлатиш учун синхронланг.';
+      'Товарлар, мижозлар ва тоифаларни оффлайн режимда ишлатиш учун серверга уланинг.';
 
   @override
   String get syncNow => 'Синхронлаш';
@@ -434,11 +433,11 @@ class SUz extends S {
 
   @override
   String pendingOfflineActions(String count) {
-    return '$count та кутилаётган оффлайн амал(лар)';
+    return '$count та кутилаётган оффлайн амал';
   }
 
   @override
-  String get currencyUzs => 'Ўзбекистон сўми';
+  String get currencyUzs => 'Ўзбек сўми';
 
   @override
   String get currencyUsd => 'АҚШ доллари';
@@ -453,10 +452,10 @@ class SUz extends S {
   String get alerts => 'Огоҳлантиришлар';
 
   @override
-  String get markAllRead => 'Ҳаммасини ўқилган деб белгилаш';
+  String get markAllRead => 'Барчасини ўқилган қилиш';
 
   @override
-  String get noAlerts => 'Огоҳлантиришлар йўқ';
+  String get noAlerts => 'Огоҳлантириш йўқ';
 
   @override
   String get unread => 'Ўқилмаган';
@@ -465,7 +464,7 @@ class SUz extends S {
   String get allCaughtUp => 'Ҳаммаси ўқилган!';
 
   @override
-  String get noAlertsToShow => 'Кўрсатиладиган огоҳлантириш йўқ';
+  String get noAlertsToShow => 'Кўрсатиш учун огоҳлантириш йўқ';
 
   @override
   String get alertLowStock => 'Кам қолган';
@@ -474,16 +473,16 @@ class SUz extends S {
   String get alertOutOfStock => 'Тугаган';
 
   @override
-  String get alertExpiring => 'Муддати тугаяпти';
+  String get alertExpiring => 'Муддати тугамоқда';
 
   @override
-  String get alertTransaction => 'Транзакция';
+  String get alertTransaction => 'Амалиёт';
 
   @override
   String get alertSummary => 'Хулоса';
 
   @override
-  String get alertPriceChange => 'Нарх ўзгариши';
+  String get alertPriceChange => 'Нарх ўзгарди';
 
   @override
   String get alertNewOrder => 'Янги буюртма';
@@ -517,6 +516,79 @@ class SUz extends S {
 
   @override
   String get categories => 'Тоифалар';
+
+  @override
+  String get somethingWentWrong => 'Хатолик юз берди';
+
+  @override
+  String get tryAgain => 'Қайта уриниб кўринг';
+
+  @override
+  String get noInternetConnection => 'Интернет алоқаси йўқ';
+
+  @override
+  String get checkConnection =>
+      'Интернет алоқасини текширинг ва қайта уриниб кўринг';
+
+  @override
+  String get sessionExpired => 'Сессия муддати тугади';
+
+  @override
+  String get pleaseLoginAgain => 'Илтимос, қайтадан киринг';
+
+  @override
+  String get success => 'Муваффақият';
+
+  @override
+  String get confirm => 'Тасдиқлаш';
+
+  @override
+  String get delete => 'Ўчириш';
+
+  @override
+  String get edit => 'Таҳрирлаш';
+
+  @override
+  String get close => 'Ёпиш';
+
+  @override
+  String get search => 'Қидириш';
+
+  @override
+  String get filter => 'Фильтр';
+
+  @override
+  String get sortBy => 'Саралаш';
+
+  @override
+  String get date => 'Сана';
+
+  @override
+  String get from => 'Дан';
+
+  @override
+  String get to => 'Гача';
+
+  @override
+  String get quantity => 'Сони';
+
+  @override
+  String get price => 'Нарх';
+
+  @override
+  String get description => 'Тавсиф';
+
+  @override
+  String get name => 'Ном';
+
+  @override
+  String get phone => 'Телефон';
+
+  @override
+  String get email => 'Электрон почта';
+
+  @override
+  String get address => 'Манзил';
 
   @override
   String get loading => 'Юкланмоқда...';

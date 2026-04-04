@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
+import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 
 /// Apple HIG-style modal bottom sheet with drag handle
 class HisobBottomSheet extends StatelessWidget {
@@ -85,7 +86,7 @@ class HisobBottomSheet extends StatelessWidget {
                     if (actions != null && actions!.isNotEmpty)
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
+                        child: Text(S.of(context).cancel),
                       )
                     else
                       const SizedBox(width: 64),

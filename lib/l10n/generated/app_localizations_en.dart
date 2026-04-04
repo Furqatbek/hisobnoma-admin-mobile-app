@@ -223,7 +223,7 @@ class SEn extends S {
   String get addToQuickSale => 'Add to Quick Sale';
 
   @override
-  String get saleCompleted => 'Sale Completed';
+  String get saleCompleted => 'Sale Completed!';
 
   @override
   String get createQuickSaleHint =>
@@ -516,6 +516,79 @@ class SEn extends S {
 
   @override
   String get categories => 'Categories';
+
+  @override
+  String get somethingWentWrong => 'Something went wrong';
+
+  @override
+  String get tryAgain => 'Try again';
+
+  @override
+  String get noInternetConnection => 'No internet connection';
+
+  @override
+  String get checkConnection =>
+      'Please check your internet connection and try again';
+
+  @override
+  String get sessionExpired => 'Session expired';
+
+  @override
+  String get pleaseLoginAgain => 'Please log in again';
+
+  @override
+  String get success => 'Success';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get filter => 'Filter';
+
+  @override
+  String get sortBy => 'Sort by';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get from => 'From';
+
+  @override
+  String get to => 'To';
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get price => 'Price';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get name => 'Name';
+
+  @override
+  String get phone => 'Phone';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get address => 'Address';
 
   @override
   String get loading => 'Loading...';

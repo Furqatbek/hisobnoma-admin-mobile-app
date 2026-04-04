@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
+import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 
 /// In-app splash screen shown while auth state is being resolved.
 /// Preserves the native splash until ready, then animates the app icon.
@@ -97,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Hisobnoma',
+                  S.of(context).appName,
                   style: AppTypography.title2.copyWith(
                     color: isDark
                         ? AppColors.darkTextPrimary
