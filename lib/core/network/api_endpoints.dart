@@ -36,6 +36,10 @@ abstract final class ApiEndpoints {
   // Inventory
   static const String inventoryProducts = '/inventory/products';
 
+  // Finance / AR
+  static const String arCustomerBalance =
+      '/finance/ar-reports/customer-balance';
+
   // Sync
   static const String syncProducts = '/mobile/sync/products';
   static const String syncCustomers = '/mobile/sync/customers';

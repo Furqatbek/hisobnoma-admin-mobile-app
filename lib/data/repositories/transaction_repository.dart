@@ -70,6 +70,15 @@ class TransactionRepository {
         .toList();
   }
 
+  /// Get customer balance report (debtors)
+  Future<CustomerBalanceReport> getCustomerBalances() async {
+    final response = await _apiClient.get(
+      ApiEndpoints.arCustomerBalance,
+    );
+    return CustomerBalanceReport.fromJson(
+        response.data as Map<String, dynamic>);
+  }
+
   /// Search customers (paginated)
   Future<PaginatedResponse<Map<String, dynamic>>> searchCustomers({
     required String query,

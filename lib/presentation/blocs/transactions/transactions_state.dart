@@ -17,17 +17,15 @@ class TransactionsLoading extends TransactionsState {
 
 class TransactionsDataLoaded extends TransactionsState {
   final List<InventoryProduct> products;
-  final List<SyncCustomer> debtors;
-  final List<SyncCustomer> creditors;
+  final List<CustomerBalance> debtors;
 
   const TransactionsDataLoaded({
     required this.products,
     required this.debtors,
-    required this.creditors,
   });
 
   @override
-  List<Object?> get props => [products, debtors, creditors];
+  List<Object?> get props => [products, debtors];
 }
 
 class ProductsSearchLoaded extends TransactionsState {

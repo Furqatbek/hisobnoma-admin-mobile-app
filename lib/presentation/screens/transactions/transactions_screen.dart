@@ -5,7 +5,7 @@ import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
-import 'package:hisobnoma/data/models/sync/sync_customer.dart';
+import 'package:hisobnoma/data/models/transaction/customer_balance.dart';
 import 'package:hisobnoma/data/models/transaction/inventory_product.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
@@ -15,9 +15,9 @@ import 'package:hisobnoma/presentation/widgets/common/hisob_empty_state.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_segmented_control.dart';
 import 'package:hisobnoma/presentation/widgets/common/loading_shimmer.dart';
 
-enum _TabFilter { inventory, debtors, creditors }
+enum _TabFilter { inventory, debtors }
 
-/// Transactions screen with inventory, debtors, and creditors lists.
+/// Transactions screen with inventory and debtors lists.
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
 
@@ -60,10 +60,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 HisobSegment(
                   value: _TabFilter.debtors,
                   label: t.debtors,
-                ),
-                HisobSegment(
-                  value: _TabFilter.creditors,
-                  label: t.creditors,
                 ),
               ],
               selectedValue: _activeTab,
@@ -124,17 +120,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           isDark: isDark,
         );
       case _TabFilter.debtors:
-        return _CustomersTab(
+        return _DebtorsTab(
           key: const ValueKey('debtors'),
-          customers: state.debtors,
-          isDebtor: true,
-          isDark: isDark,
-        );
-      case _TabFilter.creditors:
-        return _CustomersTab(
-          key: const ValueKey('creditors'),
-          customers: state.creditors,
-          isDebtor: false,
+          debtors: state.debtors,
           isDark: isDark,
         );
     }
@@ -322,16 +310,14 @@ class _InventoryTile extends StatelessWidget {
   }
 }
 
-/// Debtors / Creditors list
-class _CustomersTab extends StatelessWidget {
-  final List<SyncCustomer> customers;
-  final bool isDebtor;
+/// Debtors list
+class _DebtorsTab extends StatelessWidget {
+  final List<CustomerBalance> debtors;
   final bool isDark;
 
-  const _CustomersTab({
+  const _DebtorsTab({
     super.key,
-    required this.customers,
-    required this.isDebtor,
+    required this.debtors,
     required this.isDark,
   });
 
@@ -339,16 +325,14 @@ class _CustomersTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = S.of(context);
 
-    if (customers.isEmpty) {
+    if (debtors.isEmpty) {
       return ListView(
         children: [
           SizedBox(height: MediaQuery.of(context).size.height * 0.2),
           HisobEmptyState(
-            icon: isDebtor
-                ? Icons.person_outline
-                : Icons.business_outlined,
-            title: isDebtor ? t.noDebtors : t.noCreditors,
-            message: isDebtor ? t.noDebtorsHint : t.noCreditorsHint,
+            icon: Icons.person_outline,
+            title: t.noDebtors,
+            message: t.noDebtorsHint,
           ),
         ],
       );
@@ -356,41 +340,28 @@ class _CustomersTab extends StatelessWidget {
 
     return ListView.separated(
       padding: const EdgeInsets.all(AppSpacing.screenPadding),
-      itemCount: customers.length,
+      itemCount: debtors.length,
       separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
       itemBuilder: (context, index) {
-        final customer = customers[index];
+        final debtor = debtors[index];
         return StaggeredListItem(
           index: index,
-          child: _CustomerTile(
-            customer: customer,
-            isDebtor: isDebtor,
-            isDark: isDark,
-          ),
+          child: _DebtorTile(debtor: debtor, isDark: isDark),
         );
       },
     );
   }
 }
 
-/// Individual customer tile for debtors/creditors
-class _CustomerTile extends StatelessWidget {
-  final SyncCustomer customer;
-  final bool isDebtor;
+/// Individual debtor tile
+class _DebtorTile extends StatelessWidget {
+  final CustomerBalance debtor;
   final bool isDark;
 
-  const _CustomerTile({
-    required this.customer,
-    required this.isDebtor,
-    required this.isDark,
-  });
+  const _DebtorTile({required this.debtor, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    final t = S.of(context);
-    final balanceColor = isDebtor ? AppColors.expense : AppColors.income;
-    final absBalance = customer.currentBalance.abs();
-
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -413,16 +384,16 @@ class _CustomerTile extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: balanceColor.withValues(alpha: 0.1),
+              color: AppColors.expense.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
-                customer.name.isNotEmpty
-                    ? customer.name[0].toUpperCase()
+                debtor.customerName.isNotEmpty
+                    ? debtor.customerName[0].toUpperCase()
                     : '?',
                 style: AppTypography.headline.copyWith(
-                  color: balanceColor,
+                  color: AppColors.expense,
                 ),
               ),
             ),
@@ -434,7 +405,7 @@ class _CustomerTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  customer.name,
+                  debtor.customerName,
                   style: AppTypography.body.copyWith(
                     fontWeight: FontWeight.w500,
                     color: isDark
@@ -448,30 +419,26 @@ class _CustomerTile extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      customer.code,
+                      debtor.customerCode,
                       style: AppTypography.caption1.copyWith(
                         color: isDark
                             ? AppColors.darkTextSecondary
                             : AppColors.textSecondary,
                       ),
                     ),
-                    if (customer.phone != null) ...[
+                    if (debtor.lastInvoiceDate != null) ...[
                       Text(
                         ' · ',
                         style: AppTypography.caption1.copyWith(
                           color: AppColors.textTertiary,
                         ),
                       ),
-                      Flexible(
-                        child: Text(
-                          customer.phone!,
-                          style: AppTypography.caption1.copyWith(
-                            color: isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      Text(
+                        debtor.lastInvoiceDate!,
+                        style: AppTypography.caption1.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -482,26 +449,12 @@ class _CustomerTile extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           // Balance
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                Formatters.currency(absBalance),
-                style: AppTypography.subheadline.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: balanceColor,
-                ),
-              ),
-              if (customer.creditLimit > 0) ...[
-                const SizedBox(height: 2),
-                Text(
-                  '${t.creditLimit}: ${Formatters.compactCurrency(customer.creditLimit)}',
-                  style: AppTypography.caption2.copyWith(
-                    color: AppColors.textTertiary,
-                  ),
-                ),
-              ],
-            ],
+          Text(
+            Formatters.currency(debtor.netBalance),
+            style: AppTypography.subheadline.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.expense,
+            ),
           ),
         ],
       ),
