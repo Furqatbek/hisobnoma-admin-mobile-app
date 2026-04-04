@@ -565,27 +565,30 @@ class _SummaryPillRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = S.of(context);
-    return Row(
-      children: [
-        Expanded(
-          child: _SummaryPill(
-            label: t.revenue,
-            value: Formatters.compactCurrency(revenue),
-            change: revenueChange,
-            color: AppColors.income,
-            isDark: isDark,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _SummaryPill(
+              label: t.revenue,
+              value: Formatters.compactCurrency(revenue),
+              change: revenueChange,
+              color: AppColors.income,
+              isDark: isDark,
+            ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: _SummaryPill(
-            label: t.avgTransaction,
-            value: Formatters.compactCurrency(avgTransaction),
-            color: AppColors.royalBlue,
-            isDark: isDark,
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: _SummaryPill(
+              label: t.avgTransaction,
+              value: Formatters.compactCurrency(avgTransaction),
+              color: AppColors.royalBlue,
+              isDark: isDark,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -649,8 +652,8 @@ class _SummaryPill extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(value, style: AppTypography.headline),
-          if (change != null) ...[
-            const SizedBox(height: AppSpacing.xs),
+          const Spacer(),
+          if (change != null)
             Row(
               children: [
                 Icon(
@@ -659,15 +662,17 @@ class _SummaryPill extends StatelessWidget {
                   color: change! >= 0 ? AppColors.income : AppColors.expense,
                 ),
                 const SizedBox(width: 2),
-                Text(
-                  '${Formatters.percentage(change!)} ${t.thisMonth}',
-                  style: AppTypography.caption1.copyWith(
-                    color: change! >= 0 ? AppColors.income : AppColors.expense,
+                Flexible(
+                  child: Text(
+                    '${Formatters.percentage(change!)} ${t.thisMonth}',
+                    style: AppTypography.caption1.copyWith(
+                      color: change! >= 0 ? AppColors.income : AppColors.expense,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-          ],
         ],
       ),
     );
@@ -815,72 +820,78 @@ class _InventorySection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                value: Formatters.integer(inventory.activeSkuCount),
-                label: t.activeSkus,
-                icon: Icons.inventory_2_outlined,
-                isDark: isDark,
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _MetricCard(
+                  value: Formatters.integer(inventory.activeSkuCount),
+                  label: t.activeSkus,
+                  icon: Icons.inventory_2_outlined,
+                  isDark: isDark,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: _MetricCard(
-                value: Formatters.integer(inventory.lowStockCount),
-                label: t.lowStock,
-                icon: Icons.warning_amber_outlined,
-                color: inventory.lowStockCount > 0 ? AppColors.warning : null,
-                isDark: isDark,
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _MetricCard(
+                  value: Formatters.integer(inventory.lowStockCount),
+                  label: t.lowStock,
+                  icon: Icons.warning_amber_outlined,
+                  color: inventory.lowStockCount > 0 ? AppColors.warning : null,
+                  isDark: isDark,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: _MetricCard(
-                value: Formatters.integer(inventory.outOfStockCount),
-                label: t.outOfStock,
-                icon: Icons.remove_shopping_cart_outlined,
-                color: inventory.outOfStockCount > 0 ? AppColors.error : null,
-                isDark: isDark,
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _MetricCard(
+                  value: Formatters.integer(inventory.outOfStockCount),
+                  label: t.outOfStock,
+                  icon: Icons.remove_shopping_cart_outlined,
+                  color: inventory.outOfStockCount > 0 ? AppColors.error : null,
+                  isDark: isDark,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                value: Formatters.compactCurrency(
-                    inventory.totalInventoryValue),
-                label: t.totalValue,
-                icon: Icons.account_balance_wallet_outlined,
-                isDark: isDark,
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _MetricCard(
+                  value: Formatters.compactCurrency(
+                      inventory.totalInventoryValue),
+                  label: t.totalValue,
+                  icon: Icons.account_balance_wallet_outlined,
+                  isDark: isDark,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: _MetricCard(
-                value: Formatters.integer(inventory.expiringCount),
-                label: t.expiringSoon,
-                icon: Icons.schedule_outlined,
-                color: inventory.expiringCount > 0
-                    ? AppColors.warning
-                    : null,
-                isDark: isDark,
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _MetricCard(
+                  value: Formatters.integer(inventory.expiringCount),
+                  label: t.expiringSoon,
+                  icon: Icons.schedule_outlined,
+                  color: inventory.expiringCount > 0
+                      ? AppColors.warning
+                      : null,
+                  isDark: isDark,
+                ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: _MetricCard(
-                value: Formatters.integer(inventory.totalSkuCount),
-                label: t.totalSkus,
-                icon: Icons.category_outlined,
-                isDark: isDark,
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _MetricCard(
+                  value: Formatters.integer(inventory.totalSkuCount),
+                  label: t.totalSkus,
+                  icon: Icons.category_outlined,
+                  isDark: isDark,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

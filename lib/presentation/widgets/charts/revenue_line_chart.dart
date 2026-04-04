@@ -5,7 +5,6 @@ import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/data/models/dashboard/dashboard_models.dart';
-import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 
 /// Smooth curved revenue line chart for the dashboard.
 class RevenueLineChart extends StatelessWidget {
@@ -24,36 +23,26 @@ class RevenueLineChart extends StatelessWidget {
     final chartMinY = (minY - yRange * 0.15).clamp(0.0, double.infinity);
     final chartMaxY = maxY + yRange * 0.15;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          S.of(context).revenueTrend,
-          style: AppTypography.title3.copyWith(
-            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Container(
-          height: 200,
-          padding: const EdgeInsets.only(
-            right: AppSpacing.md,
-            top: AppSpacing.sm,
-          ),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkCard : AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-            boxShadow: isDark
-                ? null
-                : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-          ),
-          child: LineChart(
+    return Container(
+      height: 200,
+      padding: const EdgeInsets.only(
+        right: AppSpacing.md,
+        top: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: LineChart(
             LineChartData(
               minY: chartMinY,
               maxY: chartMaxY,
@@ -181,7 +170,6 @@ class RevenueLineChart extends StatelessWidget {
             curve: Curves.easeOutCubic,
           ),
         ),
-      ],
-    );
+      );
   }
 }
