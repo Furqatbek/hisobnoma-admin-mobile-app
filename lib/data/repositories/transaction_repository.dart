@@ -79,14 +79,19 @@ class TransactionRepository {
         response.data as Map<String, dynamic>);
   }
 
-  /// Get sales history (paginated)
-  Future<List<SaleRecord>> getSalesHistory({
+  /// Get POS transactions (paginated, optionally filtered by date)
+  Future<List<SaleRecord>> getTransactions({
     int page = 0,
     int size = 50,
+    String? date,
   }) async {
     final response = await _apiClient.get(
-      ApiEndpoints.salesHistory,
-      queryParameters: {'page': page, 'size': size},
+      ApiEndpoints.posTransactions,
+      queryParameters: {
+        'page': page,
+        'size': size,
+        if (date != null) 'date': date,
+      },
     );
     final data = response.data as Map<String, dynamic>;
     return (data['content'] as List)

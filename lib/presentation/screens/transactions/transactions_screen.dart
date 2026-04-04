@@ -526,9 +526,11 @@ class _SaleTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = S.of(context);
-    final statusColor =
-        sale.isCompleted ? AppColors.income : AppColors.warning;
-    final statusLabel = sale.isCompleted ? t.completed : t.pending;
+    final paymentColor = switch (sale.paymentType) {
+      'CREDIT' => AppColors.warning,
+      'CARD' => AppColors.royalBlue,
+      _ => AppColors.income,
+    };
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -547,20 +549,22 @@ class _SaleTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Status icon
+          // Payment type icon
           Container(
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.1),
+              color: paymentColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Icon(
-                sale.isCompleted
-                    ? Icons.check_circle_outline
-                    : Icons.schedule,
-                color: statusColor,
+                switch (sale.paymentType) {
+                  'CREDIT' => Icons.credit_score,
+                  'CARD' => Icons.credit_card,
+                  _ => Icons.payments_outlined,
+                },
+                color: paymentColor,
                 size: 22,
               ),
             ),
@@ -572,53 +576,66 @@ class _SaleTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  sale.transactionNumber,
+                  sale.customerName ?? sale.transactionNumber,
                   style: AppTypography.body.copyWith(
                     fontWeight: FontWeight.w500,
                     color: isDark
                         ? AppColors.darkTextPrimary
                         : AppColors.textPrimary,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    if (sale.customerName != null &&
-                        sale.customerName!.isNotEmpty) ...[
-                      Flexible(
-                        child: Text(
-                          sale.customerName!,
-                          style: AppTypography.caption1.copyWith(
-                            color: isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        ' · ',
-                        style: AppTypography.caption1.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
-                      ),
-                    ],
                     Text(
-                      Formatters.relativeDate(sale.createdAt),
+                      Formatters.time(sale.completedAt ?? sale.createdAt),
                       style: AppTypography.caption1.copyWith(
                         color: isDark
                             ? AppColors.darkTextSecondary
                             : AppColors.textSecondary,
                       ),
                     ),
+                    if (sale.cashierName != null) ...[
+                      Text(
+                        ' · ',
+                        style: AppTypography.caption1.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                      Text(
+                        sale.cashierName!,
+                        style: AppTypography.caption1.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                    if (sale.itemCount > 0) ...[
+                      Text(
+                        ' · ',
+                        style: AppTypography.caption1.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                      Text(
+                        '${sale.itemCount} ${t.products.toLowerCase()}',
+                        style: AppTypography.caption1.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          // Amount + status
+          // Amount + payment badge
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -638,13 +655,13 @@ class _SaleTile extends StatelessWidget {
                   vertical: 1,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.1),
+                  color: paymentColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  statusLabel,
+                  sale.paymentType ?? sale.status,
                   style: AppTypography.caption2.copyWith(
-                    color: statusColor,
+                    color: paymentColor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

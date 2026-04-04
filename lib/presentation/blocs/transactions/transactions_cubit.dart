@@ -32,7 +32,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
               .where((c) => c.netBalance > 0)
               .toList();
         }),
-        _transactionRepository.getSalesHistory().then((r) {
+        _transactionRepository.getTransactions().then((r) {
           sales = r;
         }).catchError((Object _) {}),
       ]);

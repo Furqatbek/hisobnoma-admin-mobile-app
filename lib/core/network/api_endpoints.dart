@@ -41,7 +41,7 @@ abstract final class ApiEndpoints {
       '/finance/ar-reports/customer-balance';
 
   // Sales history
-  static const String salesHistory = '/pos/sales';
+  static const String posTransactions = '/pos/transactions';
 
   // Sync
   static const String syncProducts = '/mobile/sync/products';
