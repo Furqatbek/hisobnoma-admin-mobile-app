@@ -29,7 +29,7 @@ abstract final class ApiEndpoints {
   // Quick Actions
   static String barcodeLookup(String barcode) => '/mobile/barcode/$barcode';
   static const String quickCount = '/mobile/quick-count';
-  static const String quickSale = '/mobile/quick-sale';
+  static const String quickSale = '/mobile/pos/quick-sale';
   static const String searchProducts = '/mobile/products/search';
   static const String searchCustomers = '/mobile/customers/search';
 

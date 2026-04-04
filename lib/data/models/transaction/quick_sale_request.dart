@@ -1,6 +1,7 @@
 class QuickSaleRequest {
   final int terminalId;
   final int? customerId;
+  final String? customerName;
   final List<QuickSaleItem> items;
   final String paymentType;
   final double tenderedAmount;
@@ -9,6 +10,7 @@ class QuickSaleRequest {
   const QuickSaleRequest({
     required this.terminalId,
     this.customerId,
+    this.customerName,
     required this.items,
     required this.paymentType,
     required this.tenderedAmount,
@@ -17,7 +19,8 @@ class QuickSaleRequest {
 
   Map<String, dynamic> toJson() => {
         'terminalId': terminalId,
-        'customerId': customerId,
+        if (customerId != null) 'customerId': customerId,
+        if (customerName != null) 'customerName': customerName,
         'items': items.map((e) => e.toJson()).toList(),
         'paymentType': paymentType,
         'tenderedAmount': tenderedAmount,
@@ -27,14 +30,12 @@ class QuickSaleRequest {
 
 class QuickSaleItem {
   final int productId;
-  final int? variantId;
-  final int quantity;
+  final double quantity;
   final double unitPrice;
   final double discountAmount;
 
   const QuickSaleItem({
     required this.productId,
-    this.variantId,
     required this.quantity,
     required this.unitPrice,
     this.discountAmount = 0,
@@ -42,7 +43,6 @@ class QuickSaleItem {
 
   Map<String, dynamic> toJson() => {
         'productId': productId,
-        'variantId': variantId,
         'quantity': quantity,
         'unitPrice': unitPrice,
         'discountAmount': discountAmount,
