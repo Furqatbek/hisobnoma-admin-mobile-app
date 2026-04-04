@@ -24,7 +24,14 @@ class DashboardRepository {
       queryParameters: {'period': period},
     );
     final data = response.data['data'] as Map<String, dynamic>;
-    return (data['dailyRevenue'] as List)
+    // API returns data under a key matching the period
+    final key = switch (period) {
+      'monthly' => 'monthlyRevenue',
+      'yearly' => 'yearlyRevenue',
+      _ => 'dailyRevenue',
+    };
+    final list = data[key] as List? ?? data.values.whereType<List>().firstOrNull ?? [];
+    return list
         .map((e) => RevenueChartData.fromJson(e as Map<String, dynamic>))
         .toList();
   }

@@ -23,10 +23,10 @@ class ReportsCubit extends Cubit<ReportsState> {
       await Future.wait([
         _dashboardRepository.getRevenueChart(period: period).then((v) {
           chartData = v;
-        }),
+        }).catchError((Object _) {}),
         _dashboardRepository.getRevenueSummary().then((v) {
           revenueSummary = v;
-        }),
+        }).catchError((Object _) {}),
         _dashboardRepository.getInventorySummary().then((v) {
           inventory = v;
         }).catchError((Object _) {}),
