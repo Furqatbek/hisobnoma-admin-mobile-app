@@ -22,7 +22,10 @@ class DashboardCubit extends Cubit<DashboardState> {
     await _fetchData();
   }
 
-  Future<void> refresh() async => _fetchData();
+  Future<void> refresh() async {
+    final prev = state;
+    await _fetchData(previous: prev is DashboardLoaded ? prev : null);
+  }
 
   Future<void> changeChartPeriod(String period) async {
     _chartPeriod = period;
@@ -38,7 +41,7 @@ class DashboardCubit extends Cubit<DashboardState> {
     }
   }
 
-  Future<void> _fetchData() async {
+  Future<void> _fetchData({DashboardLoaded? previous}) async {
     RevenueSummary? revenue;
     InventorySummary? inventory;
     FinancialSummary? financial;
@@ -75,23 +78,38 @@ class DashboardCubit extends Cubit<DashboardState> {
       }),
     ]);
 
-    // If all failed, show error
+    // If all failed and no previous data, show error
     if (revenue == null && inventory == null && financial == null) {
-      emit(DashboardError(
-        message: 'Unable to load dashboard data. Check your connection.',
+      if (previous == null) {
+        emit(DashboardError(
+          message: 'Unable to load dashboard data. Check your connection.',
+        ));
+        return;
+      }
+      // On refresh failure, keep previous data with error banner
+      emit(DashboardLoaded(
+        revenue: previous.revenue,
+        inventory: previous.inventory,
+        financial: previous.financial,
+        chartData: previous.chartData,
+        lastUpdated: previous.lastUpdated,
+        partialErrors: errors,
+        usdRate: previous.usdRate,
+        usdDiff: previous.usdDiff,
       ));
       return;
     }
 
+    // On refresh, fall back to previous data for any failed section
     emit(DashboardLoaded(
-      revenue: revenue ?? _emptyRevenue,
-      inventory: inventory ?? _emptyInventory,
-      financial: financial ?? _emptyFinancial,
-      chartData: chartData ?? [],
+      revenue: revenue ?? previous?.revenue ?? _emptyRevenue,
+      inventory: inventory ?? previous?.inventory ?? _emptyInventory,
+      financial: financial ?? previous?.financial ?? _emptyFinancial,
+      chartData: chartData ?? previous?.chartData ?? [],
       lastUpdated: DateTime.now(),
       partialErrors: errors.isEmpty ? null : errors,
-      usdRate: usdRate,
-      usdDiff: usdDiff,
+      usdRate: usdRate ?? previous?.usdRate,
+      usdDiff: usdDiff ?? previous?.usdDiff,
     ));
   }
 

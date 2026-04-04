@@ -24,6 +24,8 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  bool _hasAnimated = false;
+
   @override
   void initState() {
     super.initState();
@@ -101,8 +103,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _animate(Widget child, {Duration delay = Duration.zero}) {
+    if (_hasAnimated) return child;
+    return FadeScaleIn(delay: delay, child: child);
+  }
+
   Widget _buildLoadedContent(DashboardLoaded state, bool isDark) {
-    return RefreshIndicator(
+    final content = RefreshIndicator(
       onRefresh: () async {
         HapticFeedback.mediumImpact();
         await context.read<DashboardCubit>().refresh();
@@ -121,8 +128,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           // USD/UZS rate + last updated
           if (state.usdRate != null)
-            FadeScaleIn(
-              child: _CurrencyRateBanner(
+            _animate(
+              _CurrencyRateBanner(
                 rate: state.usdRate!,
                 diff: state.usdDiff,
                 lastUpdated: state.lastUpdated,
@@ -142,9 +149,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: AppSpacing.md),
 
           // Hero balance card
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 80),
-            child: _BalanceHeroCard(
+          _animate(
+            _BalanceHeroCard(
               balance: state.financial.netCashPosition,
               changePercent: state.revenue.monthChangePercent,
               todayRevenue: state.revenue.todayRevenue,
@@ -152,49 +158,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
               weekRevenue: state.revenue.thisWeekRevenue,
               weekTransactions: state.revenue.thisWeekTransactionCount,
             ),
+            delay: const Duration(milliseconds: 80),
           ),
           const SizedBox(height: AppSpacing.md),
 
           // Revenue / Expenses summary pills
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 160),
-            child: _SummaryPillRow(
+          _animate(
+            _SummaryPillRow(
               revenue: state.revenue.thisMonthRevenue,
               revenueChange: state.revenue.monthChangePercent,
               expenses: state.financial.apOutstanding,
               avgTransaction: state.revenue.averageTransactionValue,
               isDark: isDark,
             ),
+            delay: const Duration(milliseconds: 160),
           ),
           const SizedBox(height: AppSpacing.lg),
 
           // Revenue chart with period selector
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 240),
-            child: _ChartSection(
+          _animate(
+            _ChartSection(
               chartData: state.chartData,
               isDark: isDark,
             ),
+            delay: const Duration(milliseconds: 240),
           ),
           const SizedBox(height: AppSpacing.lg),
 
           // Inventory overview
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 320),
-            child: _InventorySection(
+          _animate(
+            _InventorySection(
               inventory: state.inventory,
               isDark: isDark,
             ),
+            delay: const Duration(milliseconds: 320),
           ),
 
           // Financial overview
           const SizedBox(height: AppSpacing.lg),
-          FadeScaleIn(
-            delay: const Duration(milliseconds: 400),
-            child: _FinancialSection(
+          _animate(
+            _FinancialSection(
               financial: state.financial,
               isDark: isDark,
             ),
+            delay: const Duration(milliseconds: 400),
           ),
 
           // Bottom padding for FAB
@@ -203,6 +210,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       ),
     );
+
+    if (!_hasAnimated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _hasAnimated = true;
+      });
+    }
+    return content;
   }
 }
 
