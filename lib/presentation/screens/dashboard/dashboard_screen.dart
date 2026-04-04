@@ -6,14 +6,12 @@ import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
-import 'package:hisobnoma/core/router/app_router.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/presentation/blocs/alerts/alerts_cubit.dart';
 import 'package:hisobnoma/data/models/dashboard/dashboard_models.dart';
 import 'package:hisobnoma/presentation/blocs/dashboard/dashboard_cubit.dart';
 import 'package:hisobnoma/presentation/widgets/charts/revenue_line_chart.dart';
 import 'package:hisobnoma/presentation/widgets/common/animations.dart';
-import 'package:hisobnoma/presentation/widgets/common/hisob_badge.dart';
 import 'package:hisobnoma/presentation/screens/transactions/add_sale_sheet.dart';
 import 'package:hisobnoma/presentation/widgets/common/loading_shimmer.dart';
 
@@ -49,26 +47,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(t.appName, style: AppTypography.headline),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
-            child: BlocBuilder<AlertsCubit, AlertsState>(
-              builder: (context, alertState) {
-                final count = _unreadCount(alertState);
-                return IconButton(
-                  icon: HisobBadge(
-                    count: count,
-                    child: const Icon(Icons.notifications_outlined),
-                  ),
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    context.push(AppRoutes.alerts);
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+        actions: const [],
       ),
       body: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
@@ -89,12 +68,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         icon: Icons.point_of_sale,
       ),
     );
-  }
-
-  int _unreadCount(AlertsState state) {
-    if (state is AlertsLoaded) return state.unreadCount;
-    if (state is AlertsUnreadCountLoaded) return state.count;
-    return 0;
   }
 
   Widget _buildErrorState(DashboardError state) {
