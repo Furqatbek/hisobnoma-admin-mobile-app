@@ -52,21 +52,19 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
   }
 
   Future<void> _loadClients() async {
+    final repo = context.read<TransactionsCubit>().transactionRepository;
     try {
-      final repo = context.read<TransactionsCubit>().transactionRepository;
       final clients = await repo.getFinanceCustomers();
-      if (mounted) {
-        setState(() {
-          _allClients = clients;
-          _filteredClients = clients;
-          _isLoadingClients = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _allClients = clients;
+        _filteredClients = clients;
+        _isLoadingClients = false;
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoadingClients = false);
-        showErrorSnackBar(context, e);
-      }
+      if (!mounted) return;
+      setState(() => _isLoadingClients = false);
+      showErrorSnackBar(context, e);
     }
   }
 

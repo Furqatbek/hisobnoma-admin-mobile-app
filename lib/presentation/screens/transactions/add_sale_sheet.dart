@@ -71,70 +71,71 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   }
 
   Future<void> _loadInitialData() async {
+    // Capture repo reference once — safe to use after awaits
     final repo = context.read<TransactionsCubit>().transactionRepository;
+
     // Load active terminal
     try {
       final terminals = await repo.getActiveTerminals();
-      if (terminals.isNotEmpty && mounted) {
+      if (!mounted) return;
+      if (terminals.isNotEmpty) {
         setState(() => _activeTerminal = terminals.first);
       }
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e);
+      if (!mounted) return;
+      showErrorSnackBar(context, e);
     }
+
     // Load inventory products
     try {
       final products = await repo.getInventoryProducts(size: 200);
-      if (mounted) {
-        setState(() {
-          _allProducts = products.where((p) => p.active).toList();
-          _filteredProducts = _allProducts;
-          _productsLoading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _allProducts = products.where((p) => p.active).toList();
+        _filteredProducts = _allProducts;
+        _productsLoading = false;
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() => _productsLoading = false);
-        showErrorSnackBar(context, e);
-      }
+      if (!mounted) return;
+      setState(() => _productsLoading = false);
+      showErrorSnackBar(context, e);
     }
+
     // Load delivery regions
+    if (!mounted) return;
+    setState(() => _regionsLoading = true);
     try {
-      setState(() => _regionsLoading = true);
       final regions = await repo.getDeliveryRegions();
-      if (mounted) {
-        setState(() {
-          _regions = regions;
-          _regionsLoading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _regions = regions;
+        _regionsLoading = false;
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() => _regionsLoading = false);
-        showErrorSnackBar(context, e);
-      }
+      if (!mounted) return;
+      setState(() => _regionsLoading = false);
+      showErrorSnackBar(context, e);
     }
   }
 
   Future<void> _loadVillages(int regionId) async {
+    final repo = context.read<TransactionsCubit>().transactionRepository;
     setState(() {
       _villagesLoading = true;
       _villages = [];
       _selectedVillage = null;
     });
     try {
-      final repo = context.read<TransactionsCubit>().transactionRepository;
       final villages = await repo.getDeliveryVillages(regionId);
-      if (mounted) {
-        setState(() {
-          _villages = villages;
-          _villagesLoading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _villages = villages;
+        _villagesLoading = false;
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() => _villagesLoading = false);
-        showErrorSnackBar(context, e);
-      }
+      if (!mounted) return;
+      setState(() => _villagesLoading = false);
+      showErrorSnackBar(context, e);
     }
   }
 

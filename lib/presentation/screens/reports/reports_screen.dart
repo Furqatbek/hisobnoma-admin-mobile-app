@@ -1261,7 +1261,7 @@ class _ReportsShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
+    return const SingleChildScrollView(
       padding: EdgeInsets.all(AppSpacing.screenPadding),
       child: Column(
         children: [
