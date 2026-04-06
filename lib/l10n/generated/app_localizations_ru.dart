@@ -696,6 +696,90 @@ class SRu extends S {
   String get address => 'Адрес';
 
   @override
+  String get debtSale => 'Продажа в долг';
+
+  @override
+  String get selectClient => 'Выберите клиента';
+
+  @override
+  String get selectClientFirst => 'Сначала выберите клиента';
+
+  @override
+  String get clientRequired => 'Для продажи в долг необходимо выбрать клиента';
+
+  @override
+  String get searchClients => 'Поиск по имени или коду...';
+
+  @override
+  String get noClientsFound => 'Клиенты не найдены';
+
+  @override
+  String get createNewClient => 'Создать клиента';
+
+  @override
+  String get quickCreateClient => 'Быстрое создание клиента';
+
+  @override
+  String get clientName => 'Имя клиента';
+
+  @override
+  String get clientPhone => 'Номер телефона';
+
+  @override
+  String get clientCreated => 'Клиент успешно создан';
+
+  @override
+  String get failedToCreateClient => 'Не удалось создать клиента';
+
+  @override
+  String get selectedClient => 'Клиент';
+
+  @override
+  String get changeClient => 'Изменить';
+
+  @override
+  String get enterQuantity => 'Введите количество';
+
+  @override
+  String get editPrice => 'Изменить цену';
+
+  @override
+  String get unitPrice => 'Цена за единицу';
+
+  @override
+  String get customPrice => 'Своя цена';
+
+  @override
+  String get deliveryAddress => 'Адрес доставки';
+
+  @override
+  String get region => 'Область';
+
+  @override
+  String get selectRegion => 'Выберите область';
+
+  @override
+  String get area => 'Район';
+
+  @override
+  String get selectArea => 'Выберите район';
+
+  @override
+  String get debt => 'Долг';
+
+  @override
+  String get onAccount => 'В долг';
+
+  @override
+  String get checkout => 'Оформить';
+
+  @override
+  String get orderSummary => 'Итог заказа';
+
+  @override
+  String get clientInfo => 'Данные клиента';
+
+  @override
   String get loading => 'Загрузка...';
 
   @override

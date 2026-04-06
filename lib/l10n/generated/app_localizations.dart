@@ -1318,6 +1318,35 @@ abstract class S {
   /// **'Address'**
   String get address;
 
+  String get debtSale;
+  String get selectClient;
+  String get selectClientFirst;
+  String get clientRequired;
+  String get searchClients;
+  String get noClientsFound;
+  String get createNewClient;
+  String get quickCreateClient;
+  String get clientName;
+  String get clientPhone;
+  String get clientCreated;
+  String get failedToCreateClient;
+  String get selectedClient;
+  String get changeClient;
+  String get enterQuantity;
+  String get editPrice;
+  String get unitPrice;
+  String get customPrice;
+  String get deliveryAddress;
+  String get region;
+  String get selectRegion;
+  String get area;
+  String get selectArea;
+  String get debt;
+  String get onAccount;
+  String get checkout;
+  String get orderSummary;
+  String get clientInfo;
+
   /// No description provided for @loading.
   ///
   /// In en, this message translates to:

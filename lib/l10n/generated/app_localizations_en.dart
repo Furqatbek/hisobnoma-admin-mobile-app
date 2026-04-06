@@ -696,6 +696,90 @@ class SEn extends S {
   String get address => 'Address';
 
   @override
+  String get debtSale => 'Debt Sale';
+
+  @override
+  String get selectClient => 'Select Client';
+
+  @override
+  String get selectClientFirst => 'Please select a client first';
+
+  @override
+  String get clientRequired => 'Client is required for debt sales';
+
+  @override
+  String get searchClients => 'Search clients by name or code...';
+
+  @override
+  String get noClientsFound => 'No clients found';
+
+  @override
+  String get createNewClient => 'Create New Client';
+
+  @override
+  String get quickCreateClient => 'Quick Create Client';
+
+  @override
+  String get clientName => 'Client Name';
+
+  @override
+  String get clientPhone => 'Phone Number';
+
+  @override
+  String get clientCreated => 'Client created successfully';
+
+  @override
+  String get failedToCreateClient => 'Failed to create client';
+
+  @override
+  String get selectedClient => 'Client';
+
+  @override
+  String get changeClient => 'Change';
+
+  @override
+  String get enterQuantity => 'Enter quantity';
+
+  @override
+  String get editPrice => 'Edit price';
+
+  @override
+  String get unitPrice => 'Unit Price';
+
+  @override
+  String get customPrice => 'Custom Price';
+
+  @override
+  String get deliveryAddress => 'Delivery Address';
+
+  @override
+  String get region => 'Region';
+
+  @override
+  String get selectRegion => 'Select region';
+
+  @override
+  String get area => 'Area';
+
+  @override
+  String get selectArea => 'Select area';
+
+  @override
+  String get debt => 'Debt';
+
+  @override
+  String get onAccount => 'On Account';
+
+  @override
+  String get checkout => 'Checkout';
+
+  @override
+  String get orderSummary => 'Order Summary';
+
+  @override
+  String get clientInfo => 'Client Info';
+
+  @override
   String get loading => 'Loading...';
 
   @override

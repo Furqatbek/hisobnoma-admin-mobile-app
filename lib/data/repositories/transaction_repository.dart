@@ -134,4 +134,19 @@ class TransactionRepository {
       (json) => json,
     );
   }
+
+  /// Create a new customer (quick create)
+  Future<Map<String, dynamic>> createCustomer({
+    required String name,
+    String? phone,
+  }) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.createCustomer,
+      data: {
+        'name': name,
+        if (phone != null && phone.isNotEmpty) 'phone': phone,
+      },
+    );
+    return response.data['data'] as Map<String, dynamic>;
+  }
 }

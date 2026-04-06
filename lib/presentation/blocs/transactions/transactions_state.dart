@@ -67,6 +67,25 @@ class QuickCountCompleted extends TransactionsState {
   List<Object?> get props => [result];
 }
 
+class CustomersSearchLoaded extends TransactionsState {
+  final List<Map<String, dynamic>> customers;
+  final String query;
+
+  const CustomersSearchLoaded({required this.customers, this.query = ''});
+
+  @override
+  List<Object?> get props => [customers, query];
+}
+
+class CustomerCreated extends TransactionsState {
+  final Map<String, dynamic> customer;
+
+  const CustomerCreated({required this.customer});
+
+  @override
+  List<Object?> get props => [customer];
+}
+
 class TransactionsError extends TransactionsState {
   final String message;
 

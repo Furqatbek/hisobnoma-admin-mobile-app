@@ -81,6 +81,36 @@ class TransactionsCubit extends Cubit<TransactionsState> {
     }
   }
 
+  Future<void> searchCustomers(String query) async {
+    if (query.trim().isEmpty) {
+      emit(const CustomersSearchLoaded(customers: []));
+      return;
+    }
+    emit(const TransactionsLoading());
+    try {
+      final data = await _transactionRepository.searchCustomers(query: query);
+      emit(CustomersSearchLoaded(customers: data.content, query: query));
+    } catch (e) {
+      emit(TransactionsError(message: e.toString()));
+    }
+  }
+
+  Future<void> createCustomer({
+    required String name,
+    String? phone,
+  }) async {
+    emit(const TransactionsLoading());
+    try {
+      final customer = await _transactionRepository.createCustomer(
+        name: name,
+        phone: phone,
+      );
+      emit(CustomerCreated(customer: customer));
+    } catch (e) {
+      emit(TransactionsError(message: e.toString()));
+    }
+  }
+
   Future<void> quickCount(QuickCountRequest request) async {
     emit(const TransactionsLoading());
     try {

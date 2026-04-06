@@ -696,6 +696,90 @@ class SUz extends S {
   String get address => 'Манзил';
 
   @override
+  String get debtSale => 'Қарзга сотув';
+
+  @override
+  String get selectClient => 'Мижозни танланг';
+
+  @override
+  String get selectClientFirst => 'Аввал мижозни танланг';
+
+  @override
+  String get clientRequired => 'Қарзга сотиш учун мижоз танлаш шарт';
+
+  @override
+  String get searchClients => 'Номи ёки коди бўйича қидиринг...';
+
+  @override
+  String get noClientsFound => 'Мижоз топилмади';
+
+  @override
+  String get createNewClient => 'Янги мижоз яратиш';
+
+  @override
+  String get quickCreateClient => 'Тезкор мижоз яратиш';
+
+  @override
+  String get clientName => 'Мижоз номи';
+
+  @override
+  String get clientPhone => 'Телефон рақами';
+
+  @override
+  String get clientCreated => 'Мижоз муваффақиятли яратилди';
+
+  @override
+  String get failedToCreateClient => 'Мижоз яратишда хатолик';
+
+  @override
+  String get selectedClient => 'Мижоз';
+
+  @override
+  String get changeClient => 'Ўзгартириш';
+
+  @override
+  String get enterQuantity => 'Сонини киритинг';
+
+  @override
+  String get editPrice => 'Нархни ўзгартириш';
+
+  @override
+  String get unitPrice => 'Бирлик нархи';
+
+  @override
+  String get customPrice => 'Махсус нарх';
+
+  @override
+  String get deliveryAddress => 'Етказиб бериш манзили';
+
+  @override
+  String get region => 'Вилоят';
+
+  @override
+  String get selectRegion => 'Вилоятни танланг';
+
+  @override
+  String get area => 'Туман';
+
+  @override
+  String get selectArea => 'Туманни танланг';
+
+  @override
+  String get debt => 'Қарз';
+
+  @override
+  String get onAccount => 'Қарзга';
+
+  @override
+  String get checkout => 'Расмийлаштириш';
+
+  @override
+  String get orderSummary => 'Буюртма хулосаси';
+
+  @override
+  String get clientInfo => 'Мижоз маълумоти';
+
+  @override
   String get loading => 'Юкланмоқда...';
 
   @override
