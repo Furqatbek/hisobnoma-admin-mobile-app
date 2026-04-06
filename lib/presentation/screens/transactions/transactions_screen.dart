@@ -14,7 +14,9 @@ import 'package:hisobnoma/data/repositories/transaction_repository.dart';
 import 'package:hisobnoma/core/di/injection.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
+import 'package:hisobnoma/presentation/blocs/shift/shift_cubit.dart';
 import 'package:hisobnoma/presentation/screens/transactions/add_sale_sheet.dart';
+import 'package:hisobnoma/presentation/screens/transactions/shift_sheet.dart';
 import 'package:hisobnoma/presentation/widgets/common/animations.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_empty_state.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_segmented_control.dart';
@@ -47,6 +49,21 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(t.transactions, style: AppTypography.headline),
+        actions: [
+          BlocBuilder<ShiftCubit, ShiftState>(
+            builder: (context, state) {
+              final isOpen = state is ShiftLoaded && state.shift.isOpen;
+              return IconButton(
+                onPressed: () => ShiftSheet.show(context),
+                icon: Icon(
+                  isOpen ? Icons.access_time_filled : Icons.access_time,
+                  color: isOpen ? AppColors.income : AppColors.textSecondary,
+                ),
+                tooltip: t.shift,
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

@@ -205,4 +205,101 @@ class TransactionRepository {
     );
     return response.data as Map<String, dynamic>;
   }
+
+  // ========== Shifts ==========
+
+  /// Get current shift for the logged-in user
+  Future<Shift?> getCurrentShift() async {
+    try {
+      final response = await _apiClient.get(ApiEndpoints.currentShift);
+      final data = response.data;
+      if (data is Map<String, dynamic> && data['data'] != null) {
+        return Shift.fromJson(data['data'] as Map<String, dynamic>);
+      }
+      if (data is Map<String, dynamic> && data['id'] != null) {
+        return Shift.fromJson(data);
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Get current shift for a specific terminal
+  Future<Shift?> getCurrentShiftForTerminal(int terminalId) async {
+    try {
+      final response = await _apiClient.get(
+        ApiEndpoints.currentShiftForTerminal(terminalId),
+      );
+      final data = response.data;
+      if (data is Map<String, dynamic> && data['data'] != null) {
+        return Shift.fromJson(data['data'] as Map<String, dynamic>);
+      }
+      if (data is Map<String, dynamic> && data['id'] != null) {
+        return Shift.fromJson(data);
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Open a new shift
+  Future<Shift> openShift({
+    required int terminalId,
+    required double openingCash,
+    String? notes,
+  }) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.openShift,
+      data: {
+        'terminalId': terminalId,
+        'openingCash': openingCash,
+        if (notes != null && notes.isNotEmpty) 'notes': notes,
+      },
+    );
+    final data = response.data;
+    if (data is Map<String, dynamic> && data['data'] != null) {
+      return Shift.fromJson(data['data'] as Map<String, dynamic>);
+    }
+    return Shift.fromJson(data as Map<String, dynamic>);
+  }
+
+  /// Close a shift
+  Future<Shift> closeShift({
+    required int shiftId,
+    required double closingCash,
+    String? closingNotes,
+  }) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.closeShift(shiftId),
+      data: {
+        'closingCash': closingCash,
+        if (closingNotes != null && closingNotes.isNotEmpty)
+          'closingNotes': closingNotes,
+      },
+    );
+    final data = response.data;
+    if (data is Map<String, dynamic> && data['data'] != null) {
+      return Shift.fromJson(data['data'] as Map<String, dynamic>);
+    }
+    return Shift.fromJson(data as Map<String, dynamic>);
+  }
+
+  /// Cash in/out operation on a shift
+  Future<void> cashOperation({
+    required int shiftId,
+    required String operationType, // CASH_IN or CASH_OUT
+    required double amount,
+    String? reason,
+  }) async {
+    await _apiClient.post(
+      ApiEndpoints.cashOperation(shiftId),
+      data: {
+        'operationType': operationType,
+        'amount': amount,
+        if (reason != null && reason.isNotEmpty) 'reason': reason,
+      },
+    );
+  }
 }

@@ -18,6 +18,7 @@ import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dar
 import 'package:hisobnoma/presentation/blocs/reports/reports_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/settings/settings_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/alerts/alerts_cubit.dart';
+import 'package:hisobnoma/presentation/blocs/shift/shift_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/sync/sync_cubit.dart';
 
 final getIt = GetIt.instance;
@@ -97,6 +98,9 @@ Future<void> configureDependencies() async {
   );
   getIt.registerFactory<AlertsCubit>(
     () => AlertsCubit(alertRepository: getIt()),
+  );
+  getIt.registerFactory<ShiftCubit>(
+    () => ShiftCubit(transactionRepository: getIt()),
   );
   getIt.registerFactory<SyncCubit>(
     () => SyncCubit(syncService: getIt()),

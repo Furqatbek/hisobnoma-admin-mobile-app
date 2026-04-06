@@ -11,6 +11,7 @@ import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dar
 import 'package:hisobnoma/presentation/blocs/reports/reports_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/settings/settings_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/alerts/alerts_cubit.dart';
+import 'package:hisobnoma/presentation/blocs/shift/shift_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/sync/sync_cubit.dart';
 import 'package:hisobnoma/data/services/sync_service.dart';
 
@@ -64,6 +65,7 @@ class _HisobnomaAppState extends State<HisobnomaApp> with WidgetsBindingObserver
         BlocProvider(create: (_) => getIt<ReportsCubit>()),
         BlocProvider(create: (_) => getIt<SettingsCubit>()..loadSettings()),
         BlocProvider(create: (_) => getIt<AlertsCubit>()),
+        BlocProvider(create: (_) => getIt<ShiftCubit>()..loadCurrentShift()),
         BlocProvider(create: (_) => getIt<SyncCubit>()),
       ],
       child: BlocBuilder<SettingsCubit, SettingsState>(

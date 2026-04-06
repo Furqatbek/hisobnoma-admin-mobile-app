@@ -1370,6 +1370,28 @@ abstract class S {
   /// In en, this message translates to:
   /// **'No data available'**
   String get noData;
+
+  String get shift;
+  String get shiftManagement;
+  String get currentShift;
+  String get openShift;
+  String get closeShift;
+  String get noOpenShift;
+  String get noOpenShiftHint;
+  String get openingCash;
+  String get closingCash;
+  String get shiftOpened;
+  String get shiftClosed;
+  String get shiftRequired;
+  String get cashIn;
+  String get cashOut;
+  String get cashOperation;
+  String get reason;
+  String get totalSales;
+  String get transactionsCount;
+  String get shiftNumber;
+  String get openedAt;
+  String get expectedCash;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

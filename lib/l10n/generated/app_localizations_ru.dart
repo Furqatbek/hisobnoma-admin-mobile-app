@@ -790,4 +790,47 @@ class SRu extends S {
 
   @override
   String get noData => 'Нет данных';
+
+  @override
+  String get shift => 'Смена';
+  @override
+  String get shiftManagement => 'Управление сменами';
+  @override
+  String get currentShift => 'Текущая смена';
+  @override
+  String get openShift => 'Открыть смену';
+  @override
+  String get closeShift => 'Закрыть смену';
+  @override
+  String get noOpenShift => 'Нет открытой смены';
+  @override
+  String get noOpenShiftHint => 'Откройте смену чтобы начать продажи';
+  @override
+  String get openingCash => 'Начальная касса';
+  @override
+  String get closingCash => 'Конечная касса';
+  @override
+  String get shiftOpened => 'Смена успешно открыта';
+  @override
+  String get shiftClosed => 'Смена успешно закрыта';
+  @override
+  String get shiftRequired => 'Для продажи необходима открытая смена';
+  @override
+  String get cashIn => 'Внесение';
+  @override
+  String get cashOut => 'Выдача';
+  @override
+  String get cashOperation => 'Кассовая операция';
+  @override
+  String get reason => 'Причина';
+  @override
+  String get totalSales => 'Итого продаж';
+  @override
+  String get transactionsCount => 'Операций';
+  @override
+  String get shiftNumber => 'Смена №';
+  @override
+  String get openedAt => 'Открыта';
+  @override
+  String get expectedCash => 'Ожидаемая касса';
 }

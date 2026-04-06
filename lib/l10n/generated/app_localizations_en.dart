@@ -790,4 +790,47 @@ class SEn extends S {
 
   @override
   String get noData => 'No data available';
+
+  @override
+  String get shift => 'Shift';
+  @override
+  String get shiftManagement => 'Shift Management';
+  @override
+  String get currentShift => 'Current Shift';
+  @override
+  String get openShift => 'Open Shift';
+  @override
+  String get closeShift => 'Close Shift';
+  @override
+  String get noOpenShift => 'No open shift';
+  @override
+  String get noOpenShiftHint => 'Open a shift to start selling';
+  @override
+  String get openingCash => 'Opening Cash';
+  @override
+  String get closingCash => 'Closing Cash';
+  @override
+  String get shiftOpened => 'Shift opened successfully';
+  @override
+  String get shiftClosed => 'Shift closed successfully';
+  @override
+  String get shiftRequired => 'An open shift is required to make a sale';
+  @override
+  String get cashIn => 'Cash In';
+  @override
+  String get cashOut => 'Cash Out';
+  @override
+  String get cashOperation => 'Cash Operation';
+  @override
+  String get reason => 'Reason';
+  @override
+  String get totalSales => 'Total Sales';
+  @override
+  String get transactionsCount => 'Transactions';
+  @override
+  String get shiftNumber => 'Shift #';
+  @override
+  String get openedAt => 'Opened At';
+  @override
+  String get expectedCash => 'Expected Cash';
 }

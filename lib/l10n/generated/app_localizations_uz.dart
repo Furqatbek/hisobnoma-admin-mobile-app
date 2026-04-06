@@ -790,4 +790,47 @@ class SUz extends S {
 
   @override
   String get noData => 'Маълумот мавжуд эмас';
+
+  @override
+  String get shift => 'Смена';
+  @override
+  String get shiftManagement => 'Смена бошқаруви';
+  @override
+  String get currentShift => 'Жорий смена';
+  @override
+  String get openShift => 'Смена очиш';
+  @override
+  String get closeShift => 'Смена ёпиш';
+  @override
+  String get noOpenShift => 'Очиқ смена йўқ';
+  @override
+  String get noOpenShiftHint => 'Сотувни бошлаш учун смена очинг';
+  @override
+  String get openingCash => 'Бошланғич нақд пул';
+  @override
+  String get closingCash => 'Якуний нақд пул';
+  @override
+  String get shiftOpened => 'Смена муваффақиятли очилди';
+  @override
+  String get shiftClosed => 'Смена муваффақиятли ёпилди';
+  @override
+  String get shiftRequired => 'Сотув учун очиқ смена талаб қилинади';
+  @override
+  String get cashIn => 'Нақд кирим';
+  @override
+  String get cashOut => 'Нақд чиқим';
+  @override
+  String get cashOperation => 'Нақд амалиёт';
+  @override
+  String get reason => 'Сабаб';
+  @override
+  String get totalSales => 'Жами сотув';
+  @override
+  String get transactionsCount => 'Амалиётлар';
+  @override
+  String get shiftNumber => 'Смена №';
+  @override
+  String get openedAt => 'Очилган вақт';
+  @override
+  String get expectedCash => 'Кутилган нақд пул';
 }

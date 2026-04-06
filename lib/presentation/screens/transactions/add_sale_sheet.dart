@@ -7,8 +7,10 @@ import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/data/models/transaction/transaction_models.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
+import 'package:hisobnoma/presentation/blocs/shift/shift_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
 import 'package:hisobnoma/presentation/screens/transactions/client_selection_sheet.dart';
+import 'package:hisobnoma/presentation/screens/transactions/shift_sheet.dart';
 import 'package:hisobnoma/presentation/widgets/common/error_handler.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_segmented_control.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_text_field.dart';
@@ -22,13 +24,54 @@ enum _SaleStep { addProducts, checkout }
 class AddSaleSheet extends StatefulWidget {
   const AddSaleSheet({super.key});
 
-  static Future<void> show(BuildContext context) {
+  /// Shows the sale sheet. Checks for an open shift first.
+  /// If no shift is open, opens the ShiftSheet to let the user open one.
+  static Future<void> show(BuildContext context) async {
+    // Check if there's an open shift
+    final shiftCubit = context.read<ShiftCubit>();
+    final shiftState = shiftCubit.state;
+
+    if (shiftState is ShiftNone || shiftState is ShiftInitial) {
+      // Try to reload shift in case it's stale
+      await shiftCubit.loadCurrentShift();
+    }
+
+    final currentState = shiftCubit.state;
+    final hasOpenShift = currentState is ShiftLoaded && currentState.shift.isOpen;
+
+    if (!hasOpenShift) {
+      if (!context.mounted) return;
+      // Show shift sheet to open a shift first
+      final shift = await ShiftSheet.show(context);
+      if (shift == null || !shift.isOpen) {
+        // User cancelled or shift wasn't opened — show message
+        if (context.mounted) {
+          final t = S.of(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(t.shiftRequired),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              ),
+              backgroundColor: AppColors.warning,
+            ),
+          );
+        }
+        return;
+      }
+    }
+
+    if (!context.mounted) return;
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => BlocProvider.value(
-        value: context.read<TransactionsCubit>(),
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<TransactionsCubit>()),
+          BlocProvider.value(value: context.read<ShiftCubit>()),
+        ],
         child: const AddSaleSheet(),
       ),
     );
