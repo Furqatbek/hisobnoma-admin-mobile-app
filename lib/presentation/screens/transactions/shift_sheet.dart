@@ -289,101 +289,103 @@ class _ShiftSheetState extends State<ShiftSheet> {
 
   Widget _buildNoShiftContent(bool isDark) {
     final t = S.of(context);
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: AppSpacing.lg),
-          Icon(
-            Icons.point_of_sale_outlined,
-            size: 56,
-            color:
-                isDark ? AppColors.darkTextSecondary : AppColors.textTertiary,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            t.noOpenShift,
-            style: AppTypography.title3.copyWith(
-              fontWeight: FontWeight.w600,
-              color:
-                  isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: constraints.maxWidth - AppSpacing.md * 2,
+              maxWidth: constraints.maxWidth - AppSpacing.md * 2,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            t.noOpenShiftHint,
-            style: AppTypography.subheadline.copyWith(
-              color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.xl),
-
-          // Terminal selector
-          Text(
-            'Terminal',
-            style: AppTypography.footnote.copyWith(
-              color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          _buildTerminalDropdown(isDark),
-          const SizedBox(height: AppSpacing.md),
-
-          // Opening cash
-          HisobTextField(
-            label: t.openingCash,
-            hint: '0.00',
-            controller: _openingCashController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-
-          // Notes
-          HisobTextField(
-            label: t.notes,
-            hint: '',
-            controller: _openNotesController,
-            maxLines: 2,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Open shift button
-          SizedBox(
-            height: 48,
-            child: ElevatedButton(
-              onPressed:
-                  _selectedTerminal != null ? _onOpenShift : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.royalBlue,
-                foregroundColor: AppColors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusMd),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: AppSpacing.lg),
+                Icon(
+                  Icons.point_of_sale_outlined,
+                  size: 56,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textTertiary,
                 ),
-                disabledBackgroundColor:
-                    isDark ? AppColors.darkFill : AppColors.fill,
-              ),
-              child: Text(
-                t.openShift,
-                style: AppTypography.headline.copyWith(
-                  color: AppColors.white,
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  t.noOpenShift,
+                  style: AppTypography.title3.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  t.noOpenShiftHint,
+                  style: AppTypography.subheadline.copyWith(
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Text(
+                  'Terminal',
+                  style: AppTypography.footnote.copyWith(
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                _buildTerminalDropdown(isDark),
+                const SizedBox(height: AppSpacing.md),
+                HisobTextField(
+                  label: t.openingCash,
+                  hint: '0.00',
+                  controller: _openingCashController,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                HisobTextField(
+                  label: t.notes,
+                  hint: '',
+                  controller: _openNotesController,
+                  maxLines: 2,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed:
+                        _selectedTerminal != null ? _onOpenShift : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.royalBlue,
+                      foregroundColor: AppColors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusMd),
+                      ),
+                      disabledBackgroundColor:
+                          isDark ? AppColors.darkFill : AppColors.fill,
+                    ),
+                    child: Text(
+                      t.openShift,
+                      style: AppTypography.headline.copyWith(
+                        color: AppColors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -471,28 +473,31 @@ class _ShiftSheetState extends State<ShiftSheet> {
     final t = S.of(context);
     final shift = _currentShift!;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Shift info card
-          _buildShiftInfoCard(isDark, shift),
-          const SizedBox(height: AppSpacing.md),
-
-          // Stats row
-          _buildStatsRow(isDark, shift),
-          const SizedBox(height: AppSpacing.md),
-
-          // Cash operations
-          _buildCashOperationSection(isDark, shift),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Close shift section
-          _buildCloseShiftSection(isDark, shift),
-          const SizedBox(height: AppSpacing.md),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: constraints.maxWidth - AppSpacing.md * 2,
+              maxWidth: constraints.maxWidth - AppSpacing.md * 2,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildShiftInfoCard(isDark, shift),
+                const SizedBox(height: AppSpacing.md),
+                _buildStatsRow(isDark, shift),
+                const SizedBox(height: AppSpacing.md),
+                _buildCashOperationSection(isDark, shift),
+                const SizedBox(height: AppSpacing.lg),
+                _buildCloseShiftSection(isDark, shift),
+                const SizedBox(height: AppSpacing.md),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
