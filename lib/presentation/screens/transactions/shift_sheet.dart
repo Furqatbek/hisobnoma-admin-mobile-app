@@ -696,41 +696,45 @@ class _ShiftSheetState extends State<ShiftSheet> {
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _cashOpType = _CashOpType.none;
-                      _cashOpAmountController.clear();
-                      _cashOpReasonController.clear();
-                    });
-                  },
-                  child: Text(
-                    t.cancel,
-                    style: AppTypography.subheadline.copyWith(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary,
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _cashOpType = _CashOpType.none;
+                        _cashOpAmountController.clear();
+                        _cashOpReasonController.clear();
+                      });
+                    },
+                    child: Text(
+                      t.cancel,
+                      style: AppTypography.subheadline.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
                     ),
                   ),
                 ),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: _onCashOperation,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _cashOpType == _CashOpType.cashIn
-                        ? AppColors.income
-                        : AppColors.expense,
-                    foregroundColor: AppColors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusSm),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _onCashOperation,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _cashOpType == _CashOpType.cashIn
+                          ? AppColors.income
+                          : AppColors.expense,
+                      foregroundColor: AppColors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusSm),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    t.confirm,
-                    style: AppTypography.subheadline.copyWith(
-                      color: AppColors.white,
-                      fontWeight: FontWeight.w600,
+                    child: Text(
+                      t.confirm,
+                      style: AppTypography.subheadline.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
