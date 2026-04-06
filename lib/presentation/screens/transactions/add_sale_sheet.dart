@@ -209,12 +209,11 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomPadding),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             _buildHandle(isDark),
             _buildHeader(isDark),
             const Divider(height: 1),
-            Flexible(child: _buildStepContent(isDark)),
+            Expanded(child: _buildStepContent(isDark)),
           ],
         ),
       ),

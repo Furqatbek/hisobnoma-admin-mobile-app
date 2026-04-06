@@ -168,7 +168,6 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
         child: Padding(
           padding: EdgeInsets.only(bottom: bottomPadding),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
               _buildHandle(isDark),
               _buildHeader(isDark),
@@ -195,7 +194,7 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
               ),
               _buildCreateSection(isDark),
               const Divider(height: 1),
-              Flexible(child: _buildClientList(isDark)),
+              Expanded(child: _buildClientList(isDark)),
             ],
           ),
         ),

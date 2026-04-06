@@ -193,12 +193,11 @@ class _ShiftSheetState extends State<ShiftSheet> {
         child: Padding(
           padding: EdgeInsets.only(bottom: bottomPadding),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
               _buildHandle(isDark),
               _buildHeader(isDark),
               const Divider(height: 1),
-              Flexible(
+              Expanded(
                 child: BlocBuilder<ShiftCubit, ShiftState>(
                   builder: (context, state) {
                     if (state is ShiftLoading) {
