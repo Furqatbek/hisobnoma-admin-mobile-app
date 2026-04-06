@@ -11,7 +11,6 @@ import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dar
 import 'package:hisobnoma/presentation/screens/transactions/client_selection_sheet.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_segmented_control.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_text_field.dart';
-import 'package:hisobnoma/presentation/widgets/transaction/product_tile.dart';
 
 enum _SaleStep { addProducts, checkout }
 
@@ -50,6 +49,11 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   // Terminal
   PosTerminal? _activeTerminal;
 
+  // Products (from inventory API, filtered locally)
+  List<InventoryProduct> _allProducts = [];
+  List<InventoryProduct> _filteredProducts = [];
+  bool _productsLoading = true;
+
   // Delivery address (API-driven)
   List<DeliveryRegion> _regions = [];
   List<DeliveryVillage> _villages = [];
@@ -65,19 +69,30 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   }
 
   Future<void> _loadInitialData() async {
-    final cubit = context.read<TransactionsCubit>();
+    final repo = context.read<TransactionsCubit>().transactionRepository;
     // Load active terminal
     try {
-      final repo = cubit.transactionRepository;
       final terminals = await repo.getActiveTerminals();
       if (terminals.isNotEmpty && mounted) {
         setState(() => _activeTerminal = terminals.first);
       }
     } catch (_) {}
+    // Load inventory products
+    try {
+      final products = await repo.getInventoryProducts(size: 200);
+      if (mounted) {
+        setState(() {
+          _allProducts = products.where((p) => p.active).toList();
+          _filteredProducts = _allProducts;
+          _productsLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _productsLoading = false);
+    }
     // Load delivery regions
     try {
       setState(() => _regionsLoading = true);
-      final repo = cubit.transactionRepository;
       final regions = await repo.getDeliveryRegions();
       if (mounted) {
         setState(() {
@@ -233,9 +248,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
             prefixIcon: const Icon(Icons.search, size: 20),
             autofocus: _cart.isEmpty,
             focusNode: _searchFocus,
-            onChanged: (value) {
-              context.read<TransactionsCubit>().searchProducts(value);
-            },
+            onChanged: _filterProducts,
           ),
         ),
         // Cart items (if any)
@@ -296,58 +309,57 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
     );
   }
 
+  void _filterProducts(String query) {
+    final q = query.trim().toLowerCase();
+    setState(() {
+      if (q.isEmpty) {
+        _filteredProducts = _allProducts;
+      } else {
+        _filteredProducts = _allProducts.where((p) {
+          return p.name.toLowerCase().contains(q) ||
+              p.sku.toLowerCase().contains(q) ||
+              p.barcode.toLowerCase().contains(q);
+        }).toList();
+      }
+    });
+  }
+
   Widget _buildSearchResults(bool isDark) {
     final t = S.of(context);
-    return BlocBuilder<TransactionsCubit, TransactionsState>(
-      builder: (context, state) {
-        if (state is TransactionsLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (state is ProductsSearchLoaded) {
-          if (state.products.isEmpty) {
-            return Center(
-              child: Text(
-                _searchController.text.isEmpty
-                    ? t.searchToAdd
-                    : t.noProductsFound,
-                style: AppTypography.subheadline.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            );
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            itemCount: state.products.length,
-            separatorBuilder: (_, __) =>
-                const SizedBox(height: AppSpacing.sm),
-            itemBuilder: (context, index) {
-              final product = state.products[index];
-              return ProductTile(
-                product: product,
-                onTap: () => _addToCart(product),
-              );
-            },
-          );
-        }
-        if (state is TransactionsError) {
-          return Center(
-            child: Text(state.message,
-                style: AppTypography.subheadline
-                    .copyWith(color: AppColors.error)),
-          );
-        }
-        return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.search, size: 48, color: AppColors.textTertiary),
-              const SizedBox(height: AppSpacing.md),
-              Text(t.searchToAdd,
-                  style: AppTypography.subheadline
-                      .copyWith(color: AppColors.textSecondary)),
-            ],
-          ),
+
+    if (_productsLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_filteredProducts.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.search, size: 48, color: AppColors.textTertiary),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              _searchController.text.isEmpty
+                  ? t.searchToAdd
+                  : t.noProductsFound,
+              style: AppTypography.subheadline
+                  .copyWith(color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      itemCount: _filteredProducts.length,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (context, index) {
+        final product = _filteredProducts[index];
+        return _InventoryProductTile(
+          product: product,
+          isDark: isDark,
+          onTap: () => _addToCart(product),
         );
       },
     );
@@ -406,7 +418,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                   child: Dismissible(
-                    key: ValueKey(item.product.productId),
+                    key: ValueKey(item.product.id),
                     direction: DismissDirection.endToStart,
                     onDismissed: (_) {
                       HapticFeedback.mediumImpact();
@@ -733,11 +745,11 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
 
   // ========== ACTIONS ==========
 
-  void _addToCart(ProductLookup product) {
+  void _addToCart(InventoryProduct product) {
     HapticFeedback.mediumImpact();
     setState(() {
       final existing = _cart.indexWhere(
-        (item) => item.product.productId == product.productId,
+        (item) => item.product.id == product.id,
       );
       if (existing >= 0) {
         _cart[existing] = _cart[existing].copyWith(
@@ -853,7 +865,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
       customerName: _selectedClient!['name'] as String?,
       items: _cart
           .map((item) => QuickSaleItem(
-                productId: item.product.productId,
+                productId: item.product.id,
                 quantity: item.quantity.toDouble(),
                 unitPrice: item.customPrice ?? item.product.sellingPrice,
               ))
@@ -904,7 +916,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
 
 /// Internal cart item model with editable price.
 class _CartItem {
-  final ProductLookup product;
+  final InventoryProduct product;
   final int quantity;
   final double? customPrice;
 
@@ -1129,6 +1141,148 @@ class _QuantityStepper extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(6),
         child: Icon(icon, size: 16, color: AppColors.royalBlue),
+      ),
+    );
+  }
+}
+
+/// Product tile for inventory products in search results.
+class _InventoryProductTile extends StatelessWidget {
+  final InventoryProduct product;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _InventoryProductTile({
+    required this.product,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
+      borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkCard : AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.royalBlue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              ),
+              child: Center(
+                child: Text(
+                  product.name.isNotEmpty
+                      ? product.name[0].toUpperCase()
+                      : '?',
+                  style: AppTypography.headline
+                      .copyWith(color: AppColors.royalBlue),
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: AppTypography.body.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Text(
+                        product.sku,
+                        style: AppTypography.caption1.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                      if (product.categoryName != null &&
+                          product.categoryName!.isNotEmpty) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.xs),
+                          child: Text('·',
+                              style: AppTypography.caption1
+                                  .copyWith(color: AppColors.textTertiary)),
+                        ),
+                        Flexible(
+                          child: Text(
+                            product.categoryName!,
+                            style: AppTypography.caption1.copyWith(
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  Formatters.currency(product.sellingPrice),
+                  style: AppTypography.subheadline.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${product.stockQuantity.toInt()}',
+                  style: AppTypography.caption2.copyWith(
+                    color: product.stockQuantity <= 0
+                        ? AppColors.error
+                        : product.stockQuantity < 10
+                            ? AppColors.warning
+                            : AppColors.income,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
