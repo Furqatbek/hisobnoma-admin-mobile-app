@@ -285,7 +285,7 @@ class _ShiftSheetState extends State<ShiftSheet> {
             Icons.point_of_sale_outlined,
             size: 56,
             color:
-                isDark ? AppColors.darkTextTertiary : AppColors.textTertiary,
+                isDark ? AppColors.darkTextSecondary : AppColors.textTertiary,
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
