@@ -39,6 +39,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   void initState() {
     super.initState();
     context.read<TransactionsCubit>().loadData();
+    context.read<ShiftCubit>().loadCurrentShift();
   }
 
   @override

@@ -65,7 +65,7 @@ class _HisobnomaAppState extends State<HisobnomaApp> with WidgetsBindingObserver
         BlocProvider(create: (_) => getIt<ReportsCubit>()),
         BlocProvider(create: (_) => getIt<SettingsCubit>()..loadSettings()),
         BlocProvider(create: (_) => getIt<AlertsCubit>()),
-        BlocProvider(create: (_) => getIt<ShiftCubit>()..loadCurrentShift()),
+        BlocProvider(create: (_) => getIt<ShiftCubit>()),
         BlocProvider(create: (_) => getIt<SyncCubit>()),
       ],
       child: BlocBuilder<SettingsCubit, SettingsState>(
