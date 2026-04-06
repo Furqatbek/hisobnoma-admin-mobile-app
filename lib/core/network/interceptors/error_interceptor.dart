@@ -23,10 +23,20 @@ class ErrorInterceptor extends Interceptor {
 
     if (response != null) {
       final data = response.data;
-      final errorData = data is Map ? data['error'] as Map? : null;
-      final message =
-          errorData?['message'] as String? ?? 'Unknown error occurred';
-      final details = (errorData?['details'] as List?)?.cast<String>();
+      // Backend may return error info as:
+      // 1. Top-level: {"message": "...", "status": 400, "code": "..."}
+      // 2. Nested:    {"error": {"message": "...", "details": [...]}}
+      String message = 'Unknown error occurred';
+      List<String>? details;
+      if (data is Map) {
+        final errorData = data['error'] as Map?;
+        if (errorData != null) {
+          message = errorData['message'] as String? ?? message;
+          details = (errorData['details'] as List?)?.cast<String>();
+        } else if (data['message'] != null) {
+          message = data['message'] as String;
+        }
+      }
 
       switch (response.statusCode) {
         case 400:

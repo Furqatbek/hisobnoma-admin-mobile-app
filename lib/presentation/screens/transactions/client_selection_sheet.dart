@@ -7,6 +7,7 @@ import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
+import 'package:hisobnoma/presentation/widgets/common/error_handler.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_text_field.dart';
 
 /// A bottom sheet for selecting an existing client or creating a new one.
@@ -61,8 +62,11 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
           _isLoadingClients = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _isLoadingClients = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingClients = false);
+        showErrorSnackBar(context, e);
+      }
     }
   }
 

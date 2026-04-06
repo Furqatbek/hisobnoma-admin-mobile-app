@@ -9,6 +9,7 @@ import 'package:hisobnoma/data/models/transaction/transaction_models.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
 import 'package:hisobnoma/presentation/screens/transactions/client_selection_sheet.dart';
+import 'package:hisobnoma/presentation/widgets/common/error_handler.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_segmented_control.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_text_field.dart';
 
@@ -53,6 +54,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   List<InventoryProduct> _allProducts = [];
   List<InventoryProduct> _filteredProducts = [];
   bool _productsLoading = true;
+  bool _showSearch = true; // toggles between search and cart view
 
   // Delivery address (API-driven)
   List<DeliveryRegion> _regions = [];
@@ -76,7 +78,9 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
       if (terminals.isNotEmpty && mounted) {
         setState(() => _activeTerminal = terminals.first);
       }
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) showErrorSnackBar(context, e);
+    }
     // Load inventory products
     try {
       final products = await repo.getInventoryProducts(size: 200);
@@ -87,8 +91,11 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
           _productsLoading = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _productsLoading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _productsLoading = false);
+        showErrorSnackBar(context, e);
+      }
     }
     // Load delivery regions
     try {
@@ -100,8 +107,11 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
           _regionsLoading = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _regionsLoading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _regionsLoading = false);
+        showErrorSnackBar(context, e);
+      }
     }
   }
 
@@ -120,8 +130,11 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
           _villagesLoading = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _villagesLoading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _villagesLoading = false);
+        showErrorSnackBar(context, e);
+      }
     }
   }
 
@@ -237,9 +250,11 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
 
   Widget _buildProductStep(bool isDark) {
     final t = S.of(context);
+    final showCartView = _cart.isNotEmpty && !_showSearch;
+
     return Column(
       children: [
-        // Product search
+        // Product search field (always visible)
         Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: HisobTextField(
@@ -249,12 +264,71 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
             autofocus: _cart.isEmpty,
             focusNode: _searchFocus,
             onChanged: _filterProducts,
+            onTap: () {
+              if (!_showSearch) setState(() => _showSearch = true);
+            },
           ),
         ),
-        // Cart items (if any)
-        if (_cart.isNotEmpty) ...[
-          _buildCartSection(isDark),
-          // Proceed to checkout button
+
+        // Toggle bar when cart has items
+        if (_cart.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+            ),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _showSearch = !_showSearch);
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        _showSearch
+                            ? Icons.shopping_cart_outlined
+                            : Icons.add_circle_outline,
+                        size: 18,
+                        color: AppColors.royalBlue,
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text(
+                        _showSearch
+                            ? t.cartCount('${_cart.length}')
+                            : t.addMoreItems,
+                        style: AppTypography.subheadline
+                            .copyWith(color: AppColors.royalBlue),
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                if (!_showSearch)
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => _cart.clear());
+                    },
+                    child: Text(t.clearAll,
+                        style: AppTypography.subheadline
+                            .copyWith(color: AppColors.error)),
+                  ),
+              ],
+            ),
+          ),
+        if (_cart.isNotEmpty) const SizedBox(height: AppSpacing.sm),
+        if (_cart.isNotEmpty) const Divider(height: 1),
+
+        // Content: search results or cart
+        Expanded(
+          child: showCartView
+              ? _buildCartList(isDark)
+              : _buildSearchResults(isDark),
+        ),
+
+        // Bottom bar with total + checkout (when cart has items)
+        if (_cart.isNotEmpty)
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
@@ -298,12 +372,6 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                 ],
               ),
             ),
-          ),
-        ],
-        // Product search results (only when cart is empty or searching)
-        if (_cart.isEmpty)
-          Expanded(
-            child: _buildSearchResults(isDark),
           ),
       ],
     );
@@ -365,102 +433,52 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
     );
   }
 
-  Widget _buildCartSection(bool isDark) {
-    final t = S.of(context);
-    return Expanded(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
+  Widget _buildCartList(bool isDark) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      itemCount: _cart.length,
+      itemBuilder: (context, index) {
+        final item = _cart[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+          child: Dismissible(
+            key: ValueKey(item.product.id),
+            direction: DismissDirection.endToStart,
+            onDismissed: (_) {
+              HapticFeedback.mediumImpact();
+              setState(() => _cart.removeAt(index));
+            },
+            background: Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: AppColors.expense.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+              ),
+              child: Icon(Icons.delete_outline, color: AppColors.expense),
             ),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    _searchController.clear();
-                    setState(() {});
-                    // Show search again by removing focus from cart
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.add_circle_outline,
-                          size: 18, color: AppColors.royalBlue),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(t.addMoreItems,
-                          style: AppTypography.subheadline
-                              .copyWith(color: AppColors.royalBlue)),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() => _cart.clear());
-                  },
-                  child: Text(t.clearAll,
-                      style: AppTypography.subheadline
-                          .copyWith(color: AppColors.error)),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              itemCount: _cart.length,
-              itemBuilder: (context, index) {
-                final item = _cart[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                  child: Dismissible(
-                    key: ValueKey(item.product.id),
-                    direction: DismissDirection.endToStart,
-                    onDismissed: (_) {
-                      HapticFeedback.mediumImpact();
-                      setState(() => _cart.removeAt(index));
-                    },
-                    background: Container(
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: AppSpacing.lg),
-                      decoration: BoxDecoration(
-                        color: AppColors.expense.withValues(alpha: 0.12),
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusCard),
-                      ),
-                      child:
-                          Icon(Icons.delete_outline, color: AppColors.expense),
-                    ),
-                    child: _CartItemTile(
-                      item: item,
-                      isDark: isDark,
-                      onQuantityChanged: (qty) {
-                        setState(() {
-                          if (qty <= 0) {
-                            _cart.removeAt(index);
-                          } else {
-                            _cart[index] = item.copyWith(quantity: qty);
-                          }
-                        });
-                      },
-                      onQuantityTap: () => _showQuantityDialog(index),
-                      onPriceTap: () => _showPriceDialog(index),
-                      onRemoved: () {
-                        HapticFeedback.mediumImpact();
-                        setState(() => _cart.removeAt(index));
-                      },
-                    ),
-                  ),
-                );
+            child: _CartItemTile(
+              item: item,
+              isDark: isDark,
+              onQuantityChanged: (qty) {
+                setState(() {
+                  if (qty <= 0) {
+                    _cart.removeAt(index);
+                  } else {
+                    _cart[index] = item.copyWith(quantity: qty);
+                  }
+                });
+              },
+              onQuantityTap: () => _showQuantityDialog(index),
+              onPriceTap: () => _showPriceDialog(index),
+              onRemoved: () {
+                HapticFeedback.mediumImpact();
+                setState(() => _cart.removeAt(index));
               },
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -896,20 +914,10 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
           backgroundColor: AppColors.income,
         ),
       );
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
-      final t = S.of(context);
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(t.failedToCompleteSale),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-          ),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      showErrorSnackBar(context, e);
     }
   }
 }
