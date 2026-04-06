@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
-import 'package:hisobnoma/core/constants/uzbekistan_regions.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/data/models/transaction/transaction_models.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
@@ -46,8 +45,69 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   final List<_CartItem> _cart = [];
   String _paymentType = 'DEBT';
   bool _isSubmitting = false;
-  String? _selectedRegion;
-  String? _selectedArea;
+
+  // Terminal
+  PosTerminal? _activeTerminal;
+
+  // Delivery address (API-driven)
+  List<DeliveryRegion> _regions = [];
+  List<DeliveryVillage> _villages = [];
+  DeliveryRegion? _selectedRegion;
+  DeliveryVillage? _selectedVillage;
+  bool _regionsLoading = false;
+  bool _villagesLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    final cubit = context.read<TransactionsCubit>();
+    // Load active terminal
+    try {
+      final repo = cubit.transactionRepository;
+      final terminals = await repo.getActiveTerminals();
+      if (terminals.isNotEmpty && mounted) {
+        setState(() => _activeTerminal = terminals.first);
+      }
+    } catch (_) {}
+    // Load delivery regions
+    try {
+      setState(() => _regionsLoading = true);
+      final repo = cubit.transactionRepository;
+      final regions = await repo.getDeliveryRegions();
+      if (mounted) {
+        setState(() {
+          _regions = regions;
+          _regionsLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _regionsLoading = false);
+    }
+  }
+
+  Future<void> _loadVillages(int regionId) async {
+    setState(() {
+      _villagesLoading = true;
+      _villages = [];
+      _selectedVillage = null;
+    });
+    try {
+      final repo = context.read<TransactionsCubit>().transactionRepository;
+      final villages = await repo.getDeliveryVillages(regionId);
+      if (mounted) {
+        setState(() {
+          _villages = villages;
+          _villagesLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _villagesLoading = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -466,9 +526,6 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
 
   Widget _buildCheckoutStep(bool isDark) {
     final t = S.of(context);
-    final areas = _selectedRegion != null
-        ? UzbekistanRegions.areasByRegion[_selectedRegion] ?? []
-        : <String>[];
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -537,39 +594,63 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
           Text(t.deliveryAddress, style: AppTypography.headline),
           const SizedBox(height: AppSpacing.sm),
 
-          // Region dropdown
-          DropdownButtonFormField<String>(
+          // Region dropdown (API-driven)
+          DropdownButtonFormField<DeliveryRegion>(
             value: _selectedRegion,
             decoration: InputDecoration(
               labelText: t.region,
               hintText: t.selectRegion,
+              suffixIcon: _regionsLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: Padding(
+                        padding: EdgeInsets.all(12),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : null,
             ),
-            items: UzbekistanRegions.regions
-                .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+            items: _regions
+                .map((r) => DropdownMenuItem(value: r, child: Text(r.name)))
                 .toList(),
             onChanged: (value) {
               setState(() {
                 _selectedRegion = value;
-                _selectedArea = null;
+                _selectedVillage = null;
+                _villages = [];
               });
+              if (value != null) {
+                _loadVillages(value.id);
+              }
             },
           ),
           const SizedBox(height: AppSpacing.md),
 
-          // Area dropdown
-          DropdownButtonFormField<String>(
-            value: _selectedArea,
+          // Area/Village dropdown (API-driven, filtered by region)
+          DropdownButtonFormField<DeliveryVillage>(
+            value: _selectedVillage,
             decoration: InputDecoration(
               labelText: t.area,
               hintText: t.selectArea,
+              suffixIcon: _villagesLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: Padding(
+                        padding: EdgeInsets.all(12),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : null,
             ),
-            items: areas
-                .map((a) => DropdownMenuItem(value: a, child: Text(a)))
+            items: _villages
+                .map((v) => DropdownMenuItem(value: v, child: Text(v.name)))
                 .toList(),
             onChanged: _selectedRegion == null
                 ? null
                 : (value) {
-                    setState(() => _selectedArea = value);
+                    setState(() => _selectedVillage = value);
                   },
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -762,7 +843,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
     HapticFeedback.mediumImpact();
 
     final request = QuickSaleRequest(
-      terminalId: 1,
+      terminalId: _activeTerminal?.id ?? 1,
       customerId: _selectedClient!['id'] as int?,
       customerName: _selectedClient!['name'] as String?,
       items: _cart
@@ -774,8 +855,8 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
           .toList(),
       paymentType: _paymentType,
       tenderedAmount: _totalAmount,
-      deliveryRegion: _selectedRegion,
-      deliveryArea: _selectedArea,
+      deliveryRegionId: _selectedRegion?.id,
+      deliveryVillageId: _selectedVillage?.id,
     );
 
     try {

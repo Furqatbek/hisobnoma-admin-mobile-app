@@ -13,6 +13,10 @@ class TransactionsCubit extends Cubit<TransactionsState> {
   })  : _transactionRepository = transactionRepository,
         super(const TransactionsInitial());
 
+  /// Exposed for direct access by widgets that need to call repo methods
+  /// without going through cubit state (e.g. loading terminals, regions).
+  TransactionRepository get transactionRepository => _transactionRepository;
+
   void reset() => emit(const TransactionsInitial());
 
   /// Load inventory, debtors, and sales history in parallel
@@ -42,6 +46,51 @@ class TransactionsCubit extends Cubit<TransactionsState> {
         debtors: debtors,
         sales: sales,
       ));
+    } catch (e) {
+      emit(TransactionsError(message: e.toString()));
+    }
+  }
+
+  /// Load active POS terminals
+  Future<void> loadActiveTerminals() async {
+    try {
+      final terminals = await _transactionRepository.getActiveTerminals();
+      emit(ActiveTerminalsLoaded(terminals: terminals));
+    } catch (e) {
+      emit(TransactionsError(message: e.toString()));
+    }
+  }
+
+  /// Load active products for POS cart
+  Future<void> loadActiveProducts({int page = 0, int size = 50}) async {
+    emit(const TransactionsLoading());
+    try {
+      final data = await _transactionRepository.getActiveProducts(
+        page: page,
+        size: size,
+      );
+      emit(ActiveProductsLoaded(products: data.content));
+    } catch (e) {
+      emit(TransactionsError(message: e.toString()));
+    }
+  }
+
+  /// Load delivery regions
+  Future<void> loadDeliveryRegions() async {
+    try {
+      final regions = await _transactionRepository.getDeliveryRegions();
+      emit(DeliveryRegionsLoaded(regions: regions));
+    } catch (e) {
+      emit(TransactionsError(message: e.toString()));
+    }
+  }
+
+  /// Load delivery villages for a region
+  Future<void> loadDeliveryVillages(int regionId) async {
+    try {
+      final villages =
+          await _transactionRepository.getDeliveryVillages(regionId);
+      emit(DeliveryVillagesLoaded(villages: villages));
     } catch (e) {
       emit(TransactionsError(message: e.toString()));
     }

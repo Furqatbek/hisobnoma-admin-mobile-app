@@ -10,6 +10,48 @@ class TransactionRepository {
   TransactionRepository({required ApiClient apiClient})
       : _apiClient = apiClient;
 
+  /// Get active POS terminals
+  Future<List<PosTerminal>> getActiveTerminals() async {
+    final response = await _apiClient.get(ApiEndpoints.activeTerminals);
+    final list = response.data['data'] as List? ?? [];
+    return list
+        .map((e) => PosTerminal.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Get active products (paginated)
+  Future<PaginatedResponse<ProductLookup>> getActiveProducts({
+    int page = 0,
+    int size = 50,
+  }) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.activeProducts,
+      queryParameters: {'page': page, 'size': size},
+    );
+    final data = response.data as Map<String, dynamic>;
+    return PaginatedResponse.fromJson(data, ProductLookup.fromJson);
+  }
+
+  /// Get active delivery regions
+  Future<List<DeliveryRegion>> getDeliveryRegions() async {
+    final response = await _apiClient.get(ApiEndpoints.deliveryRegions);
+    final list = response.data['data'] as List? ?? [];
+    return list
+        .map((e) => DeliveryRegion.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Get villages/areas for a delivery region
+  Future<List<DeliveryVillage>> getDeliveryVillages(int regionId) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.deliveryVillages(regionId),
+    );
+    final list = response.data['data'] as List? ?? [];
+    return list
+        .map((e) => DeliveryVillage.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   /// Barcode product lookup
   Future<ProductLookup> barcodeLookup(String barcode) async {
     final response = await _apiClient.get(

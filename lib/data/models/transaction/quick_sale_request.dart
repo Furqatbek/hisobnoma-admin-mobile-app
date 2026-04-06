@@ -6,8 +6,8 @@ class QuickSaleRequest {
   final String paymentType;
   final double tenderedAmount;
   final String? notes;
-  final String? deliveryRegion;
-  final String? deliveryArea;
+  final int? deliveryRegionId;
+  final int? deliveryVillageId;
 
   const QuickSaleRequest({
     required this.terminalId,
@@ -17,8 +17,8 @@ class QuickSaleRequest {
     required this.paymentType,
     required this.tenderedAmount,
     this.notes,
-    this.deliveryRegion,
-    this.deliveryArea,
+    this.deliveryRegionId,
+    this.deliveryVillageId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -29,8 +29,8 @@ class QuickSaleRequest {
         'paymentType': paymentType,
         'tenderedAmount': tenderedAmount,
         if (notes != null) 'notes': notes,
-        if (deliveryRegion != null) 'deliveryRegion': deliveryRegion,
-        if (deliveryArea != null) 'deliveryArea': deliveryArea,
+        if (deliveryRegionId != null) 'deliveryRegionId': deliveryRegionId,
+        if (deliveryVillageId != null) 'deliveryVillageId': deliveryVillageId,
       };
 }
 

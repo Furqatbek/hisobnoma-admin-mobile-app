@@ -34,8 +34,17 @@ abstract final class ApiEndpoints {
   static const String searchCustomers = '/mobile/customers/search';
   static const String createCustomer = '/mobile/customers';
 
+  // POS Terminals
+  static const String activeTerminals = '/pos/terminals/active';
+
   // Inventory
   static const String inventoryProducts = '/inventory/products';
+  static const String activeProducts = '/inventory/products/active';
+
+  // Delivery
+  static const String deliveryRegions = '/delivery/regions/active';
+  static String deliveryVillages(int regionId) =>
+      '/delivery/villages/region/$regionId';
 
   // Finance / AR
   static const String arCustomerBalance =

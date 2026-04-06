@@ -67,6 +67,42 @@ class QuickCountCompleted extends TransactionsState {
   List<Object?> get props => [result];
 }
 
+class ActiveTerminalsLoaded extends TransactionsState {
+  final List<PosTerminal> terminals;
+
+  const ActiveTerminalsLoaded({required this.terminals});
+
+  @override
+  List<Object?> get props => [terminals];
+}
+
+class ActiveProductsLoaded extends TransactionsState {
+  final List<ProductLookup> products;
+
+  const ActiveProductsLoaded({required this.products});
+
+  @override
+  List<Object?> get props => [products];
+}
+
+class DeliveryRegionsLoaded extends TransactionsState {
+  final List<DeliveryRegion> regions;
+
+  const DeliveryRegionsLoaded({required this.regions});
+
+  @override
+  List<Object?> get props => [regions];
+}
+
+class DeliveryVillagesLoaded extends TransactionsState {
+  final List<DeliveryVillage> villages;
+
+  const DeliveryVillagesLoaded({required this.villages});
+
+  @override
+  List<Object?> get props => [villages];
+}
+
 class CustomersSearchLoaded extends TransactionsState {
   final List<Map<String, dynamic>> customers;
   final String query;
