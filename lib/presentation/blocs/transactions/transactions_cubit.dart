@@ -144,13 +144,14 @@ class TransactionsCubit extends Cubit<TransactionsState> {
     }
   }
 
+  /// Create a new finance customer (for debt sale)
   Future<void> createCustomer({
     required String name,
     String? phone,
   }) async {
     emit(const TransactionsLoading());
     try {
-      final customer = await _transactionRepository.createCustomer(
+      final customer = await _transactionRepository.createFinanceCustomer(
         name: name,
         phone: phone,
       );

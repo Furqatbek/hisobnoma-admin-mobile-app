@@ -4,16 +4,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
+import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_text_field.dart';
 
 /// A bottom sheet for selecting an existing client or creating a new one.
+/// Fetches clients from GET /finance/customers and creates via POST /finance/customers.
 /// Returns the selected client as Map<String, dynamic> via Navigator.pop().
 class ClientSelectionSheet extends StatefulWidget {
   const ClientSelectionSheet({super.key});
 
-  /// Shows the sheet and returns selected client map, or null if cancelled.
   static Future<Map<String, dynamic>?> show(BuildContext context) {
     return showModalBottomSheet<Map<String, dynamic>>(
       context: context,
@@ -36,24 +37,49 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _nameFocus = FocusNode();
-  final _phoneFocus = FocusNode();
 
+  List<Map<String, dynamic>> _allClients = [];
+  List<Map<String, dynamic>> _filteredClients = [];
+  bool _isLoadingClients = true;
   bool _isCreateExpanded = false;
   bool _isCreating = false;
 
   @override
-  void dispose() {
-    _searchController.dispose();
-    _searchFocus.dispose();
-    _nameController.dispose();
-    _phoneController.dispose();
-    _nameFocus.dispose();
-    _phoneFocus.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _loadClients();
+  }
+
+  Future<void> _loadClients() async {
+    try {
+      final repo = context.read<TransactionsCubit>().transactionRepository;
+      final clients = await repo.getFinanceCustomers();
+      if (mounted) {
+        setState(() {
+          _allClients = clients;
+          _filteredClients = clients;
+          _isLoadingClients = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoadingClients = false);
+    }
   }
 
   void _onSearchChanged(String query) {
-    context.read<TransactionsCubit>().searchCustomers(query);
+    final q = query.trim().toLowerCase();
+    setState(() {
+      if (q.isEmpty) {
+        _filteredClients = _allClients;
+      } else {
+        _filteredClients = _allClients.where((c) {
+          final name = (c['name'] as String? ?? '').toLowerCase();
+          final code = (c['code'] as String? ?? '').toLowerCase();
+          final phone = (c['phone'] as String? ?? '').toLowerCase();
+          return name.contains(q) || code.contains(q) || phone.contains(q);
+        }).toList();
+      }
+    });
   }
 
   void _onClientTapped(Map<String, dynamic> client) {
@@ -88,6 +114,16 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
           name: name,
           phone: phone.isEmpty ? null : phone,
         );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocus.dispose();
+    _nameController.dispose();
+    _phoneController.dispose();
+    _nameFocus.dispose();
+    super.dispose();
   }
 
   @override
@@ -157,9 +193,7 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
               ),
               _buildCreateSection(isDark),
               const Divider(height: 1),
-              Flexible(
-                child: _buildClientList(isDark),
-              ),
+              Flexible(child: _buildClientList(isDark)),
             ],
           ),
         ),
@@ -205,15 +239,10 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
           Expanded(
             child: Text(
               t.selectClient,
-              style: AppTypography.headline.copyWith(
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.textPrimary,
-              ),
+              style: AppTypography.headline,
               textAlign: TextAlign.center,
             ),
           ),
-          // Invisible spacer to balance the cancel button
           const SizedBox(width: 64),
         ],
       ),
@@ -244,8 +273,7 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
                     height: 28,
                     decoration: BoxDecoration(
                       color: AppColors.royalBlue.withValues(alpha: 0.1),
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusSm),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                     ),
                     child: const Icon(
                       Icons.add,
@@ -318,7 +346,6 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
               label: t.clientPhone,
               hint: t.phone,
               controller: _phoneController,
-              focusNode: _phoneFocus,
               keyboardType: TextInputType.phone,
               prefixIcon: Icon(
                 Icons.phone_outlined,
@@ -339,11 +366,9 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
                   disabledBackgroundColor:
                       AppColors.royalBlue.withValues(alpha: 0.5),
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusSm),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
                 ),
                 child: _isCreating
                     ? const SizedBox(
@@ -370,85 +395,56 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
   }
 
   Widget _buildClientList(bool isDark) {
-    return BlocBuilder<TransactionsCubit, TransactionsState>(
-      buildWhen: (_, current) =>
-          current is CustomersSearchLoaded ||
-          current is TransactionsLoading ||
-          current is TransactionsError,
-      builder: (context, state) {
-        if (state is TransactionsLoading) {
-          return const Padding(
-            padding: EdgeInsets.all(AppSpacing.xl),
-            child: Center(
-              child: CircularProgressIndicator(
-                color: AppColors.royalBlue,
-              ),
-            ),
-          );
-        }
+    if (_isLoadingClients) {
+      return const Padding(
+        padding: EdgeInsets.all(AppSpacing.xl),
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.royalBlue),
+        ),
+      );
+    }
 
-        if (state is CustomersSearchLoaded) {
-          final customers = state.customers;
-
-          if (customers.isEmpty && state.query.isNotEmpty) {
-            return Padding(
-              padding: const EdgeInsets.all(AppSpacing.xl),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.person_search,
-                      size: 48,
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textTertiary,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      S.of(context).noClientsFound,
-                      style: AppTypography.subheadline.copyWith(
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          return ListView.separated(
-            shrinkWrap: true,
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-            itemCount: customers.length,
-            separatorBuilder: (_, __) => Divider(
-              height: 1,
-              indent: AppSpacing.md + 40 + AppSpacing.sm,
-              color: isDark ? AppColors.darkSeparator : AppColors.separator,
-            ),
-            itemBuilder: (context, index) {
-              final client = customers[index];
-              return _buildClientTile(client, isDark);
-            },
-          );
-        }
-
-        // Initial state - show empty prompt
-        return Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Center(
-            child: Text(
-              S.of(context).searchClients,
-              style: AppTypography.footnote.copyWith(
+    if (_filteredClients.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.person_search,
+                size: 48,
                 color: isDark
                     ? AppColors.darkTextSecondary
                     : AppColors.textTertiary,
               ),
-            ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                S.of(context).noClientsFound,
+                style: AppTypography.subheadline.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+              ),
+            ],
           ),
-        );
+        ),
+      );
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      itemCount: _filteredClients.length,
+      separatorBuilder: (_, __) => Divider(
+        height: 1,
+        indent: AppSpacing.md + 40 + AppSpacing.sm,
+        color: isDark ? AppColors.darkSeparator : AppColors.separator,
+      ),
+      itemBuilder: (context, index) {
+        final client = _filteredClients[index];
+        return _buildClientTile(client, isDark);
       },
     );
   }
@@ -457,9 +453,8 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
     final name = client['name'] as String? ?? '';
     final code = client['code'] as String? ?? '';
     final phone = client['phone'] as String?;
-
-    final firstLetter =
-        name.isNotEmpty ? name[0].toUpperCase() : '?';
+    final balance = (client['currentBalance'] as num?)?.toDouble() ?? 0;
+    final firstLetter = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
     return InkWell(
       onTap: () => _onClientTapped(client),
@@ -518,6 +513,15 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
                 ],
               ),
             ),
+            if (balance > 0)
+              Text(
+                Formatters.currency(balance),
+                style: AppTypography.caption1.copyWith(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            const SizedBox(width: AppSpacing.xs),
             Icon(
               Icons.chevron_right,
               size: 20,

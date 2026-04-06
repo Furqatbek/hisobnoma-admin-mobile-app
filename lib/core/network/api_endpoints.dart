@@ -32,7 +32,7 @@ abstract final class ApiEndpoints {
   static const String quickSale = '/mobile/pos/quick-sale';
   static const String searchProducts = '/mobile/products/search';
   static const String searchCustomers = '/mobile/customers/search';
-  static const String createCustomer = '/mobile/customers';
+  static const String financeCustomers = '/finance/customers';
 
   // POS Terminals
   static const String activeTerminals = '/pos/terminals/active';

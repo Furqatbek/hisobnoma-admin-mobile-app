@@ -161,7 +161,7 @@ class TransactionRepository {
         response.data['data'] as Map<String, dynamic>);
   }
 
-  /// Search customers (paginated)
+  /// Search customers (paginated) via mobile endpoint
   Future<PaginatedResponse<Map<String, dynamic>>> searchCustomers({
     required String query,
     int page = 0,
@@ -177,18 +177,32 @@ class TransactionRepository {
     );
   }
 
-  /// Create a new customer (quick create)
-  Future<Map<String, dynamic>> createCustomer({
+  /// Fetch all finance customers (for client selection in debt sale)
+  Future<List<Map<String, dynamic>>> getFinanceCustomers({
+    int size = 1000,
+    String sort = 'name,asc',
+  }) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.financeCustomers,
+      queryParameters: {'size': size, 'sort': sort},
+    );
+    final data = response.data as Map<String, dynamic>;
+    final content = data['content'] as List? ?? [];
+    return content.cast<Map<String, dynamic>>();
+  }
+
+  /// Create a new finance customer
+  Future<Map<String, dynamic>> createFinanceCustomer({
     required String name,
     String? phone,
   }) async {
     final response = await _apiClient.post(
-      ApiEndpoints.createCustomer,
+      ApiEndpoints.financeCustomers,
       data: {
         'name': name,
         if (phone != null && phone.isNotEmpty) 'phone': phone,
       },
     );
-    return response.data['data'] as Map<String, dynamic>;
+    return response.data as Map<String, dynamic>;
   }
 }
