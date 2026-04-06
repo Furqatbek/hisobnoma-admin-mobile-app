@@ -13,11 +13,12 @@ import 'package:hisobnoma/presentation/widgets/common/hisob_segmented_control.da
 import 'package:hisobnoma/presentation/widgets/common/hisob_text_field.dart';
 import 'package:hisobnoma/presentation/widgets/transaction/product_tile.dart';
 
-enum _SaleStep { selectClient, addProducts, checkout }
+enum _SaleStep { addProducts, checkout }
 
-/// Bottom sheet for creating a debt sale.
+/// Bottom sheet for creating a sale (cash, card, or debt).
 ///
-/// Flow: Select client → Add products (qty + price edit) → Checkout (delivery address)
+/// Flow: Add products (qty + price edit) → Checkout (client + delivery address)
+/// Client selection is mandatory only for DEBT payment type.
 class AddSaleSheet extends StatefulWidget {
   const AddSaleSheet({super.key});
 
@@ -38,12 +39,12 @@ class AddSaleSheet extends StatefulWidget {
 }
 
 class _AddSaleSheetState extends State<AddSaleSheet> {
-  _SaleStep _step = _SaleStep.selectClient;
+  _SaleStep _step = _SaleStep.addProducts;
   Map<String, dynamic>? _selectedClient;
   final _searchController = TextEditingController();
   final _searchFocus = FocusNode();
   final List<_CartItem> _cart = [];
-  String _paymentType = 'DEBT';
+  String _paymentType = 'CASH';
   bool _isSubmitting = false;
 
   // Terminal
@@ -166,11 +167,8 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
     final t = S.of(context);
     String title;
     switch (_step) {
-      case _SaleStep.selectClient:
-        title = t.debtSale;
-        break;
       case _SaleStep.addProducts:
-        title = _cart.isEmpty ? t.debtSale : t.cartCount('${_cart.length}');
+        title = _cart.isEmpty ? t.quickSale : t.cartCount('${_cart.length}');
         break;
       case _SaleStep.checkout:
         title = t.checkout;
@@ -185,16 +183,14 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
         children: [
           TextButton(
             onPressed: () {
-              if (_step == _SaleStep.addProducts) {
-                setState(() => _step = _SaleStep.selectClient);
-              } else if (_step == _SaleStep.checkout) {
+              if (_step == _SaleStep.checkout) {
                 setState(() => _step = _SaleStep.addProducts);
               } else {
                 Navigator.of(context).pop();
               }
             },
             child: Text(
-              _step == _SaleStep.selectClient ? t.cancel : '\u2190 ${t.cancel}',
+              _step == _SaleStep.addProducts ? t.cancel : '\u2190 ${t.cancel}',
               style: AppTypography.body.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -215,8 +211,6 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
 
   Widget _buildStepContent(bool isDark) {
     switch (_step) {
-      case _SaleStep.selectClient:
-        return _buildClientStep(isDark);
       case _SaleStep.addProducts:
         return _buildProductStep(isDark);
       case _SaleStep.checkout:
@@ -224,76 +218,12 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
     }
   }
 
-  // ========== STEP 1: SELECT CLIENT ==========
-
-  Widget _buildClientStep(bool isDark) {
-    final t = S.of(context);
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                t.clientRequired,
-                style: AppTypography.subheadline.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    HapticFeedback.mediumImpact();
-                    final client = await ClientSelectionSheet.show(context);
-                    if (client != null && mounted) {
-                      setState(() {
-                        _selectedClient = client;
-                        _step = _SaleStep.addProducts;
-                      });
-                    }
-                  },
-                  icon: const Icon(Icons.person_add_outlined),
-                  label: Text(_selectedClient != null
-                      ? '${_selectedClient!['name']}'
-                      : t.selectClient),
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (_selectedClient != null) ...[
-          const Divider(height: 1),
-          _buildSelectedClientBanner(isDark),
-          const SizedBox(height: AppSpacing.md),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  setState(() => _step = _SaleStep.addProducts);
-                },
-                child: Text(t.addMoreItems),
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  // ========== STEP 2: ADD PRODUCTS ==========
+  // ========== STEP 1: ADD PRODUCTS ==========
 
   Widget _buildProductStep(bool isDark) {
     final t = S.of(context);
     return Column(
       children: [
-        // Selected client banner
-        _buildSelectedClientBanner(isDark),
-        const Divider(height: 1),
         // Product search
         Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
@@ -522,7 +452,10 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
     );
   }
 
-  // ========== STEP 3: CHECKOUT ==========
+  // ========== STEP 2: CHECKOUT ==========
+
+  bool get _isDebt => _paymentType == 'DEBT';
+  bool get _clientMissing => _isDebt && _selectedClient == null;
 
   Widget _buildCheckoutStep(bool isDark) {
     final t = S.of(context);
@@ -532,8 +465,26 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Client info
-          _buildSelectedClientBanner(isDark),
+          // Payment type (moved to top so DEBT triggers client requirement)
+          HisobSegmentedControl<String>(
+            segments: [
+              HisobSegment(value: 'CASH', label: t.cash),
+              HisobSegment(value: 'CARD', label: t.card),
+              HisobSegment(value: 'DEBT', label: t.debt),
+            ],
+            selectedValue: _paymentType,
+            onChanged: (value) {
+              HapticFeedback.selectionClick();
+              setState(() => _paymentType = value);
+            },
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Client selection — required for DEBT, optional for CASH/CARD
+          if (_selectedClient != null)
+            _buildSelectedClientBanner(isDark)
+          else
+            _buildSelectClientButton(isDark),
           const SizedBox(height: AppSpacing.md),
 
           // Order summary
@@ -572,21 +523,6 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                   style: AppTypography.title2
                       .copyWith(color: AppColors.royalBlue)),
             ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Payment type
-          HisobSegmentedControl<String>(
-            segments: [
-              HisobSegment(value: 'CASH', label: t.cash),
-              HisobSegment(value: 'CARD', label: t.card),
-              HisobSegment(value: 'DEBT', label: t.debt),
-            ],
-            selectedValue: _paymentType,
-            onChanged: (value) {
-              HapticFeedback.selectionClick();
-              setState(() => _paymentType = value);
-            },
           ),
           const SizedBox(height: AppSpacing.lg),
 
@@ -679,6 +615,57 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   }
 
   // ========== SHARED WIDGETS ==========
+
+  Widget _buildSelectClientButton(bool isDark) {
+    final t = S.of(context);
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        border: _clientMissing
+            ? Border.all(color: AppColors.error, width: 1.5)
+            : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_clientMissing)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Text(
+                t.clientRequired,
+                style: AppTypography.caption1.copyWith(color: AppColors.error),
+              ),
+            ),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () async {
+                HapticFeedback.mediumImpact();
+                final client = await ClientSelectionSheet.show(context);
+                if (client != null && mounted) {
+                  setState(() => _selectedClient = client);
+                }
+              },
+              icon: const Icon(Icons.person_add_outlined, size: 18),
+              label: Text(t.selectClient),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: _clientMissing
+                    ? AppColors.error
+                    : AppColors.royalBlue,
+                side: BorderSide(
+                  color: _clientMissing
+                      ? AppColors.error
+                      : AppColors.royalBlue.withValues(alpha: 0.3),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildSelectedClientBanner(bool isDark) {
     if (_selectedClient == null) return const SizedBox.shrink();
@@ -837,7 +824,25 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   }
 
   Future<void> _submitSale() async {
-    if (_cart.isEmpty || _selectedClient == null) return;
+    if (_cart.isEmpty) return;
+
+    // Client is required for DEBT sales
+    if (_isDebt && _selectedClient == null) {
+      HapticFeedback.heavyImpact();
+      setState(() {}); // trigger rebuild to show error border
+      final t = S.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(t.selectClientFirst),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
 
     setState(() => _isSubmitting = true);
     HapticFeedback.mediumImpact();
