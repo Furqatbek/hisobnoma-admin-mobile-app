@@ -117,21 +117,40 @@ class _ShiftSheetState extends State<ShiftSheet> {
         );
   }
 
-  void _onCashOperation() {
+  Future<void> _onCashOperation() async {
     if (_currentShift == null || _cashOpType == _CashOpType.none) return;
     final amount =
         double.tryParse(_cashOpAmountController.text.trim()) ?? 0.0;
     if (amount <= 0) return;
     HapticFeedback.mediumImpact();
-    context.read<ShiftCubit>().cashOperation(
-          shiftId: _currentShift!.id,
-          operationType:
-              _cashOpType == _CashOpType.cashIn ? 'CASH_IN' : 'CASH_OUT',
-          amount: amount,
-          reason: _cashOpReasonController.text.trim().isEmpty
-              ? null
-              : _cashOpReasonController.text.trim(),
-        );
+
+    final opType =
+        _cashOpType == _CashOpType.cashIn ? 'CASH_IN' : 'CASH_OUT';
+    final label =
+        _cashOpType == _CashOpType.cashIn ? S.of(context).cashIn : S.of(context).cashOut;
+
+    try {
+      await context.read<ShiftCubit>().transactionRepository.cashOperation(
+            shiftId: _currentShift!.id,
+            operationType: opType,
+            amount: amount,
+            reason: _cashOpReasonController.text.trim().isEmpty
+                ? null
+                : _cashOpReasonController.text.trim(),
+          );
+      if (!mounted) return;
+      // Reset form and reload shift
+      setState(() {
+        _cashOpType = _CashOpType.none;
+        _cashOpAmountController.clear();
+        _cashOpReasonController.clear();
+      });
+      _showSuccessSnackBar('$label: ${Formatters.currency(amount)}');
+      context.read<ShiftCubit>().loadCurrentShift();
+    } catch (e) {
+      if (!mounted) return;
+      showErrorSnackBar(context, e);
+    }
   }
 
   void _showSuccessSnackBar(String message) {
@@ -173,10 +192,6 @@ class _ShiftSheetState extends State<ShiftSheet> {
               _closingCashController.text =
                   (state.shift.expectedCash ?? 0.0).toStringAsFixed(2);
             }
-            // Reset cash operation form
-            _cashOpType = _CashOpType.none;
-            _cashOpAmountController.clear();
-            _cashOpReasonController.clear();
           });
         } else if (state is ShiftNone) {
           setState(() => _currentShift = null);
@@ -773,7 +788,7 @@ class _ShiftSheetState extends State<ShiftSheet> {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? color.withOpacity(0.15)
+              ? color.withValues(alpha: 0.15)
               : (isDark ? AppColors.darkFill : AppColors.fill),
           borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           border: Border.all(

@@ -84,14 +84,13 @@ class ShiftCubit extends Cubit<ShiftState> {
     }
   }
 
-  /// Cash in/out operation
+  /// Cash in/out operation — doesn't emit loading to keep UI stable
   Future<void> cashOperation({
     required int shiftId,
     required String operationType,
     required double amount,
     String? reason,
   }) async {
-    emit(const ShiftLoading());
     try {
       await _transactionRepository.cashOperation(
         shiftId: shiftId,
