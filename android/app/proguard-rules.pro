@@ -8,7 +8,7 @@
 -keep class okhttp3.** { *; }
 
 # Keep model classes for JSON serialization
--keep class com.hisobnoma.hisobnoma.** { *; }
+-keep class com.hisobnoma.admin.** { *; }
 
 # Prevent R8 from stripping interfaces
 -keep,allowobfuscation interface * {

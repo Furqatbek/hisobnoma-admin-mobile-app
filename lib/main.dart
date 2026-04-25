@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb, kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -13,9 +13,16 @@ void main() async {
     FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   }
 
-  // Set environment (override via --dart-define=ENV=prod)
-  const env = String.fromEnvironment('ENV', defaultValue: 'dev');
+  // Set environment: release builds default to prod, debug to dev.
+  // Can be overridden via --dart-define=ENV=prod
+  const env = String.fromEnvironment('ENV',
+      defaultValue: kReleaseMode ? 'prod' : 'dev');
   AppConfig.current = AppConfig.fromString(env);
+
+  // Safety: warn in debug if accidentally pointing to prod
+  if (kDebugMode && AppConfig.current.isProd) {
+    debugPrint('⚠️ WARNING: Running in DEBUG mode with PRODUCTION API');
+  }
 
   // Lock to portrait orientation (skip on web)
   if (!kIsWeb) {

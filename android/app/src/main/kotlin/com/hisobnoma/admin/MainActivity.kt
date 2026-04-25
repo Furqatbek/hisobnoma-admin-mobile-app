@@ -1,4 +1,4 @@
-package com.hisobnoma.hisobnoma
+package com.hisobnoma.admin
 
 import io.flutter.embedding.android.FlutterActivity
 
