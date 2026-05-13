@@ -14,3 +14,6 @@
 -keep,allowobfuscation interface * {
     @retrofit2.http.* <methods>;
 }
+
+# Play Core (required for R8 with Flutter deferred components)
+-dontwarn com.google.android.play.core.**
