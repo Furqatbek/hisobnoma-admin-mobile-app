@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hisobnoma/core/di/injection.dart';
 import 'package:hisobnoma/core/router/app_router.dart';
@@ -32,14 +34,27 @@ class _HisobnomaAppState extends State<HisobnomaApp> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _authCubit = getIt<AuthCubit>()..checkAuth();
+    _authCubit = getIt<AuthCubit>();
     _router = createAppRouter(_authCubit);
+    _initApp();
 
     _syncService = getIt<SyncService>();
     try {
       _syncService.initialize();
     } catch (_) {}
     _safeSyncAll();
+  }
+
+  Future<void> _initApp() async {
+    try {
+      await _authCubit.checkAuth();
+    } catch (_) {}
+    // Remove splash after auth resolves (regardless of success/failure)
+    if (!kIsWeb) {
+      try {
+        FlutterNativeSplash.remove();
+      } catch (_) {}
+    }
   }
 
   Future<void> _safeSyncAll() async {

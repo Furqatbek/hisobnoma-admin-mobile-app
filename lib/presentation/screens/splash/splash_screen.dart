@@ -23,11 +23,6 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    // Remove the native splash (skip on web)
-    if (!kIsWeb) {
-      FlutterNativeSplash.remove();
-    }
-
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
