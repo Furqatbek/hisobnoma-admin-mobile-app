@@ -28,9 +28,7 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final users = await _authRepository.getUsers();
       emit(AuthUsersLoaded(users: users));
-    } catch (e, stackTrace) {
-      print('❌ loadUsers error: $e');
-      print('❌ stackTrace: $stackTrace');
+    } catch (e) {
       emit(AuthError(message: _parseError(e)));
     }
   }

@@ -32,7 +32,7 @@ class AppConfig {
     environment: Environment.prod,
     baseUrl: 'https://temurmchj.uz',
     appName: 'Hisobnoma',
-    enableLogging: true,
+    enableLogging: false,
   );
 
   bool get isDev => environment == Environment.dev;
