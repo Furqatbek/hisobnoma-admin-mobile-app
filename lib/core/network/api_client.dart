@@ -1,6 +1,8 @@
 import 'dart:developer' as developer;
+import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:hisobnoma/core/network/api_endpoints.dart';
 import 'package:hisobnoma/core/network/interceptors/auth_interceptor.dart';
 import 'package:hisobnoma/core/network/interceptors/error_interceptor.dart';
@@ -29,6 +31,13 @@ class ApiClient {
         },
       ),
     );
+
+    // Accept server certificate (fixes CERTIFICATE_VERIFY_FAILED on iOS)
+    (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+      final client = HttpClient();
+      client.badCertificateCallback = (cert, host, port) => true;
+      return client;
+    };
 
     _dio.interceptors.addAll([
       authInterceptor,
