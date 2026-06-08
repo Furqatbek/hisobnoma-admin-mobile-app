@@ -35,15 +35,23 @@ class _HisobnomaAppState extends State<HisobnomaApp> with WidgetsBindingObserver
     _authCubit = getIt<AuthCubit>()..checkAuth();
     _router = createAppRouter(_authCubit);
 
-    // Initialize sync service and trigger first sync
-    _syncService = getIt<SyncService>()..initialize();
-    _syncService.syncAll();
+    _syncService = getIt<SyncService>();
+    try {
+      _syncService.initialize();
+    } catch (_) {}
+    _safeSyncAll();
+  }
+
+  Future<void> _safeSyncAll() async {
+    try {
+      await _syncService.syncAll();
+    } catch (_) {}
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _syncService.syncAll();
+      _safeSyncAll();
     }
   }
 
