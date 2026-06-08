@@ -16,14 +16,14 @@ class AppConfig {
 
   static const dev = AppConfig._(
     environment: Environment.dev,
-    baseUrl: 'http://localhost:8080',
+    baseUrl: 'https://temurmchj.uz',
     appName: 'Hisobnoma Dev',
     enableLogging: true,
   );
 
   static const staging = AppConfig._(
     environment: Environment.staging,
-    baseUrl: 'https://staging-api.hisobnoma.com',
+    baseUrl: 'https://temurmchj.uz',
     appName: 'Hisobnoma Staging',
     enableLogging: true,
   );
