@@ -60,8 +60,14 @@ class ShiftCubit extends Cubit<ShiftState> {
         notes: notes,
       );
       emit(ShiftOpened(shift: shift));
-    } catch (e) {
-      emit(ShiftError(message: e.toString()));
+    } catch (_) {
+      // Shift may have been opened but response parsing failed — check
+      final current = await _transactionRepository.getCurrentShift();
+      if (current != null && current.isOpen) {
+        emit(ShiftOpened(shift: current));
+      } else {
+        await loadCurrentShift();
+      }
     }
   }
 
@@ -79,8 +85,14 @@ class ShiftCubit extends Cubit<ShiftState> {
         closingNotes: closingNotes,
       );
       emit(ShiftClosed(shift: shift));
-    } catch (e) {
-      emit(ShiftError(message: e.toString()));
+    } catch (_) {
+      // Shift may have been closed but response parsing failed — check
+      final current = await _transactionRepository.getCurrentShift();
+      if (current == null || current.isClosed) {
+        emit(ShiftClosed(shift: current ?? shift));
+      } else {
+        await loadCurrentShift();
+      }
     }
   }
 

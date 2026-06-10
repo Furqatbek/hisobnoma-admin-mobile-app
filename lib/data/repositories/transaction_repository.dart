@@ -258,11 +258,7 @@ class TransactionRepository {
         if (notes != null && notes.isNotEmpty) 'notes': notes,
       },
     );
-    final data = response.data;
-    if (data is Map<String, dynamic> && data['data'] != null) {
-      return Shift.fromJson(data['data'] as Map<String, dynamic>);
-    }
-    return Shift.fromJson(data as Map<String, dynamic>);
+    return _parseShiftResponse(response.data);
   }
 
   /// Close a shift
@@ -279,11 +275,23 @@ class TransactionRepository {
           'closingNotes': closingNotes,
       },
     );
-    final data = response.data;
-    if (data is Map<String, dynamic> && data['data'] != null) {
-      return Shift.fromJson(data['data'] as Map<String, dynamic>);
+    return _parseShiftResponse(response.data);
+  }
+
+  Shift _parseShiftResponse(dynamic data) {
+    if (data is Map<String, dynamic>) {
+      // { "success": true, "data": { ...shift } }
+      final nested = data['data'];
+      if (nested is Map<String, dynamic>) {
+        return Shift.fromJson(nested);
+      }
+      // Response is the shift object itself
+      if (data.containsKey('id')) {
+        return Shift.fromJson(data);
+      }
     }
-    return Shift.fromJson(data as Map<String, dynamic>);
+    // Fallback: re-fetch current shift
+    throw Exception('Unexpected shift response format');
   }
 
   /// Cash in/out operation on a shift
