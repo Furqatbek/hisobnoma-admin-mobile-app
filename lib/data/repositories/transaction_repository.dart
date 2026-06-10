@@ -213,11 +213,10 @@ class TransactionRepository {
     try {
       final response = await _apiClient.get(ApiEndpoints.currentShift);
       final data = response.data;
-      if (data is Map<String, dynamic> && data['data'] != null) {
-        return Shift.fromJson(data['data'] as Map<String, dynamic>);
-      }
-      if (data is Map<String, dynamic> && data['id'] != null) {
-        return Shift.fromJson(data);
+      if (data is Map<String, dynamic>) {
+        if (data.containsKey('id')) return Shift.fromJson(data);
+        final nested = data['data'];
+        if (nested is Map<String, dynamic>) return Shift.fromJson(nested);
       }
       return null;
     } catch (_) {
@@ -232,11 +231,10 @@ class TransactionRepository {
         ApiEndpoints.currentShiftForTerminal(terminalId),
       );
       final data = response.data;
-      if (data is Map<String, dynamic> && data['data'] != null) {
-        return Shift.fromJson(data['data'] as Map<String, dynamic>);
-      }
-      if (data is Map<String, dynamic> && data['id'] != null) {
-        return Shift.fromJson(data);
+      if (data is Map<String, dynamic>) {
+        if (data.containsKey('id')) return Shift.fromJson(data);
+        final nested = data['data'];
+        if (nested is Map<String, dynamic>) return Shift.fromJson(nested);
       }
       return null;
     } catch (_) {
@@ -280,17 +278,16 @@ class TransactionRepository {
 
   Shift _parseShiftResponse(dynamic data) {
     if (data is Map<String, dynamic>) {
-      // { "success": true, "data": { ...shift } }
+      // Direct shift object: { "id": 42, "shiftNumber": "...", ... }
+      if (data.containsKey('id')) {
+        return Shift.fromJson(data);
+      }
+      // Wrapped: { "success": true, "data": { ...shift } }
       final nested = data['data'];
       if (nested is Map<String, dynamic>) {
         return Shift.fromJson(nested);
       }
-      // Response is the shift object itself
-      if (data.containsKey('id')) {
-        return Shift.fromJson(data);
-      }
     }
-    // Fallback: re-fetch current shift
     throw Exception('Unexpected shift response format');
   }
 

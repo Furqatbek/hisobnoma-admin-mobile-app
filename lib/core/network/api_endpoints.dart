@@ -52,16 +52,16 @@ abstract final class ApiEndpoints {
   static String arCustomerUnpaid(int customerId) =>
       '/finance/ar-invoices/customer/$customerId/unpaid';
 
-  // Shifts (mobile)
-  static const String shifts = '/mobile/shifts';
-  static const String currentShift = '/mobile/shifts/current';
+  // Shifts
+  static const String shifts = '/pos/shifts';
+  static const String currentShift = '/pos/shifts/current';
   static String currentShiftForTerminal(int terminalId) =>
-      '/mobile/shifts/current/terminal/$terminalId';
-  static const String openShifts = '/mobile/shifts/open';
-  static const String openShift = '/mobile/shifts/open';
-  static String closeShift(int shiftId) => '/mobile/shifts/$shiftId/close';
+      '/pos/shifts/current/terminal/$terminalId';
+  static const String openShifts = '/pos/shifts/open';
+  static const String openShift = '/pos/shifts/open';
+  static String closeShift(int shiftId) => '/pos/shifts/$shiftId/close';
   static String cashOperation(int shiftId) =>
-      '/mobile/shifts/$shiftId/cash-operation';
+      '/pos/shifts/$shiftId/cash-operation';
 
   // Sales history
   static const String posTransactions = '/pos/transactions';
