@@ -52,16 +52,18 @@ abstract final class ApiEndpoints {
   static String arCustomerUnpaid(int customerId) =>
       '/finance/ar-invoices/customer/$customerId/unpaid';
 
-  // Shifts
-  static const String shifts = '/pos/shifts';
-  static const String currentShift = '/pos/shifts/current';
+  // Shifts — use the /mobile/** contract (uniformly ApiResponse-wrapped, like
+  // quick-sale). The /pos/shifts staff controllers are internally inconsistent
+  // per the backend team; the mobile endpoints accept the same permissions.
+  static const String shifts = '/mobile/shifts';
+  static const String currentShift = '/mobile/shifts/current';
   static String currentShiftForTerminal(int terminalId) =>
-      '/pos/shifts/current/terminal/$terminalId';
-  static const String openShifts = '/pos/shifts/open';
-  static const String openShift = '/pos/shifts/open';
-  static String closeShift(int shiftId) => '/pos/shifts/$shiftId/close';
+      '/mobile/shifts/current/terminal/$terminalId';
+  static const String openShifts = '/mobile/shifts/open';
+  static const String openShift = '/mobile/shifts/open';
+  static String closeShift(int shiftId) => '/mobile/shifts/$shiftId/close';
   static String cashOperation(int shiftId) =>
-      '/pos/shifts/$shiftId/cash-operation';
+      '/mobile/shifts/$shiftId/cash-operation';
 
   // Sales history
   static const String posTransactions = '/pos/transactions';
