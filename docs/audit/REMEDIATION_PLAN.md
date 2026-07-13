@@ -49,7 +49,7 @@ These directly cause unrecorded sales, lost sales, or credential theft on the li
 
 ### 2A. No duplicate transactions `[H1]`
 - [x] **2.1** `retry_interceptor.dart` now only retries idempotent GET/HEAD. All financial POSTs (`/quick-sale`, `/shifts/open`, `/shifts/{id}/close`, `/shifts/{id}/cash-operation`) are never auto-retried.
-- [~] **2.2** Idempotency key — no backend support exists/known, so this stays out. The safe mitigation (2.1: never auto-retry financial POSTs) fully prevents duplicates without it. Revisit only if the backend later adds an idempotency field.
+- [x] **2.2** **DONE.** Backend added `clientRequestId` dedup (migration V76). The sale sheet sends a fresh UUID per attempt; the repo flags the quick-sale POST `extra['idempotent']=true`; `RetryInterceptor` now safely retries it (all other financial POSTs still never retried). A lost response can no longer create a duplicate sale.
 - [x] **2.3** Cash in/out **Confirm** now has a submit guard (disabled while submitting) `[H12]`.
 - [x] **2.4** All shift buttons (Open/Close/Cash) share an `_isSubmitting` guard; the sale **Complete** button got its guard in Phase 1.
 
@@ -81,10 +81,10 @@ These directly cause unrecorded sales, lost sales, or credential theft on the li
 - [x] **3.1** The shared `TransactionsCubit` no longer blanks the screen: the sale path reloads `loadData()` on success (Phase 1A), and client-create now calls the repository directly instead of emitting `CustomerCreated`/`TransactionsLoading` on the shared cubit. Its dead `BlocListener` was removed.
 - [x] **3.2** `openShift` now settles on `ShiftLoaded` (after the transient `ShiftOpened`), so the sale sheet and AppBar recognize the open shift and the next sale is not wrongly blocked `[M1]`.
 
-### 3B. Pagination / data limits `[H13, H14]`  — **DEFERRED**
-- [ ] **3.3** Product picker: replace the fixed `size: 200` fetch with server-side search + pagination. *(Fine for shops under ~200 SKUs; needs the `/mobile/products/search` endpoint wired with a debounce.)*
-- [ ] **3.4** Client picker: same for the `size: 1000` customer fetch.
-- [ ] **3.5** Confirm transactions-history and inventory tabs paginate or indicate truncation.
+### 3B. Pagination / data limits `[H13, H14]`
+- [x] **3.3** Product picker now does **server-side search**: the initial page is loaded for instant browsing, and typing a query triggers a debounced (350ms) `searchInventoryProducts` call against the enriched `/mobile/products/search` (now returns full `InventoryProduct` fields), so items beyond the first page are reachable. Stale-result guard + keeps local matches on error.
+- [ ] **3.4** Client picker (`size: 1000` finance customers) — still a single fetch. Lower risk (customer lists are smaller and the endpoint has no enriched-DTO dependency); **DEFERRED** — can mirror the product-search pattern with `/mobile/customers/search` when needed.
+- [ ] **3.5** Transactions-history / inventory tab pagination — **DEFERRED** (display-only screens, not on the money path).
 
 ### 3C. Pricing / quantity guards (MEDIUM)
 - [x] **3.6** Added `minSellingPrice` to `InventoryProduct` and the price-edit dialog now rejects a price below the floor (when the backend provides one) with a clear message.

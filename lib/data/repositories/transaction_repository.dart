@@ -103,6 +103,25 @@ class TransactionRepository {
     );
   }
 
+  /// Server-side product search (paginated). The enriched /mobile/products
+  /// /search now returns the same fields as /inventory/products, so results
+  /// parse into InventoryProduct and drop into the cart identically to listed
+  /// products. Reaches items beyond the initial page (fixes H13/H14).
+  Future<PaginatedResponse<InventoryProduct>> searchInventoryProducts({
+    required String query,
+    int page = 0,
+    int size = 30,
+  }) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.searchProducts,
+      queryParameters: {'query': query, 'page': page, 'size': size},
+    );
+    return PaginatedResponse.fromJson(
+      response.data['data'] as Map<String, dynamic>,
+      InventoryProduct.fromJson,
+    );
+  }
+
   /// Get inventory products (paginated)
   Future<List<InventoryProduct>> getInventoryProducts({
     int page = 0,

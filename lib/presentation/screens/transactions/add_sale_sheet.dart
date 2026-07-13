@@ -98,10 +98,14 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   // Terminal
   PosTerminal? _activeTerminal;
 
-  // Products (from inventory API, filtered locally)
+  // Products. The initial page is loaded for instant browsing; typing a query
+  // triggers a debounced server-side search so items beyond that page are
+  // reachable too.
   List<InventoryProduct> _allProducts = [];
   List<InventoryProduct> _filteredProducts = [];
   bool _productsLoading = true;
+  bool _searching = false;
+  Timer? _searchDebounce;
   bool _showSearch = true; // toggles between search and cart view
 
   // Delivery address (API-driven)
@@ -189,6 +193,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     _searchFocus.dispose();
     super.dispose();
@@ -425,24 +430,55 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   }
 
   void _filterProducts(String query) {
-    final q = query.trim().toLowerCase();
-    setState(() {
-      if (q.isEmpty) {
+    _searchDebounce?.cancel();
+    final q = query.trim();
+    if (q.isEmpty) {
+      setState(() {
+        _searching = false;
         _filteredProducts = _allProducts;
-      } else {
-        _filteredProducts = _allProducts.where((p) {
-          return p.name.toLowerCase().contains(q) ||
-              p.sku.toLowerCase().contains(q) ||
-              p.barcode.toLowerCase().contains(q);
-        }).toList();
-      }
+      });
+      return;
+    }
+    // Instant local matches from the already-loaded page for responsiveness...
+    final lower = q.toLowerCase();
+    setState(() {
+      _searching = true;
+      _filteredProducts = _allProducts.where((p) {
+        return p.name.toLowerCase().contains(lower) ||
+            p.sku.toLowerCase().contains(lower) ||
+            p.barcode.toLowerCase().contains(lower);
+      }).toList();
     });
+    // ...then hit the server (debounced) so items beyond the loaded page are
+    // reachable too.
+    _searchDebounce =
+        Timer(const Duration(milliseconds: 350), () => _runServerSearch(q));
+  }
+
+  Future<void> _runServerSearch(String query) async {
+    final repo = context.read<TransactionsCubit>().transactionRepository;
+    try {
+      final result = await repo.searchInventoryProducts(query: query);
+      if (!mounted) return;
+      // Ignore stale results if the query changed while awaiting.
+      if (_searchController.text.trim() != query) return;
+      setState(() {
+        _filteredProducts = result.content.where((p) => p.active).toList();
+        _searching = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      // Keep the local matches already shown; just stop the spinner.
+      setState(() => _searching = false);
+      showErrorSnackBar(context, e);
+    }
   }
 
   Widget _buildSearchResults(bool isDark) {
     final t = S.of(context);
 
-    if (_productsLoading) {
+    // Initial load, or a server search with no local matches to show yet.
+    if (_productsLoading || (_searching && _filteredProducts.isEmpty)) {
       return const Center(child: CircularProgressIndicator());
     }
 
