@@ -65,7 +65,7 @@ These directly cause unrecorded sales, lost sales, or credential theft on the li
 - [x] **2.11** `closeShift` emits `ShiftClosed` only when the server confirms a closed shift; on failure it reloads real state instead of faking success (done in Phase 0.1).
 
 ### 2D. Payment type contract `[H6]`
-- [x] **2.12** **RESOLVED — not a bug.** Owner confirmed the backend accepts exactly `CASH`, `CARD`, `DEBT`; the sheet already sends those literals. No change needed.
+- [x] **2.12** **FIXED — was a real live money bug.** Backend `POSPaymentType` has no `DEBT`; `valueOf("DEBT")` fell back to `CASH`, so debt sales recorded no receivable. Now sends `CREDIT` with `tenderedAmount: 0`. ⚠️ Pre-fix debt sales need server-side reconciliation.
 
 ### 2E. Environment isolation `[H15]`
 - [~] **2.13** You explicitly chose a single backend (`temurmchj.uz`) and there is no separate staging server, so per-environment URLs don't apply. Kept as-is by design; the real risk was log exposure, addressed below.
