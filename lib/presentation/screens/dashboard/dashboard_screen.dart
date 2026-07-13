@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
@@ -93,8 +92,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: AppSpacing.lg),
             ElevatedButton(
-              onPressed: () =>
-                  context.read<DashboardCubit>().loadDashboard(),
+              onPressed: () => context.read<DashboardCubit>().loadDashboard(),
               child: Text(t.retry),
             ),
           ],
@@ -120,94 +118,94 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
         child: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.screenPadding,
-        ),
-        children: [
-          const SizedBox(height: AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenPadding,
+          ),
+          children: [
+            const SizedBox(height: AppSpacing.sm),
 
-          // USD/UZS rate + last updated
-          if (state.usdRate != null)
+            // USD/UZS rate + last updated
+            if (state.usdRate != null)
+              _animate(
+                _CurrencyRateBanner(
+                  rate: state.usdRate!,
+                  diff: state.usdDiff,
+                  lastUpdated: state.lastUpdated,
+                  isDark: isDark,
+                ),
+              ),
+
+            // Partial error banner
+            if (state.partialErrors != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              _PartialErrorBanner(
+                errors: state.partialErrors!,
+                isDark: isDark,
+                onRetry: () => context.read<DashboardCubit>().refresh(),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.md),
+
+            // Hero balance card
             _animate(
-              _CurrencyRateBanner(
-                rate: state.usdRate!,
-                diff: state.usdDiff,
-                lastUpdated: state.lastUpdated,
+              _BalanceHeroCard(
+                balance: state.financial.netCashPosition,
+                changePercent: state.revenue.monthChangePercent,
+                todayRevenue: state.revenue.todayRevenue,
+                transactionCount: state.revenue.todayTransactionCount,
+                weekRevenue: state.revenue.thisWeekRevenue,
+                weekTransactions: state.revenue.thisWeekTransactionCount,
+              ),
+              delay: const Duration(milliseconds: 80),
+            ),
+            const SizedBox(height: AppSpacing.md),
+
+            // Revenue / Expenses summary pills
+            _animate(
+              _SummaryPillRow(
+                revenue: state.revenue.thisMonthRevenue,
+                revenueChange: state.revenue.monthChangePercent,
+                expenses: state.financial.apOutstanding,
+                avgTransaction: state.revenue.averageTransactionValue,
                 isDark: isDark,
               ),
+              delay: const Duration(milliseconds: 160),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+
+            // Revenue chart with period selector
+            _animate(
+              _ChartSection(
+                chartData: state.chartData,
+                isDark: isDark,
+              ),
+              delay: const Duration(milliseconds: 240),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+
+            // Inventory overview
+            _animate(
+              _InventorySection(
+                inventory: state.inventory,
+                isDark: isDark,
+              ),
+              delay: const Duration(milliseconds: 320),
             ),
 
-          // Partial error banner
-          if (state.partialErrors != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            _PartialErrorBanner(
-              errors: state.partialErrors!,
-              isDark: isDark,
-              onRetry: () => context.read<DashboardCubit>().refresh(),
+            // Financial overview
+            const SizedBox(height: AppSpacing.lg),
+            _animate(
+              _FinancialSection(
+                financial: state.financial,
+                isDark: isDark,
+              ),
+              delay: const Duration(milliseconds: 400),
             ),
+
+            // Bottom padding for FAB
+            const SizedBox(height: 80),
           ],
-          const SizedBox(height: AppSpacing.md),
-
-          // Hero balance card
-          _animate(
-            _BalanceHeroCard(
-              balance: state.financial.netCashPosition,
-              changePercent: state.revenue.monthChangePercent,
-              todayRevenue: state.revenue.todayRevenue,
-              transactionCount: state.revenue.todayTransactionCount,
-              weekRevenue: state.revenue.thisWeekRevenue,
-              weekTransactions: state.revenue.thisWeekTransactionCount,
-            ),
-            delay: const Duration(milliseconds: 80),
-          ),
-          const SizedBox(height: AppSpacing.md),
-
-          // Revenue / Expenses summary pills
-          _animate(
-            _SummaryPillRow(
-              revenue: state.revenue.thisMonthRevenue,
-              revenueChange: state.revenue.monthChangePercent,
-              expenses: state.financial.apOutstanding,
-              avgTransaction: state.revenue.averageTransactionValue,
-              isDark: isDark,
-            ),
-            delay: const Duration(milliseconds: 160),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Revenue chart with period selector
-          _animate(
-            _ChartSection(
-              chartData: state.chartData,
-              isDark: isDark,
-            ),
-            delay: const Duration(milliseconds: 240),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Inventory overview
-          _animate(
-            _InventorySection(
-              inventory: state.inventory,
-              isDark: isDark,
-            ),
-            delay: const Duration(milliseconds: 320),
-          ),
-
-          // Financial overview
-          const SizedBox(height: AppSpacing.lg),
-          _animate(
-            _FinancialSection(
-              financial: state.financial,
-              isDark: isDark,
-            ),
-            delay: const Duration(milliseconds: 400),
-          ),
-
-          // Bottom padding for FAB
-          const SizedBox(height: 80),
-        ],
-      ),
+        ),
       ),
     );
 
@@ -252,7 +250,9 @@ class _PartialErrorBanner extends StatelessWidget {
             child: Text(
               t.couldNotLoad(errors.join(', ')),
               style: AppTypography.caption1.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ),
@@ -321,18 +321,14 @@ class _CurrencyRateBanner extends StatelessWidget {
             'USD',
             style: AppTypography.subheadline.copyWith(
               fontWeight: FontWeight.w600,
-              color: isDark
-                  ? AppColors.darkTextPrimary
-                  : AppColors.textPrimary,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
           Text(
             '$rate UZS',
             style: AppTypography.headline.copyWith(
-              color: isDark
-                  ? AppColors.darkTextPrimary
-                  : AppColors.textPrimary,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           if (diff != null) ...[
@@ -442,7 +438,9 @@ class _BalanceHeroCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: (changePercent >= 0 ? AppColors.income : AppColors.expense)
+                  color: (changePercent >= 0
+                          ? AppColors.income
+                          : AppColors.expense)
                       .withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(4),
                 ),
@@ -666,7 +664,8 @@ class _SummaryPill extends StatelessWidget {
                   child: Text(
                     '${Formatters.percentage(change!)} ${t.thisMonth}',
                     style: AppTypography.caption1.copyWith(
-                      color: change! >= 0 ? AppColors.income : AppColors.expense,
+                      color:
+                          change! >= 0 ? AppColors.income : AppColors.expense,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -862,8 +861,8 @@ class _InventorySection extends StatelessWidget {
             children: [
               Expanded(
                 child: _MetricCard(
-                  value: Formatters.compactCurrency(
-                      inventory.totalInventoryValue),
+                  value:
+                      Formatters.compactCurrency(inventory.totalInventoryValue),
                   label: t.totalValue,
                   icon: Icons.account_balance_wallet_outlined,
                   isDark: isDark,
@@ -875,9 +874,7 @@ class _InventorySection extends StatelessWidget {
                   value: Formatters.integer(inventory.expiringCount),
                   label: t.expiringSoon,
                   icon: Icons.schedule_outlined,
-                  color: inventory.expiringCount > 0
-                      ? AppColors.warning
-                      : null,
+                  color: inventory.expiringCount > 0 ? AppColors.warning : null,
                   isDark: isDark,
                 ),
               ),
@@ -1076,9 +1073,7 @@ class _FinancialRow extends StatelessWidget {
             style: AppTypography.subheadline.copyWith(
               fontWeight: FontWeight.w600,
               color: color ??
-                  (isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.textPrimary),
+                  (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
             ),
           ),
         ],

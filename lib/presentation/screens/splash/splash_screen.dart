@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
@@ -53,8 +51,7 @@ class _SplashScreenState extends State<SplashScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.darkBackground : AppColors.white,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.white,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,

@@ -12,7 +12,7 @@ import 'package:hisobnoma/presentation/widgets/common/hisob_text_field.dart';
 
 /// A bottom sheet for selecting an existing client or creating a new one.
 /// Fetches clients from GET /finance/customers and creates via POST /finance/customers.
-/// Returns the selected client as Map<String, dynamic> via Navigator.pop().
+/// Returns the selected client as `Map<String, dynamic>` via Navigator.pop().
 class ClientSelectionSheet extends StatefulWidget {
   const ClientSelectionSheet({super.key});
 

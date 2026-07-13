@@ -1,5 +1,5 @@
-/// Pure money/quantity helpers used on the sale path. Kept free of Flutter
-/// imports so they are unit-testable in isolation.
+// Pure money/quantity helpers used on the sale path. Kept free of Flutter
+// imports so they are unit-testable in isolation.
 
 /// Rounds a monetary amount to 2 decimal places, avoiding IEEE-754 drift
 /// (e.g. 0.1 * 3 = 0.30000000000000004) before it is sent to the backend.
