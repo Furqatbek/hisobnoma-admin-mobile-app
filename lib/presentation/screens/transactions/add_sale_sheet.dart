@@ -530,7 +530,13 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
 
   // ========== STEP 2: CHECKOUT ==========
 
-  bool get _isDebt => _paymentType == 'DEBT';
+  // The backend POSPaymentType enum uses CREDIT for on-account/debt sales.
+  // Sending "DEBT" silently falls back to CASH server-side (marks the sale
+  // fully paid and records NO receivable), so the payment value MUST be
+  // "CREDIT" for a debt sale.
+  static const _creditPaymentType = 'CREDIT';
+
+  bool get _isDebt => _paymentType == _creditPaymentType;
   bool get _clientMissing => _isDebt && _selectedClient == null;
 
   /// The terminal id of the currently open shift, if any. Sales must be posted
@@ -555,7 +561,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
             segments: [
               HisobSegment(value: 'CASH', label: t.cash),
               HisobSegment(value: 'CARD', label: t.card),
-              HisobSegment(value: 'DEBT', label: t.debt),
+              HisobSegment(value: _creditPaymentType, label: t.debt),
             ],
             selectedValue: _paymentType,
             onChanged: (value) {
@@ -993,7 +999,9 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                 ))
             .toList(),
         paymentType: _paymentType,
-        tenderedAmount: roundMoney(total),
+        // For CREDIT (debt), tender 0 so nothing is settled — the backend
+        // records the full amount as a receivable. Cash/card tender the total.
+        tenderedAmount: _isDebt ? 0.0 : roundMoney(total),
         deliveryRegionId: _selectedRegion?.id,
         deliveryVillageId: _selectedVillage?.id,
       );
