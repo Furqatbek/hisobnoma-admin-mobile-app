@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hisobnoma/core/utils/error_message.dart';
 import 'package:hisobnoma/data/models/transaction/transaction_models.dart';
 import 'package:hisobnoma/data/repositories/transaction_repository.dart';
 
@@ -32,9 +33,8 @@ class TransactionsCubit extends Cubit<TransactionsState> {
           products = r.where((p) => p.active).toList();
         }),
         _transactionRepository.getCustomerBalances().then((report) {
-          debtors = report.customerBalances
-              .where((c) => c.netBalance > 0)
-              .toList();
+          debtors =
+              report.customerBalances.where((c) => c.netBalance > 0).toList();
         }),
         _transactionRepository.getTransactions().then((r) {
           sales = r;
@@ -47,7 +47,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
         sales: sales,
       ));
     } catch (e) {
-      emit(TransactionsError(message: e.toString()));
+      emit(TransactionsError(message: extractErrorMessage(e)));
     }
   }
 
@@ -57,7 +57,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
       final terminals = await _transactionRepository.getActiveTerminals();
       emit(ActiveTerminalsLoaded(terminals: terminals));
     } catch (e) {
-      emit(TransactionsError(message: e.toString()));
+      emit(TransactionsError(message: extractErrorMessage(e)));
     }
   }
 
@@ -71,7 +71,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
       );
       emit(ActiveProductsLoaded(products: data.content));
     } catch (e) {
-      emit(TransactionsError(message: e.toString()));
+      emit(TransactionsError(message: extractErrorMessage(e)));
     }
   }
 
@@ -81,7 +81,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
       final regions = await _transactionRepository.getDeliveryRegions();
       emit(DeliveryRegionsLoaded(regions: regions));
     } catch (e) {
-      emit(TransactionsError(message: e.toString()));
+      emit(TransactionsError(message: extractErrorMessage(e)));
     }
   }
 
@@ -92,7 +92,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
           await _transactionRepository.getDeliveryVillages(regionId);
       emit(DeliveryVillagesLoaded(villages: villages));
     } catch (e) {
-      emit(TransactionsError(message: e.toString()));
+      emit(TransactionsError(message: extractErrorMessage(e)));
     }
   }
 
@@ -106,7 +106,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
       final data = await _transactionRepository.searchProducts(query: query);
       emit(ProductsSearchLoaded(products: data.content, query: query));
     } catch (e) {
-      emit(TransactionsError(message: e.toString()));
+      emit(TransactionsError(message: extractErrorMessage(e)));
     }
   }
 
@@ -116,7 +116,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
       final product = await _transactionRepository.barcodeLookup(barcode);
       emit(BarcodeLookupLoaded(product: product));
     } catch (e) {
-      emit(TransactionsError(message: e.toString()));
+      emit(TransactionsError(message: extractErrorMessage(e)));
     }
   }
 
@@ -126,7 +126,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
       final result = await _transactionRepository.quickSale(request);
       emit(QuickSaleCompleted(transaction: result));
     } catch (e) {
-      emit(TransactionsError(message: e.toString()));
+      emit(TransactionsError(message: extractErrorMessage(e)));
     }
   }
 
@@ -140,7 +140,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
       final data = await _transactionRepository.searchCustomers(query: query);
       emit(CustomersSearchLoaded(customers: data.content, query: query));
     } catch (e) {
-      emit(TransactionsError(message: e.toString()));
+      emit(TransactionsError(message: extractErrorMessage(e)));
     }
   }
 
@@ -157,7 +157,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
       );
       emit(CustomerCreated(customer: customer));
     } catch (e) {
-      emit(TransactionsError(message: e.toString()));
+      emit(TransactionsError(message: extractErrorMessage(e)));
     }
   }
 
@@ -167,7 +167,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
       final result = await _transactionRepository.quickCount(request);
       emit(QuickCountCompleted(result: result));
     } catch (e) {
-      emit(TransactionsError(message: e.toString()));
+      emit(TransactionsError(message: extractErrorMessage(e)));
     }
   }
 }

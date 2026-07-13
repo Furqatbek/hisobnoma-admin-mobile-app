@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hisobnoma/core/utils/error_message.dart';
 import 'package:hisobnoma/data/models/transaction/transaction_models.dart';
 import 'package:hisobnoma/data/repositories/transaction_repository.dart';
 
@@ -26,7 +27,7 @@ class ShiftCubit extends Cubit<ShiftState> {
         emit(const ShiftNone());
       }
     } catch (e) {
-      emit(ShiftError(message: e.toString()));
+      emit(ShiftError(message: extractErrorMessage(e)));
     }
   }
 
@@ -42,7 +43,7 @@ class ShiftCubit extends Cubit<ShiftState> {
         emit(const ShiftNone());
       }
     } catch (e) {
-      emit(ShiftError(message: e.toString()));
+      emit(ShiftError(message: extractErrorMessage(e)));
     }
   }
 
@@ -122,7 +123,7 @@ class ShiftCubit extends Cubit<ShiftState> {
       // Reload shift to get updated totals
       await loadCurrentShift();
     } catch (e) {
-      emit(ShiftError(message: e.toString()));
+      emit(ShiftError(message: extractErrorMessage(e)));
     }
   }
 }

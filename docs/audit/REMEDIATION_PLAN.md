@@ -92,7 +92,7 @@ These directly cause unrecorded sales, lost sales, or credential theft on the li
 - [x] **3.8** Money amounts (`unitPrice`, `tenderedAmount`) are rounded to 2 decimals at submission via `_money()`, avoiding IEEE `double` drift.
 
 ### 3D. Error UX & i18n (MEDIUM)
-- [~] **3.9** Sale/shift/client sheets already surface backend messages via `showErrorSnackBar`/`extractErrorMessage`. Mapping raw errors in the remaining list-loading cubits (transactions/reports/alerts) is **DEFERRED**.
+- [x] **3.9** Extracted a pure `extractErrorMessage` into `lib/core/utils/error_message.dart` (maps `DioException`/`ApiException`/network to friendly text) and routed **all** list cubits (transactions ×11, shift ×3, reports, alerts) through it instead of `e.toString()`. `error_handler` now delegates to the same core function. No screen shows raw `DioException … null` anymore `[M6]`.
 - [x] **3.10** `auth_cubit._parseError` now unwraps the `DioException`→`ApiException` (code/status) so wrong-PIN, network, and rate-limit cases are detected correctly instead of always showing the generic message. *(Full localization of these 4 strings still English — deferred.)*
 - [ ] **3.11** Retry affordances on load failure in the sheets — **DEFERRED**.
 - [ ] **3.12** Move remaining hardcoded English strings into ARB — **DEFERRED**.

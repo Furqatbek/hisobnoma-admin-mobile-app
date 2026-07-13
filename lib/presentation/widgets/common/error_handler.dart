@@ -1,33 +1,11 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
-import 'package:hisobnoma/core/network/api_exceptions.dart';
+import 'package:hisobnoma/core/utils/error_message.dart';
 
-/// Extracts a user-friendly error message from any exception.
-String extractErrorMessage(Object error) {
-  if (error is DioException) {
-    final dioError = error.error;
-    if (dioError is ApiException) {
-      return dioError.message;
-    }
-    // Try to extract message from response body
-    final data = error.response?.data;
-    if (data is Map) {
-      final msg = data['message'] as String?;
-      if (msg != null && msg.isNotEmpty) return msg;
-    }
-    return error.message ?? 'Network error';
-  }
-  if (error is ApiException) {
-    return error.message;
-  }
-  final str = error.toString();
-  // Strip "Exception: " prefix if present
-  if (str.startsWith('Exception: ')) return str.substring(11);
-  return str;
-}
+export 'package:hisobnoma/core/utils/error_message.dart'
+    show extractErrorMessage;
 
 /// Shows a floating error snackbar with the backend error message.
 void showErrorSnackBar(BuildContext context, Object error) {
@@ -63,9 +41,8 @@ Future<void> showErrorDialog(BuildContext context, Object error) {
             Text(
               'Error',
               style: AppTypography.headline.copyWith(
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.textPrimary,
+                color:
+                    isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
               ),
             ),
           ],
@@ -73,9 +50,8 @@ Future<void> showErrorDialog(BuildContext context, Object error) {
         content: Text(
           message,
           style: AppTypography.body.copyWith(
-            color: isDark
-                ? AppColors.darkTextSecondary
-                : AppColors.textSecondary,
+            color:
+                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
           ),
         ),
         actions: [

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hisobnoma/core/utils/error_message.dart';
 import 'package:hisobnoma/data/models/alert/alert_models.dart';
 import 'package:hisobnoma/data/repositories/alert_repository.dart';
 
@@ -26,7 +27,7 @@ class AlertsCubit extends Cubit<AlertsState> {
         hasMore: data.hasMore,
       ));
     } catch (e) {
-      emit(AlertsError(message: e.toString()));
+      emit(AlertsError(message: extractErrorMessage(e)));
     }
   }
 
@@ -58,7 +59,7 @@ class AlertsCubit extends Cubit<AlertsState> {
         ));
       }
     } catch (e) {
-      emit(AlertsError(message: e.toString()));
+      emit(AlertsError(message: extractErrorMessage(e)));
     }
   }
 
@@ -72,7 +73,7 @@ class AlertsCubit extends Cubit<AlertsState> {
         emit(current.copyWith(alerts: updated, unreadCount: 0));
       }
     } catch (e) {
-      emit(AlertsError(message: e.toString()));
+      emit(AlertsError(message: extractErrorMessage(e)));
     }
   }
 }

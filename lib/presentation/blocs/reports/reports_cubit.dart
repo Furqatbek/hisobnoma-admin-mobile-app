@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hisobnoma/core/utils/error_message.dart';
 import 'package:hisobnoma/data/models/dashboard/dashboard_models.dart';
 import 'package:hisobnoma/data/repositories/dashboard_repository.dart';
 
@@ -48,7 +49,7 @@ class ReportsCubit extends Cubit<ReportsState> {
         financial: financial,
       ));
     } catch (e) {
-      emit(ReportsError(message: e.toString()));
+      emit(ReportsError(message: extractErrorMessage(e)));
     }
   }
 
