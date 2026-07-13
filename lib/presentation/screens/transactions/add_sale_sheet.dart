@@ -7,6 +7,7 @@ import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
+import 'package:hisobnoma/core/utils/money.dart';
 import 'package:hisobnoma/data/models/transaction/transaction_models.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/shift/shift_cubit.dart';
@@ -588,7 +589,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                         overflow: TextOverflow.ellipsis),
                   ),
                   Text(
-                      '${_formatQty(item.quantity)} x ${Formatters.currency(price)}',
+                      '${formatQuantity(item.quantity)} x ${Formatters.currency(price)}',
                       style: AppTypography.caption1
                           .copyWith(color: AppColors.textSecondary)),
                   const SizedBox(width: AppSpacing.sm),
@@ -836,7 +837,8 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   Future<void> _showQuantityDialog(int index) async {
     final t = S.of(context);
     final item = _cart[index];
-    final controller = TextEditingController(text: _formatQty(item.quantity));
+    final controller =
+        TextEditingController(text: formatQuantity(item.quantity));
     final result = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -987,11 +989,11 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                   quantity: item.quantity,
                   // Round to a fixed money scale to avoid IEEE double drift.
                   unitPrice:
-                      _money(item.customPrice ?? item.product.sellingPrice),
+                      roundMoney(item.customPrice ?? item.product.sellingPrice),
                 ))
             .toList(),
         paymentType: _paymentType,
-        tenderedAmount: _money(total),
+        tenderedAmount: roundMoney(total),
         deliveryRegionId: _selectedRegion?.id,
         deliveryVillageId: _selectedVillage?.id,
       );
@@ -1027,20 +1029,6 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
       if (mounted) setState(() => _isSubmitting = false);
     }
   }
-}
-
-/// Rounds a monetary amount to 2 decimal places, avoiding IEEE-754 drift
-/// (e.g. 0.1 * 3 = 0.30000000000000004) before it is sent to the backend.
-double _money(double v) => (v * 100).roundToDouble() / 100;
-
-/// Formats a quantity for display: whole numbers without decimals,
-/// fractional values trimmed of trailing zeros (e.g. 2, 0.5, 1.25).
-String _formatQty(double q) {
-  if (q == q.roundToDouble()) return q.toInt().toString();
-  var s = q.toStringAsFixed(3);
-  s = s.replaceFirst(RegExp(r'0+$'), '');
-  if (s.endsWith('.')) s = s.substring(0, s.length - 1);
-  return s;
 }
 
 /// Internal cart item model with editable price and fractional quantity.
@@ -1244,7 +1232,7 @@ class _QuantityStepper extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               child: Text(
-                _formatQty(quantity),
+                formatQuantity(quantity),
                 style: AppTypography.subheadline.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.royalBlue,

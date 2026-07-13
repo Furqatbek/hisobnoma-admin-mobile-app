@@ -103,17 +103,27 @@ These directly cause unrecorded sales, lost sales, or credential theft on the li
 
 ## Phase 4 — Test the money paths (HIGH)
 
-`[H17, M-tests]` — currently the only tests are a `1+1==2` placeholder and one button widget test.
+> Note: the app already has more tests than the audit's testing finding implied
+> (`auth_cubit`, `alerts_cubit`, `formatters`, model + widget tests). That
+> finding was in the unverified bucket and overstated. The gaps below are still
+> real. **These require a Flutter SDK to run — write on the Mac / rely on CI.**
 
-- [ ] **4.1** Unit-test `transaction_repository` response parsing for every method (both wrapped and unwrapped shapes) — the class of bug that has already crashed this app repeatedly.
-- [ ] **4.2** Unit-test `ErrorInterceptor` (top-level and nested error bodies, status mapping) and `retry_interceptor` (no POST retries after 2.1).
-- [ ] **4.3** Widget-test the sale flow: success, failure (no false success — 1.4), cash sale without client (1.7), debt sale requires client.
-- [ ] **4.4** Widget-test shift open/close/cash-op including the offline false-success guard (2.11).
-- [ ] **4.5** Add a real app-boot smoke test replacing the placeholder (crash-on-launch guard).
-- [ ] **4.6** Add pinning tests for each past production regression (render overflow/constraints, wrong endpoints, type-cast crashes) so they cannot silently return.
-- [ ] **4.7** Turn the Phase 0.3 CI gate into a required check.
+- [x] **4.1a** Extracted the sale-path money/quantity logic into a pure,
+  Flutter-free util (`lib/core/utils/money.dart`) and added `money_test.dart`
+  covering IEEE-drift rounding and quantity formatting. **Verified passing**
+  against the Dart SDK directly. Locks in fix 3.8.
+- [x] **4.x** Guarded the existing `auth_cubit_test` from breaking: the
+  `_parseError` detection fix (3.10) was made additive so the existing
+  wrong-PIN / network assertions still hold.
+- [ ] **4.1** Unit-test `transaction_repository` response parsing for every method (wrapped + unwrapped shapes). *(Mac — needs dio + mocks.)*
+- [ ] **4.2** Unit-test `ErrorInterceptor` and `retry_interceptor` (assert no POST retries after 2.1). *(Mac.)*
+- [ ] **4.3** Widget-test the sale flow: success, failure (no false success), cash sale without client, debt requires client. *(Mac.)*
+- [ ] **4.4** Widget-test shift open/close/cash-op including the offline false-success guard. *(Mac.)*
+- [ ] **4.5** Replace the `1+1` smoke test with a real app-boot test. *(Mac.)*
+- [ ] **4.6** Pinning tests for each past regression (render overflow, wrong endpoints, type-casts). *(Mac.)*
+- [ ] **4.7** Make the CI gate a required check on the branch/PR settings.
 
-**Exit criteria:** every money path has a failing-and-passing test; CI blocks regressions.
+**Exit criteria:** every money path has a test; CI blocks regressions. **Started:** pure money logic tested + verified; interceptor/widget tests remain (need Flutter SDK).
 
 ---
 

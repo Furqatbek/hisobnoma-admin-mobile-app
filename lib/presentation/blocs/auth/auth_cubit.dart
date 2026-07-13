@@ -131,19 +131,23 @@ class AuthCubit extends Cubit<AuthState> {
 
     if (code == 'UNAUTHORIZED' ||
         status == 401 ||
+        raw.contains('UNAUTHORIZED') ||
         raw.contains('Invalid or expired')) {
       return 'Invalid username or PIN. Please try again.';
     }
     if (code == 'NETWORK_ERROR' ||
+        raw.contains('NETWORK_ERROR') ||
+        raw.contains('SocketException') ||
         error is DioException &&
             (error.type == DioExceptionType.connectionError ||
                 error.type == DioExceptionType.connectionTimeout ||
                 error.type == DioExceptionType.receiveTimeout ||
-                error.type == DioExceptionType.sendTimeout) ||
-        raw.contains('SocketException')) {
+                error.type == DioExceptionType.sendTimeout)) {
       return 'No internet connection. Please check your network.';
     }
-    if (code == 'RATE_LIMITED' || status == 429) {
+    if (code == 'RATE_LIMITED' ||
+        status == 429 ||
+        raw.contains('RATE_LIMITED')) {
       return 'Too many attempts. Please wait a moment.';
     }
     return 'Something went wrong. Please try again.';
