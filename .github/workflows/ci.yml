@@ -1,10 +1,11 @@
 name: CI
 
 on:
+  # Run on every push and PR — including feature branches — so a
+  # non-compiling or failing-test commit is caught before it can be built
+  # or shipped, not only on main/develop.
   pull_request:
-    branches: [main, develop]
   push:
-    branches: [main, develop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

@@ -86,10 +86,13 @@ class ShiftCubit extends Cubit<ShiftState> {
       );
       emit(ShiftClosed(shift: shift));
     } catch (_) {
-      // Shift may have been closed but response parsing failed — check
+      // The close POST failed or its response could not be parsed. Verify
+      // with the server before claiming success — only emit ShiftClosed when
+      // the backend confirms a closed shift, so a network failure is never
+      // reported to the cashier as a successful close.
       final current = await _transactionRepository.getCurrentShift();
-      if (current == null || current.isClosed) {
-        emit(ShiftClosed(shift: current ?? shift));
+      if (current != null && current.isClosed) {
+        emit(ShiftClosed(shift: current));
       } else {
         await loadCurrentShift();
       }

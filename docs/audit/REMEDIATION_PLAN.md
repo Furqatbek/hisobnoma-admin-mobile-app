@@ -12,11 +12,11 @@ Ordered by blast radius: unblock the build, stop money loss, then harden.
 
 The branch does not compile; nothing can be built, tested, or shipped until this is fixed.
 
-- [ ] **0.1** Fix `closeShift` scope error `[C4/H16]` — in `lib/presentation/blocs/shift/shift_cubit.dart:92`, the `catch` references `shift` declared inside the `try`. Hoist the result or use `current!` after the null check. Apply the same review to `openShift`'s catch.
-- [ ] **0.2** Run `flutter analyze` and confirm zero errors. (Install Flutter locally or run in CI — the audit could not run it.)
-- [ ] **0.3** Add a CI gate (GitHub Actions) that runs `flutter analyze` + `flutter test` on every push so a non-compiling commit can never reach the branch again. Prerequisite for trusting every later phase.
+- [x] **0.1** Fix `closeShift` scope error `[C4/H16]` — catch no longer references the out-of-scope `shift`; only emits `ShiftClosed` on server-confirmed closure. `openShift` catch reviewed (was already fine).
+- [~] **0.2** Run `flutter analyze` — no Flutter SDK in this environment; the specific scope fix was verified compiling with a standalone Dart reproduction. **Full `flutter analyze` must be run on your Mac / by the CI gate below.**
+- [x] **0.3** CI gate: existing `.github/workflows/ci.yml` (analyze + test + format) now triggers on **every** push and PR, not just main/develop — feature branches are checked so a non-compiling commit is caught. (This gap is why the compile error slipped through.)
 
-**Exit criteria:** `flutter analyze` is clean; CI is green.
+**Exit criteria:** `flutter analyze` clean (run on Mac/CI); CI green on this branch's next push.
 
 ---
 
@@ -25,21 +25,21 @@ The branch does not compile; nothing can be built, tested, or shipped until this
 These directly cause unrecorded sales, lost sales, or credential theft on the live app. Do not ship a new build without all of Phase 1.
 
 ### 1A. Sale submission is honest about failure `[C2]`
-- [ ] **1.1** Make `TransactionsCubit.createQuickSale` rethrow after `emit(TransactionsError(...))`, OR change `_submitSale` in `add_sale_sheet.dart` to inspect the resulting cubit state instead of assuming success.
-- [ ] **1.2** In `_submitSale`, only pop the sheet + show the green success snackbar when the sale is confirmed (`QuickSaleCompleted`). On failure, keep the sheet open, keep the cart, and show the real error.
-- [ ] **1.3** Preserve cart state on failure so the cashier can retry without re-scanning.
-- [ ] **1.4** Add a widget test: mock a failing `quickSale` → assert no success snackbar, sheet stays open. (Feeds Phase 4.)
+- [x] **1.1** `_submitSale` now calls `cubit.transactionRepository.quickSale(...)` directly, so a failed sale throws and reaches the catch (also sidesteps the shared-cubit clobbering for the sale path).
+- [x] **1.2** Only pops the sheet + shows the green success snackbar on real success. On failure the sheet stays open and the backend error is shown.
+- [x] **1.3** Cart is preserved on failure (sheet not popped) so the cashier can retry.
+- [ ] **1.4** Widget test: mock a failing `quickSale` → assert no success snackbar, sheet stays open. **(deferred to Phase 4)**
 
 ### 1B. Cash sale without a client no longer crashes `[C3]`
-- [ ] **1.5** In `add_sale_sheet.dart:929`, change `_selectedClient!['id']` / `['name']` to null-safe `_selectedClient?['id']` / `?['name']`.
-- [ ] **1.6** Guarantee `_isSubmitting` is reset on every exit path (wrap the whole submit body in try/finally) so the button can never stick in a spinner.
-- [ ] **1.7** Widget test: submit a CASH sale with no client selected → request is built and sent, no crash.
+- [x] **1.5** `_selectedClient?['id']` / `?['name']` are now null-safe.
+- [x] **1.6** Whole submit body wrapped in try/finally; `_isSubmitting` reset on every exit path (+ early-return double-submit guard).
+- [ ] **1.7** Widget test: CASH sale with no client selected → request built and sent, no crash. **(deferred to Phase 4)**
 
 ### 1C. TLS — remove the blanket bypass `[C1]` (needs coordinated server fix)
-- [ ] **1.8** **Server-side (blocker):** fix the certificate chain on `temurmchj.uz` (install the full intermediate chain). Verify with SSL Labs until it grades without chain warnings and passes default iOS validation.
-- [ ] **1.9** Remove `badCertificateCallback => true` from `api_client.dart` once 1.8 is verified. If a transitional period is unavoidable, gate it behind `!kReleaseMode` and a single host allowlist — never unconditional in release.
-- [ ] **1.10** Apply the same TLS policy to the bare `Dio()` instances in `auth_interceptor.dart` and `retry_interceptor.dart` so all paths behave identically (ties into H7).
-- [ ] **1.11** Update `docs/privacy-policy.html` claim about "encryption in transit" so it is truthful once 1.9 lands.
+- [ ] **1.8** **Server-side (blocker, YOUR action):** fix the certificate chain on `temurmchj.uz` (install the full intermediate chain). Verify with SSL Labs until it grades without chain warnings and passes default iOS validation.
+- [~] **1.9** Bypass no longer unconditional: gated to `!kReleaseMode` and restricted to the exact API host. **Release builds now do full validation.** Delete the block entirely once 1.8 is verified. ⚠️ **The next release build will not connect until 1.8 is done.**
+- [ ] **1.10** Apply the same TLS policy to the bare `Dio()` instances in `auth_interceptor.dart` and `retry_interceptor.dart` (folded into Phase 2, tie H7). **(deferred to Phase 2)**
+- [x] **1.11** No change needed — the privacy policy claim "encryption in transit (HTTPS)" is accurate; the finding was about certificate *validation*, not absence of encryption.
 
 **Exit criteria:** a failed sale never shows success; a cash sale with no client completes; no unconditional cert bypass in release builds.
 

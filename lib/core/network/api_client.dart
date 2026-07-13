@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:hisobnoma/core/network/api_endpoints.dart';
 import 'package:hisobnoma/core/network/interceptors/auth_interceptor.dart';
 import 'package:hisobnoma/core/network/interceptors/error_interceptor.dart';
@@ -32,12 +33,27 @@ class ApiClient {
       ),
     );
 
-    // Accept server certificate (fixes CERTIFICATE_VERIFY_FAILED on iOS)
-    (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-      final client = HttpClient();
-      client.badCertificateCallback = (cert, host, port) => true;
-      return client;
-    };
+    // TLS policy.
+    //
+    // Release builds (App Store / Play Store) ALWAYS use full certificate
+    // validation — no bypass. In debug/profile builds ONLY, we tolerate a bad
+    // certificate for the exact API host so local testing is not blocked while
+    // the server's certificate chain is being fixed.
+    //
+    // This is a TRANSITIONAL measure. The real fix is to install the full
+    // intermediate certificate chain on the API server (see
+    // docs/audit/REMEDIATION_PLAN.md task 1.8). Once the server validates
+    // cleanly, delete this entire block. Until then, release builds will
+    // (correctly) refuse to connect to a server they cannot verify.
+    if (!kReleaseMode) {
+      final allowedHost = Uri.tryParse(baseUrl)?.host;
+      (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+        final client = HttpClient();
+        client.badCertificateCallback =
+            (cert, host, port) => allowedHost != null && host == allowedHost;
+        return client;
+      };
+    }
 
     _dio.interceptors.addAll([
       authInterceptor,

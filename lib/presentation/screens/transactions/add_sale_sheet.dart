@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,7 +39,8 @@ class AddSaleSheet extends StatefulWidget {
     }
 
     final currentState = shiftCubit.state;
-    final hasOpenShift = currentState is ShiftLoaded && currentState.shift.isOpen;
+    final hasOpenShift =
+        currentState is ShiftLoaded && currentState.shift.isOpen;
 
     if (!hasOpenShift) {
       if (!context.mounted) return;
@@ -378,8 +381,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
               color: isDark ? AppColors.darkCard : AppColors.cardBackground,
               border: Border(
                 top: BorderSide(
-                  color:
-                      isDark ? AppColors.darkSeparator : AppColors.separator,
+                  color: isDark ? AppColors.darkSeparator : AppColors.separator,
                   width: 0.5,
                 ),
               ),
@@ -576,7 +578,8 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis),
                   ),
-                  Text('${_formatQty(item.quantity)} x ${Formatters.currency(price)}',
+                  Text(
+                      '${_formatQty(item.quantity)} x ${Formatters.currency(price)}',
                       style: AppTypography.caption1
                           .copyWith(color: AppColors.textSecondary)),
                   const SizedBox(width: AppSpacing.sm),
@@ -724,9 +727,8 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
               icon: const Icon(Icons.person_add_outlined, size: 18),
               label: Text(t.selectClient),
               style: OutlinedButton.styleFrom(
-                foregroundColor: _clientMissing
-                    ? AppColors.error
-                    : AppColors.royalBlue,
+                foregroundColor:
+                    _clientMissing ? AppColors.error : AppColors.royalBlue,
                 side: BorderSide(
                   color: _clientMissing
                       ? AppColors.error
@@ -761,8 +763,8 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
             child: Center(
               child: Text(
                 (_selectedClient!['name'] as String? ?? '?')[0].toUpperCase(),
-                style: AppTypography.headline
-                    .copyWith(color: AppColors.royalBlue),
+                style:
+                    AppTypography.headline.copyWith(color: AppColors.royalBlue),
               ),
             ),
           ),
@@ -825,8 +827,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   Future<void> _showQuantityDialog(int index) async {
     final t = S.of(context);
     final item = _cart[index];
-    final controller =
-        TextEditingController(text: _formatQty(item.quantity));
+    final controller = TextEditingController(text: _formatQty(item.quantity));
     final result = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -847,8 +848,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
           ),
           TextButton(
             onPressed: () {
-              final val =
-                  double.tryParse(controller.text.replaceAll(',', '.'));
+              final val = double.tryParse(controller.text.replaceAll(',', '.'));
               Navigator.pop(ctx, val);
             },
             child: Text(t.save),
@@ -867,7 +867,8 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
     final t = S.of(context);
     final item = _cart[index];
     final currentPrice = item.customPrice ?? item.product.sellingPrice;
-    final controller = TextEditingController(text: currentPrice.toStringAsFixed(0));
+    final controller =
+        TextEditingController(text: currentPrice.toStringAsFixed(0));
     final result = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -901,7 +902,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   }
 
   Future<void> _submitSale() async {
-    if (_cart.isEmpty) return;
+    if (_cart.isEmpty || _isSubmitting) return;
 
     // Client is required for DEBT sales
     if (_isDebt && _selectedClient == null) {
@@ -924,36 +925,42 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
     setState(() => _isSubmitting = true);
     HapticFeedback.mediumImpact();
 
-    final request = QuickSaleRequest(
-      terminalId: _activeTerminal?.id ?? 1,
-      customerId: _selectedClient!['id'] as int?,
-      customerName: _selectedClient!['name'] as String?,
-      items: _cart
-          .map((item) => QuickSaleItem(
-                productId: item.product.id,
-                quantity: item.quantity,
-                unitPrice: item.customPrice ?? item.product.sellingPrice,
-              ))
-          .toList(),
-      paymentType: _paymentType,
-      tenderedAmount: _totalAmount,
-      deliveryRegionId: _selectedRegion?.id,
-      deliveryVillageId: _selectedVillage?.id,
-    );
-
+    final cubit = context.read<TransactionsCubit>();
+    final total = _totalAmount;
     try {
-      await context.read<TransactionsCubit>().createQuickSale(request);
+      final request = QuickSaleRequest(
+        terminalId: _activeTerminal?.id ?? 1,
+        // Null-safe: client is optional for CASH/CARD sales.
+        customerId: _selectedClient?['id'] as int?,
+        customerName: _selectedClient?['name'] as String?,
+        items: _cart
+            .map((item) => QuickSaleItem(
+                  productId: item.product.id,
+                  quantity: item.quantity,
+                  unitPrice: item.customPrice ?? item.product.sellingPrice,
+                ))
+            .toList(),
+        paymentType: _paymentType,
+        tenderedAmount: total,
+        deliveryRegionId: _selectedRegion?.id,
+        deliveryVillageId: _selectedVillage?.id,
+      );
+
+      // Call the repository directly so a failed sale actually throws and
+      // lands in the catch below — never a false "completed" confirmation.
+      await cubit.transactionRepository.quickSale(request);
       if (!mounted) return;
 
-      final t = S.of(context);
       HapticFeedback.heavyImpact();
-      Navigator.of(context).pop();
+      // Refresh the transactions screen so the new sale appears and the
+      // screen behind the sheet is not left blank.
+      unawaited(cubit.loadData());
 
+      final t = S.of(context);
+      Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            t.saleCompletedAmount(Formatters.currency(_totalAmount)),
-          ),
+          content: Text(t.saleCompletedAmount(Formatters.currency(total))),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
@@ -962,9 +969,12 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
         ),
       );
     } catch (e) {
-      if (!mounted) return;
-      setState(() => _isSubmitting = false);
-      showErrorSnackBar(context, e);
+      // Sale failed: keep the sheet open with the cart intact and show the
+      // real backend error so the cashier does not hand over unpaid goods.
+      if (mounted) showErrorSnackBar(context, e);
+    } finally {
+      // Always release the button, on every exit path.
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 }
@@ -991,8 +1001,7 @@ class _CartItem {
     this.customPrice,
   });
 
-  double get totalPrice =>
-      (customPrice ?? product.sellingPrice) * quantity;
+  double get totalPrice => (customPrice ?? product.sellingPrice) * quantity;
 
   _CartItem copyWith({double? quantity, double? customPrice}) {
     return _CartItem(
@@ -1095,7 +1104,8 @@ class _CartItemTile extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 2),
-                      Icon(Icons.edit, size: 10,
+                      Icon(Icons.edit,
+                          size: 10,
                           color: isDark
                               ? AppColors.darkTextSecondary
                               : AppColors.textSecondary),
@@ -1134,8 +1144,7 @@ class _CartItemTile extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(top: 2),
                   child: Icon(Icons.delete_outline,
-                      size: 16,
-                      color: AppColors.error.withValues(alpha: 0.7)),
+                      size: 16, color: AppColors.error.withValues(alpha: 0.7)),
                 ),
               ),
             ],
@@ -1179,8 +1188,7 @@ class _QuantityStepper extends StatelessWidget {
               onTap();
             },
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               child: Text(
                 _formatQty(quantity),
                 style: AppTypography.subheadline.copyWith(
@@ -1257,9 +1265,7 @@ class _InventoryProductTile extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  product.name.isNotEmpty
-                      ? product.name[0].toUpperCase()
-                      : '?',
+                  product.name.isNotEmpty ? product.name[0].toUpperCase() : '?',
                   style: AppTypography.headline
                       .copyWith(color: AppColors.royalBlue),
                 ),
