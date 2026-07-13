@@ -52,6 +52,9 @@ class _ShiftSheetState extends State<ShiftSheet> {
   final _closingCashController = TextEditingController();
   final _closingNotesController = TextEditingController();
 
+  // Guards every mutating action (open / close / cash op) against double-taps.
+  bool _isSubmitting = false;
+
   @override
   void initState() {
     super.initState();
@@ -90,10 +93,11 @@ class _ShiftSheetState extends State<ShiftSheet> {
   }
 
   void _onOpenShift() {
-    if (_selectedTerminal == null) return;
+    if (_selectedTerminal == null || _isSubmitting) return;
     final openingCash =
         double.tryParse(_openingCashController.text.trim()) ?? 0.0;
     HapticFeedback.mediumImpact();
+    setState(() => _isSubmitting = true);
     context.read<ShiftCubit>().openShift(
           terminalId: _selectedTerminal!.id,
           openingCash: openingCash,
@@ -104,10 +108,11 @@ class _ShiftSheetState extends State<ShiftSheet> {
   }
 
   void _onCloseShift() {
-    if (_currentShift == null) return;
+    if (_currentShift == null || _isSubmitting) return;
     final closingCash =
         double.tryParse(_closingCashController.text.trim()) ?? 0.0;
     HapticFeedback.mediumImpact();
+    setState(() => _isSubmitting = true);
     context.read<ShiftCubit>().closeShift(
           shiftId: _currentShift!.id,
           closingCash: closingCash,
@@ -118,16 +123,20 @@ class _ShiftSheetState extends State<ShiftSheet> {
   }
 
   Future<void> _onCashOperation() async {
-    if (_currentShift == null || _cashOpType == _CashOpType.none) return;
-    final amount =
-        double.tryParse(_cashOpAmountController.text.trim()) ?? 0.0;
+    if (_currentShift == null ||
+        _cashOpType == _CashOpType.none ||
+        _isSubmitting) {
+      return;
+    }
+    final amount = double.tryParse(_cashOpAmountController.text.trim()) ?? 0.0;
     if (amount <= 0) return;
     HapticFeedback.mediumImpact();
+    setState(() => _isSubmitting = true);
 
-    final opType =
-        _cashOpType == _CashOpType.cashIn ? 'CASH_IN' : 'CASH_OUT';
-    final label =
-        _cashOpType == _CashOpType.cashIn ? S.of(context).cashIn : S.of(context).cashOut;
+    final opType = _cashOpType == _CashOpType.cashIn ? 'CASH_IN' : 'CASH_OUT';
+    final label = _cashOpType == _CashOpType.cashIn
+        ? S.of(context).cashIn
+        : S.of(context).cashOut;
 
     try {
       await context.read<ShiftCubit>().transactionRepository.cashOperation(
@@ -148,8 +157,9 @@ class _ShiftSheetState extends State<ShiftSheet> {
       _showSuccessSnackBar('$label: ${Formatters.currency(amount)}');
       context.read<ShiftCubit>().loadCurrentShift();
     } catch (e) {
-      if (!mounted) return;
-      showErrorSnackBar(context, e);
+      if (mounted) showErrorSnackBar(context, e);
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
@@ -175,6 +185,11 @@ class _ShiftSheetState extends State<ShiftSheet> {
 
     return BlocListener<ShiftCubit, ShiftState>(
       listener: (context, state) {
+        // Any terminal state (not the transient loading state) releases the
+        // open/close submit guard.
+        if (_isSubmitting && state is! ShiftLoading) {
+          _isSubmitting = false;
+        }
         if (state is ShiftOpened) {
           _showSuccessSnackBar(S.of(context).shiftOpened);
           Navigator.of(context).pop(state.shift);
@@ -266,9 +281,8 @@ class _ShiftSheetState extends State<ShiftSheet> {
               t.shiftManagement,
               style: AppTypography.title3.copyWith(
                 fontWeight: FontWeight.w600,
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.textPrimary,
+                color:
+                    isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
               ),
             ),
           ),
@@ -276,8 +290,9 @@ class _ShiftSheetState extends State<ShiftSheet> {
             onPressed: () => Navigator.of(context).pop(),
             icon: Icon(
               Icons.close,
-              color:
-                  isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
             ),
           ),
         ],
@@ -296,18 +311,14 @@ class _ShiftSheetState extends State<ShiftSheet> {
         Icon(
           Icons.point_of_sale_outlined,
           size: 56,
-          color: isDark
-              ? AppColors.darkTextSecondary
-              : AppColors.textTertiary,
+          color: isDark ? AppColors.darkTextSecondary : AppColors.textTertiary,
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
           t.noOpenShift,
           style: AppTypography.title3.copyWith(
             fontWeight: FontWeight.w600,
-            color: isDark
-                ? AppColors.darkTextPrimary
-                : AppColors.textPrimary,
+            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
           ),
           textAlign: TextAlign.center,
         ),
@@ -315,9 +326,8 @@ class _ShiftSheetState extends State<ShiftSheet> {
         Text(
           t.noOpenShiftHint,
           style: AppTypography.subheadline.copyWith(
-            color: isDark
-                ? AppColors.darkTextSecondary
-                : AppColors.textSecondary,
+            color:
+                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
           ),
           textAlign: TextAlign.center,
         ),
@@ -325,9 +335,8 @@ class _ShiftSheetState extends State<ShiftSheet> {
         Text(
           'Terminal',
           style: AppTypography.footnote.copyWith(
-            color: isDark
-                ? AppColors.darkTextSecondary
-                : AppColors.textSecondary,
+            color:
+                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
@@ -337,8 +346,7 @@ class _ShiftSheetState extends State<ShiftSheet> {
           label: t.openingCash,
           hint: '0.00',
           controller: _openingCashController,
-          keyboardType:
-              const TextInputType.numberWithOptions(decimal: true),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
         ),
         const SizedBox(height: AppSpacing.md),
         HisobTextField(
@@ -351,14 +359,14 @@ class _ShiftSheetState extends State<ShiftSheet> {
         SizedBox(
           height: 48,
           child: ElevatedButton(
-            onPressed:
-                _selectedTerminal != null ? _onOpenShift : null,
+            onPressed: _selectedTerminal != null && !_isSubmitting
+                ? _onOpenShift
+                : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.royalBlue,
               foregroundColor: AppColors.white,
               shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.radiusMd),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
               disabledBackgroundColor:
                   isDark ? AppColors.darkFill : AppColors.fill,
@@ -646,8 +654,7 @@ class _ShiftSheetState extends State<ShiftSheet> {
             t.cashOperation,
             style: AppTypography.headline.copyWith(
               fontWeight: FontWeight.w600,
-              color:
-                  isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -683,8 +690,7 @@ class _ShiftSheetState extends State<ShiftSheet> {
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
-                FilteringTextInputFormatter.allow(
-                    RegExp(r'^\d*\.?\d{0,2}')),
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -718,7 +724,7 @@ class _ShiftSheetState extends State<ShiftSheet> {
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _onCashOperation,
+                    onPressed: _isSubmitting ? null : _onCashOperation,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _cashOpType == _CashOpType.cashIn
                           ? AppColors.income
@@ -818,8 +824,7 @@ class _ShiftSheetState extends State<ShiftSheet> {
             t.closeShift,
             style: AppTypography.headline.copyWith(
               fontWeight: FontWeight.w600,
-              color:
-                  isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -837,8 +842,7 @@ class _ShiftSheetState extends State<ShiftSheet> {
             label: t.closingCash,
             hint: '0.00',
             controller: _closingCashController,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
             ],
@@ -858,13 +862,12 @@ class _ShiftSheetState extends State<ShiftSheet> {
           SizedBox(
             height: 48,
             child: ElevatedButton(
-              onPressed: _onCloseShift,
+              onPressed: _isSubmitting ? null : _onCloseShift,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.error,
                 foregroundColor: AppColors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusMd),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
               ),
               child: Text(

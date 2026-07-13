@@ -103,6 +103,21 @@ class AuthCubit extends Cubit<AuthState> {
     await loadUsers();
   }
 
+  /// Called when the server rejects our refresh token (session truly expired).
+  /// Routes the user back to the login screen instead of leaving them stranded
+  /// on screens that silently fail every request. Does NOT call the logout API
+  /// (that request would just 401 again).
+  Future<void> handleSessionExpired() async {
+    // If we are already in the login flow, there is nothing to do.
+    if (state is AuthUnauthenticated ||
+        state is AuthUsersLoaded ||
+        state is AuthAccountSelected) {
+      return;
+    }
+    emit(const AuthUnauthenticated());
+    await loadUsers();
+  }
+
   String _parseError(Object error) {
     final message = error.toString();
     if (message.contains('UNAUTHORIZED') ||

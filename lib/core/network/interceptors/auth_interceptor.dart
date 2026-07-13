@@ -1,12 +1,33 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hisobnoma/core/network/tls_policy.dart';
+
+/// Outcome of a token-refresh attempt.
+enum _RefreshOutcome {
+  /// New tokens obtained.
+  success,
+
+  /// Server actively rejected the refresh (bad/expired refresh token).
+  /// The session is truly over — tokens should be cleared and the user
+  /// routed to login.
+  rejected,
+
+  /// Could not reach the server (timeout / connection error). The refresh
+  /// token may still be valid — DO NOT clear it; just fail this request so
+  /// the user can retry when connectivity returns.
+  networkError,
+}
 
 /// Attaches JWT Bearer token to all requests and handles token refresh on 401.
 /// Uses a request queue to prevent multiple simultaneous refresh attempts.
 class AuthInterceptor extends QueuedInterceptor {
   final FlutterSecureStorage _secureStorage;
-  final Future<void> Function()? onTokenExpired;
+
+  /// Invoked when the session has truly expired (refresh rejected by the
+  /// server). Wired after app start to route the user to login. Settable
+  /// because the interceptor is constructed before the AuthCubit exists.
+  Future<void> Function()? onTokenExpired;
 
   static const _accessTokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
@@ -47,8 +68,9 @@ class AuthInterceptor extends QueuedInterceptor {
     }
 
     // Skip refresh for auth endpoints themselves
-    final isAuthEndpoint = err.requestOptions.path.contains('/auth/pin-login') ||
-        err.requestOptions.path.contains('/auth/refresh');
+    final isAuthEndpoint =
+        err.requestOptions.path.contains('/auth/pin-login') ||
+            err.requestOptions.path.contains('/auth/refresh');
     if (isAuthEndpoint) {
       return handler.next(err);
     }
@@ -56,10 +78,10 @@ class AuthInterceptor extends QueuedInterceptor {
     // Attempt token refresh (QueuedInterceptor serializes these)
     if (!_isRefreshing) {
       _isRefreshing = true;
-      final refreshed = await _tryRefreshToken(err.requestOptions);
+      final outcome = await _tryRefreshToken(err.requestOptions);
       _isRefreshing = false;
 
-      if (refreshed) {
+      if (outcome == _RefreshOutcome.success) {
         // Retry the original request with new token
         final token = await _secureStorage.read(key: _accessTokenKey);
         err.requestOptions.headers['Authorization'] = 'Bearer $token';
@@ -69,6 +91,7 @@ class AuthInterceptor extends QueuedInterceptor {
             baseUrl: err.requestOptions.baseUrl,
             headers: err.requestOptions.headers,
           ));
+          applyTlsPolicy(dio, allowedHost: err.requestOptions.uri.host);
           final response = await dio.fetch(err.requestOptions);
           return handler.resolve(response);
         } catch (retryError) {
@@ -77,26 +100,32 @@ class AuthInterceptor extends QueuedInterceptor {
             return handler.next(retryError);
           }
         }
+      } else if (outcome == _RefreshOutcome.rejected) {
+        // The refresh token itself is bad/expired — the session is truly over.
+        // Clear tokens and let the app route to login.
+        await clearTokens();
+        await onTokenExpired?.call();
       }
-
-      // Token refresh failed — notify app to handle logout
-      await clearTokens();
-      onTokenExpired?.call();
+      // _RefreshOutcome.networkError: keep tokens intact; just fail this
+      // request. A transient network blip must never destroy a valid session.
     }
 
     handler.next(err);
   }
 
-  Future<bool> _tryRefreshToken(RequestOptions originalRequest) async {
-    try {
-      final refreshToken = await _secureStorage.read(key: _refreshTokenKey);
-      if (refreshToken == null) return false;
+  Future<_RefreshOutcome> _tryRefreshToken(
+      RequestOptions originalRequest) async {
+    final refreshToken = await _secureStorage.read(key: _refreshTokenKey);
+    // No refresh token at all → the user must log in again.
+    if (refreshToken == null) return _RefreshOutcome.rejected;
 
+    try {
       final dio = Dio(BaseOptions(
         baseUrl: originalRequest.baseUrl,
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
       ));
+      applyTlsPolicy(dio, allowedHost: originalRequest.uri.host);
       final response = await dio.post(
         '/auth/refresh',
         data: {'refreshToken': refreshToken},
@@ -108,12 +137,24 @@ class AuthInterceptor extends QueuedInterceptor {
           accessToken: data['accessToken'] as String,
           refreshToken: data['refreshToken'] as String,
         );
-        return true;
+        return _RefreshOutcome.success;
       }
+      // 2xx but unexpected shape → treat as a rejection.
+      return _RefreshOutcome.rejected;
+    } on DioException catch (e) {
+      // Could not reach the server — keep the (possibly still valid) tokens.
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.connectionError) {
+        return _RefreshOutcome.networkError;
+      }
+      // Server actively refused the refresh (401/403/400) → session over.
+      return _RefreshOutcome.rejected;
     } catch (_) {
-      // Refresh failed
+      // Unknown failure — do not nuke a potentially valid session.
+      return _RefreshOutcome.networkError;
     }
-    return false;
   }
 
   // === Public Token Management ===

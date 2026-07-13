@@ -48,30 +48,30 @@ These directly cause unrecorded sales, lost sales, or credential theft on the li
 ## Phase 2 — Prevent financial corruption & session breakage (HIGH)
 
 ### 2A. No duplicate transactions `[H1]`
-- [ ] **2.1** In `retry_interceptor.dart`, only retry idempotent methods (GET). Never auto-retry `POST` to `/quick-sale`, `/shifts/open`, `/shifts/{id}/close`, `/shifts/{id}/cash-operation`.
-- [ ] **2.2** (Preferred, with backend) add a client-generated idempotency key (UUID) to sale/shift/cash POST bodies or headers so the server can dedupe; then safe retry becomes possible. Coordinate the field name with backend.
-- [ ] **2.3** Add double-tap guard to the cash in/out **Confirm** button in `shift_sheet.dart:721` `[H12]` (disable while submitting).
-- [ ] **2.4** Verify the sale **Complete** and shift **Open/Close** buttons all have submit guards; add where missing.
+- [x] **2.1** `retry_interceptor.dart` now only retries idempotent GET/HEAD. All financial POSTs (`/quick-sale`, `/shifts/open`, `/shifts/{id}/close`, `/shifts/{id}/cash-operation`) are never auto-retried.
+- [ ] **2.2** **(needs backend)** client-generated idempotency key (UUID) on sale/shift/cash POSTs so retries could be safe. **BLOCKED: coordinate the field name/header with backend.**
+- [x] **2.3** Cash in/out **Confirm** now has a submit guard (disabled while submitting) `[H12]`.
+- [x] **2.4** All shift buttons (Open/Close/Cash) share an `_isSubmitting` guard; the sale **Complete** button got its guard in Phase 1.
 
 ### 2B. Auth/session resilience `[H3, H4]`
-- [ ] **2.5** Wire `onTokenExpired` when constructing `AuthInterceptor` in `injection.dart:46` so a failed refresh drives the app to the login screen (via `AuthCubit`).
-- [ ] **2.6** Fix token-refresh Dio in `auth_interceptor.dart` to use the same adapter/policy as the main client (folded into 1.10).
-- [ ] **2.7** Do not wipe a valid refresh token on a transient network error — distinguish "refresh rejected (401)" from "network failed", only clear tokens on true rejection.
-- [ ] **2.8** Surface a localized "session expired, please log in" message instead of raw error screens.
+- [x] **2.5** `onTokenExpired` wired in `app.dart` to `AuthCubit.handleSessionExpired`, which routes to login. No more stranding on silently-failing screens.
+- [x] **2.6** Token-refresh + retry Dio instances now go through the shared `applyTlsPolicy` (new `tls_policy.dart`), same policy as the main client (folds in 1.10).
+- [x] **2.7** `_tryRefreshToken` now distinguishes `rejected` (401/403 → clear tokens, log in) from `networkError` (timeout/connection → keep tokens). A transient blip no longer destroys a valid session.
+- [~] **2.8** Session expiry now routes to the login screen (the substance of H4). An explicit "session expired" toast is **deferred to Phase 3** (needs a small state flag through `AuthUnauthenticated`).
 
 ### 2C. Shift + terminal correctness `[H5, H9]`
-- [ ] **2.9** Send the **open shift's** `terminalId` on sales, not `?? 1`. If no terminal/shift is resolved, block the sale with a clear message rather than silently posting to terminal 1 `[M4]`.
-- [ ] **2.10** Distinguish "network error" from "no open shift" in `getCurrentShift` (repository swallows all errors → `null`). Return/throw a typed error so `closeShift` does not report a false success when offline `[H9]`.
-- [ ] **2.11** Do not emit `ShiftClosed` unless the server confirms closure; on network failure keep the shift open and show an error.
+- [x] **2.9** Sales now post against the **open shift's** `terminalId` (`_openShiftTerminalId`), never `?? 1`. If no terminal is resolved, the sale is blocked with a message `[M4]`.
+- [~] **2.10** The dangerous half (false "closed" success on a network drop) is fixed via 2.11. Returning a **typed** network-vs-no-shift error from `getCurrentShift` (to stop "no shift" showing during outages, which invites duplicate opens) is **deferred to Phase 3**.
+- [x] **2.11** `closeShift` emits `ShiftClosed` only when the server confirms a closed shift; on failure it reloads real state instead of faking success (done in Phase 0.1).
 
 ### 2D. Payment type contract `[H6]`
-- [ ] **2.12** Confirm the backend's accepted `paymentType` enum (get the real vocabulary — CASH/CARD/CREDIT?). Fix the `'DEBT'` value in `add_sale_sheet.dart` to match. Until confirmed, debt sales may be silently rejected (and, pre-1A, shown as success).
+- [ ] **2.12** **(needs backend) BLOCKED.** `'DEBT'` was introduced by the mobile app and has no confirmed backend enum value. **You must confirm the backend's accepted `paymentType` vocabulary** (CASH/CARD/CREDIT/DEBT?). With Phase 1A in place, a rejected debt sale now correctly shows the backend error instead of a false success — so if `'DEBT'` is wrong you will see it fail loudly rather than silently.
 
 ### 2E. Environment isolation `[H15]`
-- [ ] **2.13** Restore real per-environment base URLs in `app_config.dart`: dev → local/staging, prod → `temurmchj.uz`. Debug builds must not hit production by default.
-- [ ] **2.14** Ensure `enableLogging` is `false` for any environment pointing at production `[M3]`.
+- [~] **2.13** You explicitly chose a single backend (`temurmchj.uz`) and there is no separate staging server, so per-environment URLs don't apply. Kept as-is by design; the real risk was log exposure, addressed below.
+- [x] **2.14** Prod `enableLogging` is `false`; and Dio's raw `LogInterceptor` (which dumped Authorization headers + PINs) is replaced by `SafeLogInterceptor`, which redacts credentials — so even debug logging can't leak tokens/PINs `[M3]`.
 
-**Exit criteria:** no auto-retry of financial POSTs; session expiry routes to login; shifts/terminals are accurate; debug builds cannot touch prod data.
+**Exit criteria:** no auto-retry of financial POSTs ✔; session expiry routes to login ✔; shifts/terminals accurate ✔; credentials never logged ✔. **Open (backend):** idempotency key (2.2), payment enum (2.12).
 
 ---
 

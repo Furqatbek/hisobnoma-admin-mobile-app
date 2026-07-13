@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hisobnoma/core/di/injection.dart';
+import 'package:hisobnoma/core/network/interceptors/auth_interceptor.dart';
 import 'package:hisobnoma/core/router/app_router.dart';
 import 'package:hisobnoma/core/theme/app_theme.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
@@ -25,7 +26,8 @@ class HisobnomaApp extends StatefulWidget {
   State<HisobnomaApp> createState() => _HisobnomaAppState();
 }
 
-class _HisobnomaAppState extends State<HisobnomaApp> with WidgetsBindingObserver {
+class _HisobnomaAppState extends State<HisobnomaApp>
+    with WidgetsBindingObserver {
   late final AuthCubit _authCubit;
   late final GoRouter _router;
   late final SyncService _syncService;
@@ -36,6 +38,11 @@ class _HisobnomaAppState extends State<HisobnomaApp> with WidgetsBindingObserver
     WidgetsBinding.instance.addObserver(this);
     _authCubit = getIt<AuthCubit>();
     _router = createAppRouter(_authCubit);
+
+    // Route to login when the server rejects our refresh token, so an expired
+    // session never strands the user on silently-failing screens.
+    getIt<AuthInterceptor>().onTokenExpired = _authCubit.handleSessionExpired;
+
     _initApp();
 
     _syncService = getIt<SyncService>();

@@ -532,6 +532,15 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   bool get _isDebt => _paymentType == 'DEBT';
   bool get _clientMissing => _isDebt && _selectedClient == null;
 
+  /// The terminal id of the currently open shift, if any. Sales must be posted
+  /// against the shift's terminal, not a hardcoded fallback.
+  int? get _openShiftTerminalId {
+    final s = context.read<ShiftCubit>().state;
+    if (s is ShiftLoaded && s.shift.isOpen) return s.shift.terminalId;
+    if (s is ShiftOpened) return s.shift.terminalId;
+    return null;
+  }
+
   Widget _buildCheckoutStep(bool isDark) {
     final t = S.of(context);
 
@@ -922,6 +931,26 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
       return;
     }
 
+    // Post the sale against the OPEN SHIFT's terminal — never a hardcoded
+    // fallback. If we cannot resolve it, block the sale rather than silently
+    // recording it against the wrong terminal.
+    final terminalId = _openShiftTerminalId ?? _activeTerminal?.id;
+    if (terminalId == null) {
+      HapticFeedback.heavyImpact();
+      final t = S.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(t.shiftRequired),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isSubmitting = true);
     HapticFeedback.mediumImpact();
 
@@ -929,7 +958,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
     final total = _totalAmount;
     try {
       final request = QuickSaleRequest(
-        terminalId: _activeTerminal?.id ?? 1,
+        terminalId: terminalId,
         // Null-safe: client is optional for CASH/CARD sales.
         customerId: _selectedClient?['id'] as int?,
         customerName: _selectedClient?['name'] as String?,
