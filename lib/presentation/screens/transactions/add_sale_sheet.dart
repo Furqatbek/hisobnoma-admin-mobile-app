@@ -576,7 +576,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis),
                   ),
-                  Text('${item.quantity} x ${Formatters.currency(price)}',
+                  Text('${_formatQty(item.quantity)} x ${Formatters.currency(price)}',
                       style: AppTypography.caption1
                           .copyWith(color: AppColors.textSecondary)),
                   const SizedBox(width: AppSpacing.sm),
@@ -825,17 +825,20 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   Future<void> _showQuantityDialog(int index) async {
     final t = S.of(context);
     final item = _cart[index];
-    final controller = TextEditingController(text: '${item.quantity}');
-    final result = await showDialog<int>(
+    final controller =
+        TextEditingController(text: _formatQty(item.quantity));
+    final result = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(t.enterQuantity),
         content: TextField(
           controller: controller,
-          keyboardType: TextInputType.number,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
           autofocus: true,
           decoration: InputDecoration(hintText: t.quantity),
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+          ],
         ),
         actions: [
           TextButton(
@@ -844,7 +847,8 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
           ),
           TextButton(
             onPressed: () {
-              final val = int.tryParse(controller.text);
+              final val =
+                  double.tryParse(controller.text.replaceAll(',', '.'));
               Navigator.pop(ctx, val);
             },
             child: Text(t.save),
@@ -927,7 +931,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
       items: _cart
           .map((item) => QuickSaleItem(
                 productId: item.product.id,
-                quantity: item.quantity.toDouble(),
+                quantity: item.quantity,
                 unitPrice: item.customPrice ?? item.product.sellingPrice,
               ))
           .toList(),
@@ -965,10 +969,20 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   }
 }
 
-/// Internal cart item model with editable price.
+/// Formats a quantity for display: whole numbers without decimals,
+/// fractional values trimmed of trailing zeros (e.g. 2, 0.5, 1.25).
+String _formatQty(double q) {
+  if (q == q.roundToDouble()) return q.toInt().toString();
+  var s = q.toStringAsFixed(3);
+  s = s.replaceFirst(RegExp(r'0+$'), '');
+  if (s.endsWith('.')) s = s.substring(0, s.length - 1);
+  return s;
+}
+
+/// Internal cart item model with editable price and fractional quantity.
 class _CartItem {
   final InventoryProduct product;
-  final int quantity;
+  final double quantity;
   final double? customPrice;
 
   const _CartItem({
@@ -980,7 +994,7 @@ class _CartItem {
   double get totalPrice =>
       (customPrice ?? product.sellingPrice) * quantity;
 
-  _CartItem copyWith({int? quantity, double? customPrice}) {
+  _CartItem copyWith({double? quantity, double? customPrice}) {
     return _CartItem(
       product: product,
       quantity: quantity ?? this.quantity,
@@ -993,7 +1007,7 @@ class _CartItem {
 class _CartItemTile extends StatelessWidget {
   final _CartItem item;
   final bool isDark;
-  final ValueChanged<int> onQuantityChanged;
+  final ValueChanged<double> onQuantityChanged;
   final VoidCallback onQuantityTap;
   final VoidCallback onPriceTap;
   final VoidCallback onRemoved;
@@ -1133,8 +1147,8 @@ class _CartItemTile extends StatelessWidget {
 }
 
 class _QuantityStepper extends StatelessWidget {
-  final int quantity;
-  final ValueChanged<int> onChanged;
+  final double quantity;
+  final ValueChanged<double> onChanged;
   final VoidCallback onTap;
   final bool isDark;
 
@@ -1168,7 +1182,7 @@ class _QuantityStepper extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               child: Text(
-                '$quantity',
+                _formatQty(quantity),
                 style: AppTypography.subheadline.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.royalBlue,
