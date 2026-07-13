@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:hisobnoma/core/network/api_client.dart';
 import 'package:hisobnoma/core/network/api_endpoints.dart';
 import 'package:hisobnoma/core/network/api_response.dart';
@@ -71,11 +72,16 @@ class TransactionRepository {
         response.data['data'] as Map<String, dynamic>);
   }
 
-  /// Quick sale
+  /// Quick sale. Safe to auto-retry ONLY when the request carries a
+  /// clientRequestId (idempotency key) — the backend dedups on it, so a
+  /// retried sale returns the original transaction instead of a duplicate.
   Future<QuickSaleResponse> quickSale(QuickSaleRequest request) async {
     final response = await _apiClient.post(
       ApiEndpoints.quickSale,
       data: request.toJson(),
+      options: request.clientRequestId != null
+          ? Options(extra: {'idempotent': true})
+          : null,
     );
     return QuickSaleResponse.fromJson(
         response.data['data'] as Map<String, dynamic>);
@@ -157,8 +163,7 @@ class TransactionRepository {
     final response = await _apiClient.get(
       ApiEndpoints.posTransactionDetail(id),
     );
-    return SaleDetail.fromJson(
-        response.data['data'] as Map<String, dynamic>);
+    return SaleDetail.fromJson(response.data['data'] as Map<String, dynamic>);
   }
 
   /// Search customers (paginated) via mobile endpoint

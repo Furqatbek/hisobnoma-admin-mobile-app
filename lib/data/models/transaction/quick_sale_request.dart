@@ -9,6 +9,11 @@ class QuickSaleRequest {
   final int? deliveryRegionId;
   final int? deliveryVillageId;
 
+  /// Client-generated idempotency key (UUID). The backend records
+  /// (tenant, clientRequestId) → transactionId and returns the original
+  /// transaction on a repeat, so a retried sale never creates a duplicate.
+  final String? clientRequestId;
+
   const QuickSaleRequest({
     required this.terminalId,
     this.customerId,
@@ -19,6 +24,7 @@ class QuickSaleRequest {
     this.notes,
     this.deliveryRegionId,
     this.deliveryVillageId,
+    this.clientRequestId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -31,6 +37,7 @@ class QuickSaleRequest {
         if (notes != null) 'notes': notes,
         if (deliveryRegionId != null) 'deliveryRegionId': deliveryRegionId,
         if (deliveryVillageId != null) 'deliveryVillageId': deliveryVillageId,
+        if (clientRequestId != null) 'clientRequestId': clientRequestId,
       };
 }
 

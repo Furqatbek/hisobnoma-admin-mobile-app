@@ -43,11 +43,14 @@ class RetryInterceptor extends Interceptor {
   bool _shouldRetry(DioException err) {
     // NEVER auto-retry non-idempotent requests. A POST/PUT/PATCH/DELETE that
     // times out may already have been processed by the server; re-sending it
-    // would create duplicate sales, shifts, or cash operations. Only GET (and
-    // HEAD) are safe to replay. A server-side idempotency key would be needed
-    // before financial POSTs could be safely retried (see plan task 2.2).
+    // would create duplicate sales, shifts, or cash operations. Only GET/HEAD
+    // are safe to replay by default. A POST may opt in by setting
+    // extra['idempotent'] = true — used by quick-sale, which carries a
+    // clientRequestId the backend dedups on, so a retry returns the original
+    // transaction instead of a duplicate.
     final method = err.requestOptions.method.toUpperCase();
-    if (method != 'GET' && method != 'HEAD') return false;
+    final isIdempotent = err.requestOptions.extra['idempotent'] == true;
+    if (method != 'GET' && method != 'HEAD' && !isIdempotent) return false;
 
     return err.type == DioExceptionType.connectionTimeout ||
         err.type == DioExceptionType.receiveTimeout ||

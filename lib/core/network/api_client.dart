@@ -64,12 +64,14 @@ class ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
+    Options? options,
   }) {
     return _dio.post<T>(
       path,
       data: data,
       queryParameters: queryParameters,
       cancelToken: cancelToken,
+      options: options,
     );
   }
 

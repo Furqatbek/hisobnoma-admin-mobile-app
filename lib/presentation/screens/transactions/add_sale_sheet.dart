@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:uuid/uuid.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
@@ -1004,6 +1005,10 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
         tenderedAmount: _isDebt ? 0.0 : roundMoney(total),
         deliveryRegionId: _selectedRegion?.id,
         deliveryVillageId: _selectedVillage?.id,
+        // Idempotency key: one per sale attempt. A timed-out sale is safely
+        // auto-retried with the same key and the backend dedups on it, so a
+        // lost response can never create a duplicate sale.
+        clientRequestId: Uuid().v4(),
       );
 
       // Call the repository directly so a failed sale actually throws and
