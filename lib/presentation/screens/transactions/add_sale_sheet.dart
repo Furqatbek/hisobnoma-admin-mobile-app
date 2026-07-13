@@ -904,6 +904,25 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
       ),
     );
     if (result != null && result > 0) {
+      // Enforce the product's price floor when the backend provides one.
+      final floor = item.product.minSellingPrice;
+      if (floor > 0 && result < floor) {
+        if (!mounted) return;
+        HapticFeedback.heavyImpact();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${t.unitPrice} ≥ ${Formatters.currency(floor)}',
+            ),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
       setState(() {
         _cart[index] = item.copyWith(customPrice: result);
       });
@@ -966,11 +985,13 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
             .map((item) => QuickSaleItem(
                   productId: item.product.id,
                   quantity: item.quantity,
-                  unitPrice: item.customPrice ?? item.product.sellingPrice,
+                  // Round to a fixed money scale to avoid IEEE double drift.
+                  unitPrice:
+                      _money(item.customPrice ?? item.product.sellingPrice),
                 ))
             .toList(),
         paymentType: _paymentType,
-        tenderedAmount: total,
+        tenderedAmount: _money(total),
         deliveryRegionId: _selectedRegion?.id,
         deliveryVillageId: _selectedVillage?.id,
       );
@@ -1007,6 +1028,10 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
     }
   }
 }
+
+/// Rounds a monetary amount to 2 decimal places, avoiding IEEE-754 drift
+/// (e.g. 0.1 * 3 = 0.30000000000000004) before it is sent to the backend.
+double _money(double v) => (v * 100).roundToDouble() / 100;
 
 /// Formats a quantity for display: whole numbers without decimals,
 /// fractional values trimmed of trailing zeros (e.g. 2, 0.5, 1.25).

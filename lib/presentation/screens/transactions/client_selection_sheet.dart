@@ -100,22 +100,43 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
     });
   }
 
-  void _onCreateClient() {
+  Future<void> _onCreateClient() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       HapticFeedback.heavyImpact();
       _nameFocus.requestFocus();
       return;
     }
+    if (_isCreating) return;
 
     HapticFeedback.mediumImpact();
     setState(() => _isCreating = true);
 
     final phone = _phoneController.text.trim();
-    context.read<TransactionsCubit>().createCustomer(
-          name: name,
-          phone: phone.isEmpty ? null : phone,
-        );
+    // Call the repository directly rather than the shared TransactionsCubit,
+    // so creating a client never clobbers the transactions screen's loaded
+    // state behind this sheet.
+    final repo = context.read<TransactionsCubit>().transactionRepository;
+    try {
+      final customer = await repo.createFinanceCustomer(
+        name: name,
+        phone: phone.isEmpty ? null : phone,
+      );
+      if (!mounted) return;
+      HapticFeedback.heavyImpact();
+      final t = S.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(t.clientCreated),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      Navigator.of(context).pop(customer);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isCreating = false);
+      showErrorSnackBar(context, e);
+    }
   }
 
   @override
@@ -134,69 +155,45 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return BlocListener<TransactionsCubit, TransactionsState>(
-      listener: (context, state) {
-        if (state is CustomerCreated) {
-          HapticFeedback.heavyImpact();
-          final t = S.of(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(t.clientCreated),
-              backgroundColor: AppColors.success,
-            ),
-          );
-          Navigator.of(context).pop(state.customer);
-        } else if (state is TransactionsError && _isCreating) {
-          setState(() => _isCreating = false);
-          final t = S.of(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(t.failedToCreateClient),
-              backgroundColor: AppColors.error,
-            ),
-          );
-        }
-      },
-      child: Container(
-        constraints: BoxConstraints(maxHeight: screenHeight * 0.85),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkElevated : AppColors.white,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.radiusLg),
-          ),
+    return Container(
+      constraints: BoxConstraints(maxHeight: screenHeight * 0.85),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkElevated : AppColors.white,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLg),
         ),
-        child: Padding(
-          padding: EdgeInsets.only(bottom: bottomPadding),
-          child: Column(
-            children: [
-              _buildHandle(isDark),
-              _buildHeader(isDark),
-              const Divider(height: 1),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm,
-                ),
-                child: HisobTextField(
-                  hint: S.of(context).searchClients,
-                  controller: _searchController,
-                  focusNode: _searchFocus,
-                  autofocus: true,
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.textSecondary,
-                    size: 20,
-                  ),
-                  onChanged: _onSearchChanged,
-                ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(bottom: bottomPadding),
+        child: Column(
+          children: [
+            _buildHandle(isDark),
+            _buildHeader(isDark),
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
               ),
-              _buildCreateSection(isDark),
-              const Divider(height: 1),
-              Expanded(child: _buildClientList(isDark)),
-            ],
-          ),
+              child: HisobTextField(
+                hint: S.of(context).searchClients,
+                controller: _searchController,
+                focusNode: _searchFocus,
+                autofocus: true,
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                  size: 20,
+                ),
+                onChanged: _onSearchChanged,
+              ),
+            ),
+            _buildCreateSection(isDark),
+            const Divider(height: 1),
+            Expanded(child: _buildClientList(isDark)),
+          ],
         ),
       ),
     );
@@ -526,9 +523,8 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
             Icon(
               Icons.chevron_right,
               size: 20,
-              color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.textTertiary,
+              color:
+                  isDark ? AppColors.darkTextSecondary : AppColors.textTertiary,
             ),
           ],
         ),

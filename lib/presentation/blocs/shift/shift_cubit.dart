@@ -59,12 +59,18 @@ class ShiftCubit extends Cubit<ShiftState> {
         openingCash: openingCash,
         notes: notes,
       );
+      // ShiftOpened is the transient "just opened" signal the sheet uses to
+      // pop with a success message; ShiftLoaded is the canonical resting state
+      // every other consumer (sale sheet, AppBar) checks. Emit both so the
+      // next sale is not wrongly told there is no open shift.
       emit(ShiftOpened(shift: shift));
+      emit(ShiftLoaded(shift: shift));
     } catch (_) {
       // Shift may have been opened but response parsing failed — check
       final current = await _transactionRepository.getCurrentShift();
       if (current != null && current.isOpen) {
         emit(ShiftOpened(shift: current));
+        emit(ShiftLoaded(shift: current));
       } else {
         await loadCurrentShift();
       }

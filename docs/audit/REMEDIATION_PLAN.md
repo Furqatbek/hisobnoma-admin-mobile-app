@@ -78,26 +78,26 @@ These directly cause unrecorded sales, lost sales, or credential theft on the li
 ## Phase 3 — Correctness & data completeness (HIGH/MEDIUM)
 
 ### 3A. State management `[H2, M1]`
-- [ ] **3.1** Stop the shared `TransactionsCubit` from blanking the transactions screen after a sale/customer-create. Options: separate cubit instance for the sheets, add `buildWhen`/`listenWhen` guards, or reload `loadData()` after a sale completes. Pick one and apply consistently across sale sheet, client sheet, and screen.
-- [ ] **3.2** Fix `ShiftOpened` not being recognized as an open shift `[M1]` so the next sale after opening a shift is not blocked (make the check accept `ShiftOpened` or re-emit `ShiftLoaded`).
+- [x] **3.1** The shared `TransactionsCubit` no longer blanks the screen: the sale path reloads `loadData()` on success (Phase 1A), and client-create now calls the repository directly instead of emitting `CustomerCreated`/`TransactionsLoading` on the shared cubit. Its dead `BlocListener` was removed.
+- [x] **3.2** `openShift` now settles on `ShiftLoaded` (after the transient `ShiftOpened`), so the sale sheet and AppBar recognize the open shift and the next sale is not wrongly blocked `[M1]`.
 
-### 3B. Pagination / data limits `[H13, H14]`
-- [ ] **3.3** Product picker: replace the fixed `size: 200` fetch with server-side search + pagination (query the API as the user types), so product #201+ is reachable.
+### 3B. Pagination / data limits `[H13, H14]`  — **DEFERRED**
+- [ ] **3.3** Product picker: replace the fixed `size: 200` fetch with server-side search + pagination. *(Fine for shops under ~200 SKUs; needs the `/mobile/products/search` endpoint wired with a debounce.)*
 - [ ] **3.4** Client picker: same for the `size: 1000` customer fetch.
-- [ ] **3.5** Confirm transactions-history and inventory tabs paginate or clearly indicate truncation.
+- [ ] **3.5** Confirm transactions-history and inventory tabs paginate or indicate truncation.
 
 ### 3C. Pricing / quantity guards (MEDIUM)
-- [ ] **3.6** Enforce a price floor on edited prices (e.g. `minSellingPrice` from the product model) rather than only `> 0`.
-- [ ] **3.7** Decide and enforce per-UOM quantity rules (fractional allowed for weight, integer for UNIT).
-- [ ] **3.8** Round currency math to a fixed scale at submission to avoid IEEE `double` drift.
+- [x] **3.6** Added `minSellingPrice` to `InventoryProduct` and the price-edit dialog now rejects a price below the floor (when the backend provides one) with a clear message.
+- [ ] **3.7** Per-UOM quantity rules (integer for UNIT, fractional for weight) — **DEFERRED**; needs the UOM policy confirmed.
+- [x] **3.8** Money amounts (`unitPrice`, `tenderedAmount`) are rounded to 2 decimals at submission via `_money()`, avoiding IEEE `double` drift.
 
 ### 3D. Error UX & i18n (MEDIUM)
-- [ ] **3.9** Map raw `DioException.toString()` to friendly, localized messages across core cubits `[M6]`; never show stack-trace-ish text.
-- [ ] **3.10** Fix dead wrong-PIN detection in `auth_cubit._parseError` and localize login errors `[M7]`.
-- [ ] **3.11** Give the shift/sale/client sheets real retry affordances when their load APIs fail instead of misleading empty states `[M8]`.
-- [ ] **3.12** Move remaining hardcoded English strings (`shift_sheet` "Terminal"/"No terminals available", `error_handler` "Error"/"OK"/"Network error", settings "System", localized dates/formatters) into the ARB files.
+- [~] **3.9** Sale/shift/client sheets already surface backend messages via `showErrorSnackBar`/`extractErrorMessage`. Mapping raw errors in the remaining list-loading cubits (transactions/reports/alerts) is **DEFERRED**.
+- [x] **3.10** `auth_cubit._parseError` now unwraps the `DioException`→`ApiException` (code/status) so wrong-PIN, network, and rate-limit cases are detected correctly instead of always showing the generic message. *(Full localization of these 4 strings still English — deferred.)*
+- [ ] **3.11** Retry affordances on load failure in the sheets — **DEFERRED**.
+- [ ] **3.12** Move remaining hardcoded English strings into ARB — **DEFERRED**.
 
-**Exit criteria:** screens survive normal use without blanking; all catalog items reachable; errors are friendly and localized.
+**Exit criteria:** screens survive normal use without blanking ✔; price floor + money rounding enforced ✔; login errors detected ✔. **Deferred:** catalog pagination, per-UOM rules, remaining i18n/retry polish.
 
 ---
 

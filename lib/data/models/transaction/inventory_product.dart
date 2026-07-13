@@ -11,6 +11,9 @@ class InventoryProduct {
   final String baseUomName;
   final double costPrice;
   final double sellingPrice;
+
+  /// Lowest price the item may be sold at. 0 means "no floor provided".
+  final double minSellingPrice;
   final bool trackInventory;
   final bool active;
   final double margin;
@@ -29,6 +32,7 @@ class InventoryProduct {
     required this.baseUomName,
     required this.costPrice,
     required this.sellingPrice,
+    this.minSellingPrice = 0,
     required this.trackInventory,
     required this.active,
     required this.margin,
@@ -49,6 +53,7 @@ class InventoryProduct {
       baseUomName: json['baseUomName'] as String? ?? '',
       costPrice: (json['costPrice'] as num?)?.toDouble() ?? 0,
       sellingPrice: (json['sellingPrice'] as num?)?.toDouble() ?? 0,
+      minSellingPrice: (json['minSellingPrice'] as num?)?.toDouble() ?? 0,
       trackInventory: json['trackInventory'] as bool? ?? false,
       active: json['active'] as bool? ?? true,
       margin: (json['margin'] as num?)?.toDouble() ?? 0,

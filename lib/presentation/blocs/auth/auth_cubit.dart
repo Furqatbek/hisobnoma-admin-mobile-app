@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hisobnoma/core/network/api_exceptions.dart';
 import 'package:hisobnoma/data/models/auth/auth_models.dart';
 import 'package:hisobnoma/data/repositories/auth_repository.dart';
 
@@ -119,16 +121,29 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   String _parseError(Object error) {
-    final message = error.toString();
-    if (message.contains('UNAUTHORIZED') ||
-        message.contains('Invalid or expired')) {
+    // Unwrap the typed ApiException that ErrorInterceptor attaches to the
+    // DioException — matching on the raw toString() never fired, so every
+    // failure previously fell through to the generic message.
+    final inner = error is DioException ? error.error : error;
+    final code = inner is ApiException ? inner.code : '';
+    final status = inner is ApiException ? inner.statusCode : null;
+    final raw = error.toString();
+
+    if (code == 'UNAUTHORIZED' ||
+        status == 401 ||
+        raw.contains('Invalid or expired')) {
       return 'Invalid username or PIN. Please try again.';
     }
-    if (message.contains('NETWORK_ERROR') ||
-        message.contains('SocketException')) {
+    if (code == 'NETWORK_ERROR' ||
+        error is DioException &&
+            (error.type == DioExceptionType.connectionError ||
+                error.type == DioExceptionType.connectionTimeout ||
+                error.type == DioExceptionType.receiveTimeout ||
+                error.type == DioExceptionType.sendTimeout) ||
+        raw.contains('SocketException')) {
       return 'No internet connection. Please check your network.';
     }
-    if (message.contains('RATE_LIMITED')) {
+    if (code == 'RATE_LIMITED' || status == 429) {
       return 'Too many attempts. Please wait a moment.';
     }
     return 'Something went wrong. Please try again.';
