@@ -49,7 +49,7 @@ These directly cause unrecorded sales, lost sales, or credential theft on the li
 
 ### 2A. No duplicate transactions `[H1]`
 - [x] **2.1** `retry_interceptor.dart` now only retries idempotent GET/HEAD. All financial POSTs (`/quick-sale`, `/shifts/open`, `/shifts/{id}/close`, `/shifts/{id}/cash-operation`) are never auto-retried.
-- [ ] **2.2** **(needs backend)** client-generated idempotency key (UUID) on sale/shift/cash POSTs so retries could be safe. **BLOCKED: coordinate the field name/header with backend.**
+- [~] **2.2** Idempotency key — no backend support exists/known, so this stays out. The safe mitigation (2.1: never auto-retry financial POSTs) fully prevents duplicates without it. Revisit only if the backend later adds an idempotency field.
 - [x] **2.3** Cash in/out **Confirm** now has a submit guard (disabled while submitting) `[H12]`.
 - [x] **2.4** All shift buttons (Open/Close/Cash) share an `_isSubmitting` guard; the sale **Complete** button got its guard in Phase 1.
 
@@ -65,7 +65,7 @@ These directly cause unrecorded sales, lost sales, or credential theft on the li
 - [x] **2.11** `closeShift` emits `ShiftClosed` only when the server confirms a closed shift; on failure it reloads real state instead of faking success (done in Phase 0.1).
 
 ### 2D. Payment type contract `[H6]`
-- [ ] **2.12** **(needs backend) BLOCKED.** `'DEBT'` was introduced by the mobile app and has no confirmed backend enum value. **You must confirm the backend's accepted `paymentType` vocabulary** (CASH/CARD/CREDIT/DEBT?). With Phase 1A in place, a rejected debt sale now correctly shows the backend error instead of a false success — so if `'DEBT'` is wrong you will see it fail loudly rather than silently.
+- [x] **2.12** **RESOLVED — not a bug.** Owner confirmed the backend accepts exactly `CASH`, `CARD`, `DEBT`; the sheet already sends those literals. No change needed.
 
 ### 2E. Environment isolation `[H15]`
 - [~] **2.13** You explicitly chose a single backend (`temurmchj.uz`) and there is no separate staging server, so per-environment URLs don't apply. Kept as-is by design; the real risk was log exposure, addressed below.
