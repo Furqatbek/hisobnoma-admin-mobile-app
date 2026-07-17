@@ -13,6 +13,7 @@ import 'package:hisobnoma/presentation/widgets/charts/revenue_line_chart.dart';
 import 'package:hisobnoma/presentation/widgets/common/animations.dart';
 import 'package:hisobnoma/presentation/screens/transactions/add_sale_sheet.dart';
 import 'package:hisobnoma/presentation/widgets/common/loading_shimmer.dart';
+import 'package:hisobnoma/presentation/widgets/common/notification_bell.dart';
 
 /// Main dashboard / home screen
 class DashboardScreen extends StatefulWidget {
@@ -40,7 +41,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(t.appName, style: AppTypography.headline),
-        actions: const [],
+        actions: const [
+          NotificationBell(),
+          SizedBox(width: AppSpacing.xs),
+        ],
       ),
       body: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
