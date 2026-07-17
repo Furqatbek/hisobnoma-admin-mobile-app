@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hisobnoma/core/di/injection.dart';
 import 'package:hisobnoma/core/network/interceptors/auth_interceptor.dart';
 import 'package:hisobnoma/core/router/app_router.dart';
+import 'package:hisobnoma/core/services/push_notification_service.dart';
 import 'package:hisobnoma/core/theme/app_theme.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/auth/auth_cubit.dart';
@@ -31,6 +34,8 @@ class _HisobnomaAppState extends State<HisobnomaApp>
   late final AuthCubit _authCubit;
   late final GoRouter _router;
   late final SyncService _syncService;
+  late final PushNotificationService _pushService;
+  StreamSubscription<AuthState>? _authSub;
 
   @override
   void initState() {
@@ -42,6 +47,19 @@ class _HisobnomaAppState extends State<HisobnomaApp>
     // Route to login when the server rejects our refresh token, so an expired
     // session never strands the user on silently-failing screens.
     getIt<AuthInterceptor>().onTokenExpired = _authCubit.handleSessionExpired;
+
+    // Push notifications: register this device's token once authenticated,
+    // unregister on logout. Attached before checkAuth so the login emitted by
+    // checkAuth is caught. No-op on non-iOS until Android/FCM lands.
+    _pushService = getIt<PushNotificationService>();
+    _pushService.onNotificationTap = _handleNotificationTap;
+    _authSub = _authCubit.stream.listen((state) {
+      if (state is AuthAuthenticated) {
+        _pushService.enable();
+      } else if (state is AuthUnauthenticated) {
+        _pushService.disable();
+      }
+    });
 
     _initApp();
 
@@ -70,6 +88,14 @@ class _HisobnomaAppState extends State<HisobnomaApp>
     } catch (_) {}
   }
 
+  /// Route when the user taps a notification. Minimal for now: honor an
+  /// explicit `route` in the payload, else open Alerts. Richer per-type routing
+  /// arrives with the Phase 4 payload contract.
+  void _handleNotificationTap(Map<String, dynamic> data) {
+    final route = data['route'] as String?;
+    _router.go(route ?? AppRoutes.alerts);
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -80,6 +106,7 @@ class _HisobnomaAppState extends State<HisobnomaApp>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _authSub?.cancel();
     _syncService.dispose();
     _router.dispose();
     super.dispose();

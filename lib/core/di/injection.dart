@@ -5,8 +5,10 @@ import 'package:hisobnoma/core/config/app_config.dart';
 import 'package:hisobnoma/core/network/api_client.dart';
 import 'package:hisobnoma/core/network/connectivity_checker.dart';
 import 'package:hisobnoma/core/network/interceptors/auth_interceptor.dart';
+import 'package:hisobnoma/core/services/push_notification_service.dart';
 import 'package:hisobnoma/data/local/database_helper.dart';
 import 'package:hisobnoma/data/repositories/auth_repository.dart';
+import 'package:hisobnoma/data/repositories/device_repository.dart';
 import 'package:hisobnoma/data/repositories/dashboard_repository.dart';
 import 'package:hisobnoma/data/repositories/transaction_repository.dart';
 import 'package:hisobnoma/data/repositories/alert_repository.dart';
@@ -69,6 +71,9 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<SyncRepository>(
     () => SyncRepository(apiClient: getIt()),
   );
+  getIt.registerLazySingleton<DeviceRepository>(
+    () => DeviceRepository(apiClient: getIt()),
+  );
 
   // Services
   getIt.registerLazySingleton<SyncService>(
@@ -78,6 +83,9 @@ Future<void> configureDependencies() async {
       databaseHelper: getIt(),
       connectivityChecker: getIt(),
     ),
+  );
+  getIt.registerLazySingleton<PushNotificationService>(
+    () => PushNotificationService(deviceRepository: getIt()),
   );
 
   // Blocs / Cubits

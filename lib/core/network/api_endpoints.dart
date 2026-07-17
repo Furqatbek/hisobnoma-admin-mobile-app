@@ -34,6 +34,9 @@ abstract final class ApiEndpoints {
   static const String searchCustomers = '/mobile/customers/search';
   static const String financeCustomers = '/finance/customers';
 
+  // Devices / push notifications
+  static const String pushToken = '/mobile/devices/push-token';
+
   // POS Terminals
   static const String activeTerminals = '/pos/terminals/active';
 

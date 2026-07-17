@@ -66,33 +66,38 @@ natively, handing it to Dart.
 
 ---
 
-## Phase 2 — Flutter client integration **[App]**
+## Phase 2 — Flutter client integration **[App]** — ✅ SCAFFOLDED
 
-- [ ] **2.1** Decide the transport: a maintained package
-  (`flutter_apns_only`) **or** a thin platform-channel + `flutter_local_
-  notifications` (for showing notifications while the app is foregrounded).
-  Recommendation: platform channel for the token + `flutter_local_
-  notifications` for foreground display — zero heavy dependencies, full control.
-- [ ] **2.2** Request notification permission via `UNUserNotificationCenter`
-  (provisional or explicit). Show it at a sensible moment (e.g. after first
-  login), not cold on launch. Handle "denied" gracefully (feature simply off).
-- [ ] **2.3** Receive the APNs device token from the native channel; store it in
-  memory + secure storage.
-- [ ] **2.4** Register the token with the backend after login and on every app
-  start if changed: `POST /mobile/devices/push-token`
-  `{ token, platform: "ios", environment: "sandbox"|"production", appVersion }`.
-  Include the environment so the backend targets the right APNs host.
-- [ ] **2.5** Handle token refresh (APNs can rotate it) — re-register when the
-  native callback fires with a new token.
-- [ ] **2.6** On **logout**, unregister the token
-  (`DELETE /mobile/devices/push-token`) so a logged-out phone stops receiving
-  that user's notifications.
-- [ ] **2.7** Foreground handling: when a push arrives while the app is open,
-  show it via `flutter_local_notifications` (iOS won't display remote pushes
-  automatically in foreground).
-- [ ] **2.8** Tap handling / routing: when the user taps a notification, read
-  its custom `data` payload and navigate (e.g. to Alerts, or a specific sale).
-  Handle all three launch states: foreground, background, terminated.
+Chosen transport: **thin platform channel** (`hisobnoma/push`) — no extra
+dependency. Foreground display is handled **natively** in `AppDelegate`
+(`willPresent`), so `flutter_local_notifications` was not needed.
+
+- [x] **2.1** Platform-channel transport (no package); native handles
+  foreground presentation.
+- [x] **2.2** Permission requested via the native `requestPermissionAndRegister`
+  channel method, triggered by `PushNotificationService.enable()` after login.
+  Denial is a graceful no-op.
+- [x] **2.3** APNs token received over the channel (`onToken`) into
+  `PushNotificationService`.
+- [x] **2.4** `DeviceRepository.registerPushToken` → `POST /mobile/devices
+  /push-token` `{ token, platform: "ios", environment }`. Environment is
+  `sandbox` in debug / `production` in release. Re-registers on each `enable()`.
+- [x] **2.5** Token refresh: the native `onToken` callback fires again on
+  rotation → re-registers automatically.
+- [x] **2.6** Logout: `disable()` → `DELETE /mobile/devices/push-token`.
+- [x] **2.7** Foreground display handled natively (`willPresent` returns
+  banner/alert + sound + badge).
+- [x] **2.8** Tap routing wired: `onNotificationTap` → `app.dart` routes to the
+  payload's `route` or Alerts. Cold-launch taps are buffered natively and
+  flushed when the channel comes up. *(Per-`type` routing finalizes with the
+  Phase 4 payload contract.)*
+
+Wiring: `PushNotificationService` is a DI singleton; `app.dart` enables it on
+`AuthAuthenticated` and disables on `AuthUnauthenticated`.
+
+**Exit (pending validation):** compiles + analyzes clean; end-to-end token
+registration verified once Phase 1 native build is green AND the backend
+Phase 3 endpoint is live.
 - [ ] **2.9** Badge handling: clear the app icon badge when the relevant screen
   is opened.
 
