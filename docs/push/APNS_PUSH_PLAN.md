@@ -115,8 +115,9 @@ already granted) and `disable()` on `AuthUnauthenticated`.
 **Exit (Dart validated):** ✅ analyzes clean (0 errors/warnings) + `flutter
 test` green, and Phase 1 native build is green on the Mac. End-to-end token
 registration still blocked on the backend Phase 3 endpoint going live.
-- [ ] **2.9** Badge handling: clear the app icon badge when the relevant screen
-  is opened.
+- [x] **2.9** Badge handling: `clearBadge()` (native `UNUserNotificationCenter
+  .setBadgeCount(0)` / `applicationIconBadgeNumber = 0`) is invoked when the
+  Alerts center opens.
 
 **Exit:** a real device registers its token with the backend, receives a test
 push in all app states, and tapping it routes correctly.

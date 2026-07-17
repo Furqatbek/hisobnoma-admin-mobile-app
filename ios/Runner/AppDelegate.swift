@@ -65,9 +65,30 @@ import UserNotifications
       }
     case "getToken":
       result(cachedToken)
+    case "clearBadge":
+      // Clear the app-icon badge (e.g. when the user opens the Alerts center).
+      if #available(iOS 16.0, *) {
+        UNUserNotificationCenter.current().setBadgeCount(0)
+      } else {
+        UIApplication.shared.applicationIconBadgeNumber = 0
+      }
+      result(nil)
     default:
       result(FlutterMethodNotImplemented)
     }
+  }
+
+  /// Extract the app's routing payload from a notification. The backend sends
+  /// `type`/`id`/`route` at the TOP LEVEL alongside `aps` (not nested under a
+  /// `data` key), so collect every top-level key except Apple's `aps`.
+  private func routingData(from userInfo: [AnyHashable: Any]) -> [String: Any] {
+    var data: [String: Any] = [:]
+    for (key, value) in userInfo {
+      if let k = key as? String, k != "aps" {
+        data[k] = value
+      }
+    }
+    return data
   }
 
   override func application(
@@ -109,7 +130,7 @@ import UserNotifications
     withCompletionHandler completionHandler: @escaping () -> Void
   ) {
     let userInfo = response.notification.request.content.userInfo
-    let data = (userInfo["data"] as? [String: Any]) ?? [:]
+    let data = routingData(from: userInfo)
     if let channel = pushChannel {
       channel.invokeMethod("onNotificationTap", arguments: data)
     } else {

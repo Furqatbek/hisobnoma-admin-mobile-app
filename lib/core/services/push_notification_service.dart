@@ -130,6 +130,18 @@ class PushNotificationService {
     }
   }
 
+  /// Clear the app-icon badge natively (e.g. when the user opens the Alerts
+  /// center). No-op on platforms without the native handler.
+  Future<void> clearBadge() async {
+    try {
+      await _channel.invokeMethod<void>('clearBadge');
+    } on PlatformException catch (_) {
+      // ignore
+    } on MissingPluginException catch (_) {
+      // No native handler (non-iOS platform) — no-op.
+    }
+  }
+
   /// Remove this device's token on logout so it stops receiving pushes. Keeps
   /// the user's master-toggle intent so the next login re-registers.
   Future<void> disable() async {

@@ -90,12 +90,34 @@ class _HisobnomaAppState extends State<HisobnomaApp>
     } catch (_) {}
   }
 
-  /// Route when the user taps a notification. Minimal for now: honor an
-  /// explicit `route` in the payload, else open Alerts. Richer per-type routing
-  /// arrives with the Phase 4 payload contract.
+  /// Route when the user taps a notification. The backend may send deep links
+  /// (e.g. "/orders/555") for detail screens this app doesn't have yet — going
+  /// to an unknown route would show a GoRouter error page, so we only honor
+  /// routes the app actually has and otherwise fall back by `type` to the
+  /// Alerts center (where the alert's content lives).
   void _handleNotificationTap(Map<String, dynamic> data) {
+    _router.go(_resolveNotificationRoute(data));
+  }
+
+  static const _knownRoutes = <String>{
+    AppRoutes.home,
+    AppRoutes.transactions,
+    AppRoutes.reports,
+    AppRoutes.settings,
+    AppRoutes.alerts,
+  };
+
+  String _resolveNotificationRoute(Map<String, dynamic> data) {
     final route = data['route'] as String?;
-    _router.go(route ?? AppRoutes.alerts);
+    if (route != null && _knownRoutes.contains(route)) return route;
+
+    switch (data['type'] as String?) {
+      case 'new_order':
+      case 'large_transaction':
+        return AppRoutes.transactions;
+      default:
+        return AppRoutes.alerts;
+    }
   }
 
   @override

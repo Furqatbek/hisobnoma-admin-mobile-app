@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
+import 'package:hisobnoma/core/di/injection.dart';
+import 'package:hisobnoma/core/services/push_notification_service.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/data/models/alert/alert_models.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
@@ -28,6 +30,9 @@ class _AlertsScreenState extends State<AlertsScreen> {
   void initState() {
     super.initState();
     context.read<AlertsCubit>().loadAlerts();
+    // Opening the Alerts center means the user has seen their notifications —
+    // clear the app-icon badge.
+    getIt<PushNotificationService>().clearBadge();
   }
 
   void _onFilterChanged(_AlertFilter filter) {
@@ -221,8 +226,7 @@ class _AlertList extends StatelessWidget {
                   decoration: BoxDecoration(
                     color:
                         isDark ? AppColors.darkCard : AppColors.cardBackground,
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusCard),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                     boxShadow: isDark
                         ? null
                         : [
@@ -280,9 +284,8 @@ class _AlertTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dismissible(
       key: ValueKey(alert.id),
-      direction: alert.isRead
-          ? DismissDirection.none
-          : DismissDirection.endToStart,
+      direction:
+          alert.isRead ? DismissDirection.none : DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSpacing.lg),
