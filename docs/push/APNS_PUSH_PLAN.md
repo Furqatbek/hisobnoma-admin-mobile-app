@@ -41,25 +41,28 @@ variant is noted where it differs.
 
 ---
 
-## Phase 1 — iOS native capability **[App]**
+## Phase 1 — iOS native capability **[App]** — 🔨 IN PROGRESS
 
-- [ ] **1.1** In Xcode (`ios/Runner.xcworkspace`) → Runner target → **Signing &
-  Capabilities** → **+ Capability** → **Push Notifications**. This writes the
-  `aps-environment` entitlement.
-- [ ] **1.2** Add **+ Capability → Background Modes** → check **Remote
-  notifications** (needed for background/silent delivery).
-- [ ] **1.3** Verify `ios/Runner/Runner.entitlements` contains
-  `aps-environment` (Xcode manages `development` in debug / `production` in
-  release automatically).
-- [ ] **1.4** In `AppDelegate.swift`: register for remote notifications on
-  launch, implement `didRegisterForRemoteNotificationsWithDeviceToken` (convert
-  the token `Data` → hex string) and `didFailToRegister…`, and expose the token
-  to Flutter over a `MethodChannel`.
-- [ ] **1.5** Add `NSUserNotificationsUsageDescription` is NOT required, but add
-  a clear purpose string in the permission prompt copy (Phase 2.2).
+- [ ] **1.1 [You, Xcode GUI]** In Xcode (`ios/Runner.xcworkspace`) → Runner
+  target → **Signing & Capabilities** → **+ Capability** → **Push
+  Notifications**. Writes `aps-environment` + `Runner.entitlements` and wires
+  the project file. *(Must be done in the GUI — editing the project file by
+  hand is error-prone.)*
+- [ ] **1.2 [You, Xcode GUI]** **+ Capability → Background Modes** → check
+  **Remote notifications**.
+- [ ] **1.3 [You]** Confirm `ios/Runner/Runner.entitlements` now exists with an
+  `aps-environment` key (Xcode created it in 1.1).
+- [x] **1.4 [App]** `AppDelegate.swift` written: sets the
+  `UNUserNotificationCenter` delegate, obtains the APNs token
+  (`didRegisterForRemoteNotificationsWithDeviceToken` → hex), and bridges token
+  + taps to Dart over the `hisobnoma/push` `MethodChannel` (built on the
+  implicit-engine registrar for the new scene architecture). ⚠️ Written blind —
+  expect one round of build-error fixes on the Mac.
+- [x] **1.5 [App]** Permission is requested via `UNUserNotificationCenter`
+  (Dart triggers it in Phase 2.2). No Info.plist usage string is required.
 
-**Exit:** the app compiles with the push entitlement and can obtain a raw APNs
-device token natively.
+**Exit:** the app builds with the push entitlement and obtains a raw APNs token
+natively, handing it to Dart.
 
 ---
 
