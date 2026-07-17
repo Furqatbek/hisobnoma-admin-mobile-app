@@ -152,48 +152,52 @@ via APNs, and prunes dead tokens.
 
 ---
 
-## Phase 4 — Payload contract & UX polish **[App]+[BE]**
+## Phase 4 — Payload contract & UX polish **[App]+[BE]** — ✅ DONE
 
-- [ ] **4.1** Agree the payload schema (title/body + a `type` and `id` in
-  `data` for routing). Document it in `docs/api/MOBILE_MODULE_API.md`.
-- [ ] **4.2** Localize notification text server-side (send in the user's
-  language — the app already supports uz/ru/en; store the user's locale or send
-  per-locale).
-- [ ] **4.3** Define notification categories if you want action buttons later
-  (optional).
-- [ ] **4.4** Rate/quiet-hours policy so users aren't spammed (optional).
+- [x] **4.1** Payload schema agreed and documented: backend
+  `docs/api/MOBILE_PUSH_API.md` + `docs/push/BACKEND_HANDOFF.md` §5. Routing keys
+  `type`/`id`/`route` are **top-level** (siblings of `aps`). Client dispatches on
+  them via `resolveNotificationRoute` (unit-tested), honoring known routes and
+  falling back by `type` to Alerts — unknown deep links never error.
+- [ ] **4.2 [BE]** Localize notification text server-side (send in the user's
+  language — the app supports uz/ru/en; store the user's locale or send
+  per-locale). Backend task; the client displays whatever text arrives.
+- [ ] **4.3** Notification categories / action buttons — optional, deferred.
+- [ ] **4.4** Rate/quiet-hours policy — optional, deferred (backend).
 
-**Exit:** a stable, documented payload contract both sides implement against.
+**Exit:** ✅ a stable, documented payload contract both sides implement against.
+4.2 remains a backend follow-up; 4.3/4.4 are optional polish.
 
 ---
 
-## Phase 5 — Testing & rollout **[You]+[App]+[BE]**
+## Phase 5 — Testing & rollout **[You]+[App]+[BE]** — 📋 RUNBOOK READY
 
-- [ ] **5.1** Sandbox test: TestFlight/dev build uses **sandbox** APNs. Register
-  a token, send from the backend to `api.sandbox.push.apple.com`, verify
-  delivery on a **real device** (remote push is unreliable on the simulator).
-- [ ] **5.2** Test all states: app foreground, backgrounded, and **terminated**
-  (killed) — plus tap-to-route in each.
-- [ ] **5.3** Test permission denied, token refresh, and logout-unregister.
-- [ ] **5.4** Test dead-token cleanup (uninstall the app → send → backend gets
-  `410` → token removed).
-- [ ] **5.5** Production test: an App Store/TestFlight-signed build uses
-  **production** APNs (`api.push.apple.com`). Confirm the backend picks the host
-  by the token's `environment`.
-- [ ] **5.6** Send the first real announcement to a small internal group before
-  a full broadcast.
+Turnkey checklist written in **`docs/push/TESTING_RUNBOOK.md`**. Blocked only on
+ops setting the `APNS_*` env vars and a real device — not on code. Execute it
+top to bottom; it covers 5.1–5.6 below.
+
+- [ ] **5.1** Sandbox test on a **real device** → `api.sandbox.push.apple.com`.
+- [ ] **5.2** All states: foreground, backgrounded, **terminated** + tap-route.
+- [ ] **5.3** Permission denied, token refresh, logout-unregister, master toggle.
+- [ ] **5.4** Dead-token cleanup (uninstall → send → `410` → removed).
+- [ ] **5.5** Production test → `api.push.apple.com`; confirm host chosen by the
+  token's `environment`.
+- [ ] **5.6** First real announcement to a small internal group, then broadcast.
 
 **Exit:** delivery verified in sandbox and production, all app states, with
-token hygiene working.
+token hygiene working. *(Automated: `resolveNotificationRoute` has unit tests;
+everything else needs a device.)*
 
 ---
 
-## Phase 6 — Release & follow-ups **[You]+[App]**
+## Phase 6 — Release & follow-ups **[You]+[App]** — 🚀 PREPPED
 
-- [ ] **6.1** Bump version, `flutter build ipa --release`, upload, submit. The
-  push capability + permission prompt may draw a brief App Review look — keep
-  the permission purpose honest ("to notify you about your business activity
-  and updates").
+- [x] **6.1a [App]** Version bumped to **`1.0.4+5`**; release notes drafted in
+  `docs/push/RELEASE_NOTES_1.0.4.md`.
+- [ ] **6.1b [You]** On the Mac: `flutter build ipa --release`, upload, submit.
+  The push capability + permission prompt may draw a brief App Review look —
+  keep the permission purpose honest ("to notify you about your business
+  activity and updates"). Requires Phase 1 Xcode capabilities already added.
 - [ ] **6.2** After approval, use the backend admin action to send announcements
   (e.g. "New update available", low-stock alerts, payment reminders).
 - [ ] **6.3** (Future) **Android push** — needs FCM (APNs can't reach Android).

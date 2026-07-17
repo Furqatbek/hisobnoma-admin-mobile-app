@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hisobnoma/core/di/injection.dart';
 import 'package:hisobnoma/core/network/interceptors/auth_interceptor.dart';
 import 'package:hisobnoma/core/router/app_router.dart';
+import 'package:hisobnoma/core/services/notification_router.dart';
 import 'package:hisobnoma/core/services/push_notification_service.dart';
 import 'package:hisobnoma/core/theme/app_theme.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
@@ -90,34 +91,10 @@ class _HisobnomaAppState extends State<HisobnomaApp>
     } catch (_) {}
   }
 
-  /// Route when the user taps a notification. The backend may send deep links
-  /// (e.g. "/orders/555") for detail screens this app doesn't have yet — going
-  /// to an unknown route would show a GoRouter error page, so we only honor
-  /// routes the app actually has and otherwise fall back by `type` to the
-  /// Alerts center (where the alert's content lives).
+  /// Route when the user taps a notification. Resolution (deep-link safety,
+  /// type fallback) lives in [resolveNotificationRoute] so it can be unit-tested.
   void _handleNotificationTap(Map<String, dynamic> data) {
-    _router.go(_resolveNotificationRoute(data));
-  }
-
-  static const _knownRoutes = <String>{
-    AppRoutes.home,
-    AppRoutes.transactions,
-    AppRoutes.reports,
-    AppRoutes.settings,
-    AppRoutes.alerts,
-  };
-
-  String _resolveNotificationRoute(Map<String, dynamic> data) {
-    final route = data['route'] as String?;
-    if (route != null && _knownRoutes.contains(route)) return route;
-
-    switch (data['type'] as String?) {
-      case 'new_order':
-      case 'large_transaction':
-        return AppRoutes.transactions;
-      default:
-        return AppRoutes.alerts;
-    }
+    _router.go(resolveNotificationRoute(data));
   }
 
   @override
