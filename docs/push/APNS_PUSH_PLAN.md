@@ -23,22 +23,21 @@ variant is noted where it differs.
 
 ---
 
-## Phase 0 — Apple prerequisites (no code) **[You]**
+## Phase 0 — Apple prerequisites (no code) **[You]** — ✅ DONE
 
-- [ ] **0.1** In the Apple Developer portal → Certificates, Identifiers &
-  Profiles → **Identifiers** → your App ID (`com.hisobnoma.admin`) → enable the
-  **Push Notifications** capability. Save.
-- [ ] **0.2** Create the APNs auth key: **Keys** → **+** → check **Apple Push
-  Notifications service (APNs)** → Register → **download the `.p8` file** (you
-  can only download it ONCE). Record the **Key ID**.
-- [ ] **0.3** Record the three values the backend will need: **`.p8` file**,
-  **Key ID**, **Team ID** (top-right of the portal), and the **Bundle ID**
-  (`com.hisobnoma.admin`).
-- [ ] **0.4** (Only if you insist on `.p12`) Instead of 0.2, create an **Apple
-  Push Notification service SSL** certificate for the App ID, export it from
-  Keychain as `.p12` with its password. Remember it expires yearly.
+- [x] **0.1** Push Notifications enabled on the App ID `com.hisobnoma.admin`.
+- [x] **0.2** `.p8` APNs auth key created (Key ID + Team ID recorded).
+- [x] **0.4** `.p12` APNs SSL cert also exported (with password). Either works;
+  the backend should prefer the `.p8` (no yearly expiry).
 
-**Exit:** push enabled on the App ID; `.p8` (+ Key ID, Team ID) in hand.
+**Exit:** ✅ push enabled; both `.p8` and `.p12` in hand.
+
+**Hand to the backend team (Phase 3):**
+- Preferred — `.p8`: the file + **Key ID** + **Team ID** + **Bundle ID**
+  (`com.hisobnoma.admin`, which is also the `apns-topic`).
+- Or `.p12`: the file + its **password** + Bundle ID. Note it **expires yearly**.
+- APNs hosts: `api.sandbox.push.apple.com` (TestFlight/dev tokens),
+  `api.push.apple.com` (App Store tokens) — route by the token's `environment`.
 
 ---
 
