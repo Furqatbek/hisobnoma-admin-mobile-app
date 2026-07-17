@@ -92,8 +92,25 @@ dependency. Foreground display is handled **natively** in `AppDelegate`
   flushed when the channel comes up. *(Per-`type` routing finalizes with the
   Phase 4 payload contract.)*
 
-Wiring: `PushNotificationService` is a DI singleton; `app.dart` enables it on
-`AuthAuthenticated` and disables on `AuthUnauthenticated`.
+Wiring: `PushNotificationService` is a DI singleton; `app.dart` calls
+`syncOnLogin()` on `AuthAuthenticated` (silent re-register only for users who
+already granted) and `disable()` on `AuthUnauthenticated`.
+
+### Notification frontend (UI) — ✅ ADDED
+
+- [x] **Bell + unread badge** in the dashboard AppBar (`NotificationBell`)
+  opening the Alerts center — previously the fully-built Alerts screen was
+  unreachable except via a push tap.
+- [x] **Permission priming** — instead of firing the iOS dialog cold at login,
+  a branded `NotificationPrimingSheet` is shown **after the user's first sale**
+  (gated by `shouldPrimeAfterSale`); tapping "Enable notifications" triggers the
+  real OS prompt. New users are never prompted cold; returning users who already
+  granted are re-registered silently.
+- [x] **Settings master toggle** — a single "Push notifications" switch
+  (`_NotificationsTile`) reflecting the user's intent; ON registers the token
+  (prompting the first time), OFF removes it so the backend stops sending.
+- Preference state persists in `SharedPreferences`
+  (`notifications_enabled` / `push_permission_prompted` / `push_priming_shown`).
 
 **Exit (Dart validated):** ✅ analyzes clean (0 errors/warnings) + `flutter
 test` green, and Phase 1 native build is green on the Mac. End-to-end token

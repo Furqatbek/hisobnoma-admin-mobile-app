@@ -203,7 +203,8 @@ class SRu extends S {
   @override
   String get noInventory => 'Склад пуст';
   @override
-  String get noInventoryHint => 'Синхронизируйте данные для отображения товаров';
+  String get noInventoryHint =>
+      'Синхронизируйте данные для отображения товаров';
   @override
   String get noTransactions => 'Нет операций';
   @override
@@ -487,6 +488,26 @@ class SRu extends S {
 
   @override
   String get notifications => 'Уведомления';
+
+  @override
+  String get pushNotifications => 'Push-уведомления';
+
+  @override
+  String get pushNotificationsDesc =>
+      'Получайте уведомления о новых продажах, низком остатке и предстоящих платежах.';
+
+  @override
+  String get enableNotificationsTitle => 'Включить уведомления?';
+
+  @override
+  String get enableNotificationsBody =>
+      'Получайте уведомления о новых продажах, низком остатке и предстоящих платежах — даже когда приложение закрыто.';
+
+  @override
+  String get enableNotificationsCta => 'Включить уведомления';
+
+  @override
+  String get notNow => 'Не сейчас';
 
   @override
   String get alertPreferences => 'Настройки оповещений';

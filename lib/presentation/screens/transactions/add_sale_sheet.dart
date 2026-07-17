@@ -7,10 +7,13 @@ import 'package:uuid/uuid.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
+import 'package:hisobnoma/core/di/injection.dart';
+import 'package:hisobnoma/core/services/push_notification_service.dart';
 import 'package:hisobnoma/core/utils/formatters.dart';
 import 'package:hisobnoma/core/utils/money.dart';
 import 'package:hisobnoma/data/models/transaction/transaction_models.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
+import 'package:hisobnoma/presentation/widgets/common/notification_priming_sheet.dart';
 import 'package:hisobnoma/presentation/blocs/shift/shift_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
 import 'package:hisobnoma/presentation/screens/transactions/client_selection_sheet.dart';
@@ -1058,6 +1061,10 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
       unawaited(cubit.loadData());
 
       final t = S.of(context);
+      // Capture the app-level navigator context before popping the sheet, so
+      // the after-sale notification priming can be shown on a context that
+      // survives this sheet's disposal.
+      final rootContext = Navigator.of(context, rootNavigator: true).context;
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1069,6 +1076,18 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
           backgroundColor: AppColors.income,
         ),
       );
+
+      // After the user's first sale, gently ask to turn on notifications
+      // (no-op if already asked or the user opted out). Deferred a frame so it
+      // opens after the sheet finishes closing.
+      final pushService = getIt<PushNotificationService>();
+      if (pushService.shouldPrimeAfterSale) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (rootContext.mounted) {
+            NotificationPrimingSheet.showIfNeeded(rootContext, pushService);
+          }
+        });
+      }
     } catch (e) {
       // Sale failed: keep the sheet open with the cart intact and show the
       // real backend error so the cashier does not hand over unpaid goods.

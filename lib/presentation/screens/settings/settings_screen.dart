@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
+import 'package:hisobnoma/core/di/injection.dart';
+import 'package:hisobnoma/core/services/push_notification_service.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/auth/auth_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/settings/settings_cubit.dart';
@@ -46,6 +48,16 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     onTap: () => _showLanguagePicker(context, state.locale),
                   ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // -- Notifications --
+              _SectionHeader(title: t.notifications),
+              _SettingsGroup(
+                isDark: isDark,
+                children: const [
+                  _NotificationsTile(),
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -195,6 +207,77 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
+/// Master push-notification toggle. Reflects the user's intent; enabling
+/// triggers the iOS permission prompt (first time) and registers the device
+/// token, disabling removes it so the backend stops sending.
+class _NotificationsTile extends StatefulWidget {
+  const _NotificationsTile();
+
+  @override
+  State<_NotificationsTile> createState() => _NotificationsTileState();
+}
+
+class _NotificationsTileState extends State<_NotificationsTile> {
+  late final PushNotificationService _push = getIt<PushNotificationService>();
+  late bool _enabled = _push.enabledPreference;
+
+  Future<void> _onChanged(bool value) async {
+    HapticFeedback.selectionClick();
+    setState(() => _enabled = value);
+    await _push.setEnabledPreference(value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final t = S.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.notifications_none_rounded,
+            size: 22,
+            color: AppColors.royalBlue,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  t.pushNotifications,
+                  style: AppTypography.body.copyWith(
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  t.pushNotificationsDesc,
+                  style: AppTypography.caption2.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Switch.adaptive(
+            value: _enabled,
+            onChanged: _onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SettingsGroup extends StatelessWidget {
   final bool isDark;
   final List<Widget> children;
@@ -290,9 +373,7 @@ class _ThemeTile extends StatelessWidget {
                   isDark: isDark,
                   onTap: () {
                     HapticFeedback.selectionClick();
-                    context
-                        .read<SettingsCubit>()
-                        .setThemeMode(ThemeMode.light);
+                    context.read<SettingsCubit>().setThemeMode(ThemeMode.light);
                   },
                 ),
                 _ThemeOption(
@@ -414,9 +495,7 @@ class _LanguagePickerSheet extends StatelessWidget {
                 width: 36,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.darkSeparator
-                      : AppColors.separator,
+                  color: isDark ? AppColors.darkSeparator : AppColors.separator,
                   borderRadius: BorderRadius.circular(2.5),
                 ),
               ),
@@ -439,8 +518,7 @@ class _LanguagePickerSheet extends StatelessWidget {
                     color: isSelected
                         ? AppColors.royalBlue.withValues(alpha: 0.1)
                         : (isDark ? AppColors.darkFill : AppColors.fill),
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusSm),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
                   child: Center(
                     child: Text(
@@ -459,8 +537,7 @@ class _LanguagePickerSheet extends StatelessWidget {
                 title: Text(
                   label,
                   style: AppTypography.body.copyWith(
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w400,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                     color: isDark
                         ? AppColors.darkTextPrimary
                         : AppColors.textPrimary,
@@ -541,8 +618,8 @@ class _SyncInfoSheetState extends State<_SyncInfoSheet> {
                             height: 48,
                             child: CircularProgressIndicator.adaptive(),
                           )
-                        : Icon(Icons.sync, size: 48,
-                            color: AppColors.royalBlue),
+                        : Icon(Icons.sync,
+                            size: 48, color: AppColors.royalBlue),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
@@ -587,8 +664,7 @@ class _SyncInfoSheetState extends State<_SyncInfoSheet> {
                   ),
                   if (info != null && info.pendingActions > 0)
                     Padding(
-                      padding:
-                          const EdgeInsets.only(top: AppSpacing.sm),
+                      padding: const EdgeInsets.only(top: AppSpacing.sm),
                       child: Text(
                         t.pendingOfflineActions('${info.pendingActions}'),
                         style: AppTypography.footnote.copyWith(
@@ -645,9 +721,8 @@ class _SyncItem extends StatelessWidget {
           Icon(
             icon,
             size: 20,
-            color: isDark
-                ? AppColors.darkTextSecondary
-                : AppColors.textSecondary,
+            color:
+                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(

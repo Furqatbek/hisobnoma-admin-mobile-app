@@ -48,14 +48,16 @@ class _HisobnomaAppState extends State<HisobnomaApp>
     // session never strands the user on silently-failing screens.
     getIt<AuthInterceptor>().onTokenExpired = _authCubit.handleSessionExpired;
 
-    // Push notifications: register this device's token once authenticated,
-    // unregister on logout. Attached before checkAuth so the login emitted by
-    // checkAuth is caught. No-op on non-iOS until Android/FCM lands.
+    // Push notifications: on login we only silently re-register a token for
+    // users who already granted permission — new users are asked after their
+    // first sale (see AddSaleSheet), not prompted cold here. Unregister on
+    // logout. Attached before checkAuth so the login emitted by checkAuth is
+    // caught. No-op on non-iOS until Android/FCM lands.
     _pushService = getIt<PushNotificationService>();
     _pushService.onNotificationTap = _handleNotificationTap;
     _authSub = _authCubit.stream.listen((state) {
       if (state is AuthAuthenticated) {
-        _pushService.enable();
+        _pushService.syncOnLogin();
       } else if (state is AuthUnauthenticated) {
         _pushService.disable();
       }

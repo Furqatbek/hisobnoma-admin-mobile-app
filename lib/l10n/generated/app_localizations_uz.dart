@@ -489,6 +489,26 @@ class SUz extends S {
   String get notifications => 'Билдиришномалар';
 
   @override
+  String get pushNotifications => 'Пуш билдиришномалар';
+
+  @override
+  String get pushNotificationsDesc =>
+      'Янги сотувлар, кам қолган товарлар ва тўловлар ҳақида билдиришнома олинг.';
+
+  @override
+  String get enableNotificationsTitle => 'Билдиришномалар ёқилсинми?';
+
+  @override
+  String get enableNotificationsBody =>
+      'Илова ёпиқ бўлса ҳам, янги сотувлар, кам қолган товарлар ва тўловлар ҳақида билдиришнома олинг.';
+
+  @override
+  String get enableNotificationsCta => 'Билдиришномаларни ёқиш';
+
+  @override
+  String get notNow => 'Ҳозир эмас';
+
+  @override
   String get alertPreferences => 'Огоҳлантириш созламалари';
 
   @override

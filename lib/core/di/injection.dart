@@ -85,7 +85,10 @@ Future<void> configureDependencies() async {
     ),
   );
   getIt.registerLazySingleton<PushNotificationService>(
-    () => PushNotificationService(deviceRepository: getIt()),
+    () => PushNotificationService(
+      deviceRepository: getIt(),
+      preferences: getIt(),
+    ),
   );
 
   // Blocs / Cubits

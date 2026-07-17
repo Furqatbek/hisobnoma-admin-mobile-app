@@ -489,6 +489,26 @@ class SEn extends S {
   String get notifications => 'Notifications';
 
   @override
+  String get pushNotifications => 'Push notifications';
+
+  @override
+  String get pushNotificationsDesc =>
+      'Get notified about new sales, low stock and payments due.';
+
+  @override
+  String get enableNotificationsTitle => 'Turn on notifications?';
+
+  @override
+  String get enableNotificationsBody =>
+      'Get notified about new sales, low stock and payments due — even when the app is closed.';
+
+  @override
+  String get enableNotificationsCta => 'Enable notifications';
+
+  @override
+  String get notNow => 'Not now';
+
+  @override
   String get alertPreferences => 'Alert Preferences';
 
   @override
