@@ -41,23 +41,23 @@ variant is noted where it differs.
 
 ---
 
-## Phase 1 — iOS native capability **[App]** — 🔨 IN PROGRESS
+## Phase 1 — iOS native capability **[App]** — ✅ DONE
 
-- [ ] **1.1 [You, Xcode GUI]** In Xcode (`ios/Runner.xcworkspace`) → Runner
+- [x] **1.1 [You, Xcode GUI]** In Xcode (`ios/Runner.xcworkspace`) → Runner
   target → **Signing & Capabilities** → **+ Capability** → **Push
   Notifications**. Writes `aps-environment` + `Runner.entitlements` and wires
   the project file. *(Must be done in the GUI — editing the project file by
   hand is error-prone.)*
-- [ ] **1.2 [You, Xcode GUI]** **+ Capability → Background Modes** → check
+- [x] **1.2 [You, Xcode GUI]** **+ Capability → Background Modes** → check
   **Remote notifications**.
-- [ ] **1.3 [You]** Confirm `ios/Runner/Runner.entitlements` now exists with an
+- [x] **1.3 [You]** Confirmed `ios/Runner/Runner.entitlements` now exists with an
   `aps-environment` key (Xcode created it in 1.1).
 - [x] **1.4 [App]** `AppDelegate.swift` written: sets the
   `UNUserNotificationCenter` delegate, obtains the APNs token
   (`didRegisterForRemoteNotificationsWithDeviceToken` → hex), and bridges token
   + taps to Dart over the `hisobnoma/push` `MethodChannel` (built on the
-  implicit-engine registrar for the new scene architecture). ⚠️ Written blind —
-  expect one round of build-error fixes on the Mac.
+  implicit-engine registrar for the new scene architecture). ✅ Builds green on
+  the Mac after the iOS-14 availability fix.
 - [x] **1.5 [App]** Permission is requested via `UNUserNotificationCenter`
   (Dart triggers it in Phase 2.2). No Info.plist usage string is required.
 
@@ -95,9 +95,9 @@ dependency. Foreground display is handled **natively** in `AppDelegate`
 Wiring: `PushNotificationService` is a DI singleton; `app.dart` enables it on
 `AuthAuthenticated` and disables on `AuthUnauthenticated`.
 
-**Exit (pending validation):** compiles + analyzes clean; end-to-end token
-registration verified once Phase 1 native build is green AND the backend
-Phase 3 endpoint is live.
+**Exit (Dart validated):** ✅ analyzes clean (0 errors/warnings) + `flutter
+test` green, and Phase 1 native build is green on the Mac. End-to-end token
+registration still blocked on the backend Phase 3 endpoint going live.
 - [ ] **2.9** Badge handling: clear the app icon badge when the relevant screen
   is opened.
 
