@@ -9,10 +9,9 @@ part 'transactions_state.dart';
 class TransactionsCubit extends Cubit<TransactionsState> {
   final TransactionRepository _transactionRepository;
 
-  TransactionsCubit({
-    required TransactionRepository transactionRepository,
-  })  : _transactionRepository = transactionRepository,
-        super(const TransactionsInitial());
+  TransactionsCubit({required TransactionRepository transactionRepository})
+    : _transactionRepository = transactionRepository,
+      super(const TransactionsInitial());
 
   /// Exposed for direct access by widgets that need to call repo methods
   /// without going through cubit state (e.g. loading terminals, regions).
@@ -33,19 +32,25 @@ class TransactionsCubit extends Cubit<TransactionsState> {
           products = r.where((p) => p.active).toList();
         }),
         _transactionRepository.getCustomerBalances().then((report) {
-          debtors =
-              report.customerBalances.where((c) => c.netBalance > 0).toList();
+          debtors = report.customerBalances
+              .where((c) => c.netBalance > 0)
+              .toList();
         }),
-        _transactionRepository.getTransactions().then((r) {
-          sales = r;
-        }).catchError((Object _) {}),
+        _transactionRepository
+            .getTransactions()
+            .then((r) {
+              sales = r;
+            })
+            .catchError((Object _) {}),
       ]);
 
-      emit(TransactionsDataLoaded(
-        products: products,
-        debtors: debtors,
-        sales: sales,
-      ));
+      emit(
+        TransactionsDataLoaded(
+          products: products,
+          debtors: debtors,
+          sales: sales,
+        ),
+      );
     } catch (e) {
       emit(TransactionsError(message: extractErrorMessage(e)));
     }
@@ -88,8 +93,9 @@ class TransactionsCubit extends Cubit<TransactionsState> {
   /// Load delivery villages for a region
   Future<void> loadDeliveryVillages(int regionId) async {
     try {
-      final villages =
-          await _transactionRepository.getDeliveryVillages(regionId);
+      final villages = await _transactionRepository.getDeliveryVillages(
+        regionId,
+      );
       emit(DeliveryVillagesLoaded(villages: villages));
     } catch (e) {
       emit(TransactionsError(message: extractErrorMessage(e)));
@@ -145,10 +151,7 @@ class TransactionsCubit extends Cubit<TransactionsState> {
   }
 
   /// Create a new finance customer (for debt sale)
-  Future<void> createCustomer({
-    required String name,
-    String? phone,
-  }) async {
+  Future<void> createCustomer({required String name, String? phone}) async {
     emit(const TransactionsLoading());
     try {
       final customer = await _transactionRepository.createFinanceCustomer(

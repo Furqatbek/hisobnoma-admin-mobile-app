@@ -41,8 +41,9 @@ Future<void> showErrorDialog(BuildContext context, Object error) {
             Text(
               'Error',
               style: AppTypography.headline.copyWith(
-                color:
-                    isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
               ),
             ),
           ],
@@ -50,8 +51,9 @@ Future<void> showErrorDialog(BuildContext context, Object error) {
         content: Text(
           message,
           style: AppTypography.body.copyWith(
-            color:
-                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
           ),
         ),
         actions: [

@@ -26,7 +26,8 @@ class LoginResponse {
       expiresIn: json['expiresIn'] as int? ?? 86400,
       userId: user['id'] as int? ?? json['userId'] as int? ?? 0,
       tenantId: user['tenantId'] as int? ?? json['tenantId'] as int? ?? 0,
-      permissions: (user['permissions'] as List?)?.cast<String>() ??
+      permissions:
+          (user['permissions'] as List?)?.cast<String>() ??
           (json['permissions'] as List?)?.cast<String>() ??
           [],
     );

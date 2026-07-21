@@ -59,8 +59,16 @@ class DashboardLoaded extends DashboardState {
   }
 
   @override
-  List<Object?> get props =>
-      [revenue, inventory, financial, chartData, lastUpdated, partialErrors, usdRate, usdDiff];
+  List<Object?> get props => [
+    revenue,
+    inventory,
+    financial,
+    chartData,
+    lastUpdated,
+    partialErrors,
+    usdRate,
+    usdDiff,
+  ];
 }
 
 class DashboardError extends DashboardState {

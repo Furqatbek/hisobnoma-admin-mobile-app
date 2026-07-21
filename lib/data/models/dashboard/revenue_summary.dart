@@ -37,12 +37,9 @@ class RevenueSummary {
       lastWeekRevenue: (json['lastWeekRevenue'] as num?)?.toDouble() ?? 0,
       thisMonthRevenue: (json['thisMonthRevenue'] as num?)?.toDouble() ?? 0,
       lastMonthRevenue: (json['lastMonthRevenue'] as num?)?.toDouble() ?? 0,
-      todayChangePercent:
-          (json['todayChangePercent'] as num?)?.toDouble() ?? 0,
-      weekChangePercent:
-          (json['weekChangePercent'] as num?)?.toDouble() ?? 0,
-      monthChangePercent:
-          (json['monthChangePercent'] as num?)?.toDouble() ?? 0,
+      todayChangePercent: (json['todayChangePercent'] as num?)?.toDouble() ?? 0,
+      weekChangePercent: (json['weekChangePercent'] as num?)?.toDouble() ?? 0,
+      monthChangePercent: (json['monthChangePercent'] as num?)?.toDouble() ?? 0,
       todayTransactionCount:
           (json['todayTransactionCount'] as num?)?.toInt() ?? 0,
       thisWeekTransactionCount:

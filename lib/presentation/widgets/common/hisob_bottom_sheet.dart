@@ -48,9 +48,7 @@ class HisobBottomSheet extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
-      constraints: BoxConstraints(
-        maxHeight: maxHeight ?? screenHeight * 0.9,
-      ),
+      constraints: BoxConstraints(maxHeight: maxHeight ?? screenHeight * 0.9),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkElevated : AppColors.white,
         borderRadius: const BorderRadius.vertical(

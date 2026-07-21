@@ -89,16 +89,11 @@ class DatabaseHelper {
     ''');
 
     // Indexes for search performance
-    await db.execute(
-        'CREATE INDEX idx_products_barcode ON products(barcode)');
-    await db.execute(
-        'CREATE INDEX idx_products_sku ON products(sku)');
-    await db.execute(
-        'CREATE INDEX idx_products_name ON products(name)');
-    await db.execute(
-        'CREATE INDEX idx_customers_code ON customers(code)');
-    await db.execute(
-        'CREATE INDEX idx_customers_phone ON customers(phone)');
+    await db.execute('CREATE INDEX idx_products_barcode ON products(barcode)');
+    await db.execute('CREATE INDEX idx_products_sku ON products(sku)');
+    await db.execute('CREATE INDEX idx_products_name ON products(name)');
+    await db.execute('CREATE INDEX idx_customers_code ON customers(code)');
+    await db.execute('CREATE INDEX idx_customers_phone ON customers(phone)');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -111,24 +106,20 @@ class DatabaseHelper {
     final db = await database;
     final batch = db.batch();
     for (final product in products) {
-      batch.insert(
-        'products',
-        {
-          'id': product['id'],
-          'sku': product['sku'],
-          'barcode': product['barcode'],
-          'name': product['name'],
-          'category_id': product['categoryId'],
-          'category_name': product['categoryName'],
-          'selling_price': product['sellingPrice'],
-          'cost_price': product['costPrice'],
-          'unit_of_measure': product['unitOfMeasure'],
-          'track_inventory': product['trackInventory'] == true ? 1 : 0,
-          'active': product['active'] == true ? 1 : 0,
-          'updated_at': product['updatedAt'],
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      batch.insert('products', {
+        'id': product['id'],
+        'sku': product['sku'],
+        'barcode': product['barcode'],
+        'name': product['name'],
+        'category_id': product['categoryId'],
+        'category_name': product['categoryName'],
+        'selling_price': product['sellingPrice'],
+        'cost_price': product['costPrice'],
+        'unit_of_measure': product['unitOfMeasure'],
+        'track_inventory': product['trackInventory'] == true ? 1 : 0,
+        'active': product['active'] == true ? 1 : 0,
+        'updated_at': product['updatedAt'],
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
     await batch.commit(noResult: true);
   }
@@ -160,22 +151,18 @@ class DatabaseHelper {
     final db = await database;
     final batch = db.batch();
     for (final customer in customers) {
-      batch.insert(
-        'customers',
-        {
-          'id': customer['id'],
-          'code': customer['code'],
-          'name': customer['name'],
-          'phone': customer['phone'],
-          'email': customer['email'],
-          'price_list_id': customer['priceListId'],
-          'credit_limit': customer['creditLimit'],
-          'current_balance': customer['currentBalance'],
-          'active': customer['active'] == true ? 1 : 0,
-          'updated_at': customer['updatedAt'],
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      batch.insert('customers', {
+        'id': customer['id'],
+        'code': customer['code'],
+        'name': customer['name'],
+        'phone': customer['phone'],
+        'email': customer['email'],
+        'price_list_id': customer['priceListId'],
+        'credit_limit': customer['creditLimit'],
+        'current_balance': customer['currentBalance'],
+        'active': customer['active'] == true ? 1 : 0,
+        'updated_at': customer['updatedAt'],
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
     await batch.commit(noResult: true);
   }
@@ -196,18 +183,14 @@ class DatabaseHelper {
     final db = await database;
     final batch = db.batch();
     for (final category in categories) {
-      batch.insert(
-        'categories',
-        {
-          'id': category['id'],
-          'name': category['name'],
-          'parent_id': category['parentId'],
-          'sort_order': category['sortOrder'],
-          'active': category['active'] == true ? 1 : 0,
-          'updated_at': category['updatedAt'],
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      batch.insert('categories', {
+        'id': category['id'],
+        'name': category['name'],
+        'parent_id': category['parentId'],
+        'sort_order': category['sortOrder'],
+        'active': category['active'] == true ? 1 : 0,
+        'updated_at': category['updatedAt'],
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
     await batch.commit(noResult: true);
   }
@@ -237,15 +220,11 @@ class DatabaseHelper {
 
   Future<void> setLastSyncAt(String entity, DateTime syncAt) async {
     final db = await database;
-    await db.insert(
-      'sync_metadata',
-      {
-        'entity': entity,
-        'last_sync_at': syncAt.toIso8601String(),
-        'sync_version': '1.0',
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('sync_metadata', {
+      'entity': entity,
+      'last_sync_at': syncAt.toIso8601String(),
+      'sync_version': '1.0',
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // === Offline Queue ===

@@ -13,10 +13,7 @@ abstract final class AppTheme {
   static ThemeData get dark => DarkTheme.data;
 
   /// Card decoration with subtle shadow
-  static BoxDecoration cardDecoration({
-    required bool isDark,
-    Color? color,
-  }) {
+  static BoxDecoration cardDecoration({required bool isDark, Color? color}) {
     return BoxDecoration(
       color: color ?? (isDark ? AppColors.darkCard : AppColors.cardBackground),
       borderRadius: BorderRadius.circular(AppSpacing.radiusCard),

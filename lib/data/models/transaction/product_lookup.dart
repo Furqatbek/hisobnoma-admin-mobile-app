@@ -37,9 +37,9 @@ class ProductLookup {
       category: json['category'] as String? ?? '',
       uom: json['uom'] as String? ?? 'pcs',
       trackInventory: json['trackInventory'] as bool? ?? true,
-      stockByLocation: (json['stockByLocation'] as List?)
-              ?.map(
-                  (e) => StockByLocation.fromJson(e as Map<String, dynamic>))
+      stockByLocation:
+          (json['stockByLocation'] as List?)
+              ?.map((e) => StockByLocation.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
     );

@@ -97,15 +97,18 @@ abstract final class DarkTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-          borderSide:
-              const BorderSide(color: AppColors.royalBlueLight, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppColors.royalBlueLight,
+            width: 1.5,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
           borderSide: const BorderSide(color: AppColors.error),
         ),
-        hintStyle:
-            AppTypography.body.copyWith(color: AppColors.darkTextSecondary),
+        hintStyle: AppTypography.body.copyWith(
+          color: AppColors.darkTextSecondary,
+        ),
         labelStyle: AppTypography.subheadline.copyWith(
           color: AppColors.darkTextSecondary,
         ),

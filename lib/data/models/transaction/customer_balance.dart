@@ -69,8 +69,7 @@ class CustomerBalanceReport {
       customerBalances: (json['customerBalances'] as List? ?? [])
           .map((e) => CustomerBalance.fromJson(e as Map<String, dynamic>))
           .toList(),
-      totalReceivables:
-          (json['totalReceivables'] as num?)?.toDouble() ?? 0,
+      totalReceivables: (json['totalReceivables'] as num?)?.toDouble() ?? 0,
       totalCredits: (json['totalCredits'] as num?)?.toDouble() ?? 0,
       totalNetBalance: (json['totalNetBalance'] as num?)?.toDouble() ?? 0,
       customerCount: json['customerCount'] as int? ?? 0,

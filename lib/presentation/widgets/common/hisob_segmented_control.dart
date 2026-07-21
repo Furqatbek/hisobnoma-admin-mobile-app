@@ -64,15 +64,16 @@ class HisobSegmentedControl<T> extends StatelessWidget {
                   child: Text(
                     segment.label,
                     style: AppTypography.subheadline.copyWith(
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                       color: isSelected
                           ? (isDark
-                              ? AppColors.darkTextPrimary
-                              : AppColors.textPrimary)
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary)
                           : (isDark
-                              ? AppColors.darkTextSecondary
-                              : AppColors.textSecondary),
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary),
                     ),
                   ),
                 ),

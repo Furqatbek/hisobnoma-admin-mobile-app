@@ -92,9 +92,7 @@ Future<void> configureDependencies() async {
   );
 
   // Blocs / Cubits
-  getIt.registerFactory<AuthCubit>(
-    () => AuthCubit(authRepository: getIt()),
-  );
+  getIt.registerFactory<AuthCubit>(() => AuthCubit(authRepository: getIt()));
   getIt.registerFactory<DashboardCubit>(
     () => DashboardCubit(dashboardRepository: getIt()),
   );
@@ -113,7 +111,5 @@ Future<void> configureDependencies() async {
   getIt.registerFactory<ShiftCubit>(
     () => ShiftCubit(transactionRepository: getIt()),
   );
-  getIt.registerFactory<SyncCubit>(
-    () => SyncCubit(syncService: getIt()),
-  );
+  getIt.registerFactory<SyncCubit>(() => SyncCubit(syncService: getIt()));
 }

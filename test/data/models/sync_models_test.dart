@@ -176,9 +176,7 @@ void main() {
     });
 
     test('fromJson handles missing items key', () {
-      final json = {
-        'lastSyncAt': '2026-03-15T10:00:00.000Z',
-      };
+      final json = {'lastSyncAt': '2026-03-15T10:00:00.000Z'};
 
       final response = SyncResponse.fromJson(
         json,

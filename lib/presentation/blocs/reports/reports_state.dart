@@ -31,7 +31,13 @@ class ReportsLoaded extends ReportsState {
   });
 
   @override
-  List<Object?> get props => [chartData, revenueSummary, selectedPeriod, inventory, financial];
+  List<Object?> get props => [
+    chartData,
+    revenueSummary,
+    selectedPeriod,
+    inventory,
+    financial,
+  ];
 }
 
 class ReportsError extends ReportsState {

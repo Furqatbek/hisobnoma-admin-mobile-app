@@ -33,9 +33,6 @@ class DeviceRepository {
   /// Remove this device's push token (called on logout) so a logged-out phone
   /// stops receiving that user's notifications.
   Future<void> removePushToken({required String token}) async {
-    await _apiClient.delete(
-      ApiEndpoints.pushToken,
-      data: {'token': token},
-    );
+    await _apiClient.delete(ApiEndpoints.pushToken, data: {'token': token});
   }
 }

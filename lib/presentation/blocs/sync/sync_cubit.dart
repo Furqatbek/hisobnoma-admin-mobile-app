@@ -11,8 +11,8 @@ class SyncCubit extends Cubit<SyncState> {
   StreamSubscription<SyncStatus>? _statusSub;
 
   SyncCubit({required SyncService syncService})
-      : _syncService = syncService,
-        super(const SyncState()) {
+    : _syncService = syncService,
+      super(const SyncState()) {
     _statusSub = _syncService.statusStream.listen(_onStatusChanged);
   }
 
@@ -25,16 +25,15 @@ class SyncCubit extends Cubit<SyncState> {
       case SyncOffline():
         emit(state.copyWith(status: SyncUIStatus.offline));
       case SyncCompleted(:final syncedAt, :final itemCount):
-        emit(state.copyWith(
-          status: SyncUIStatus.completed,
-          lastSyncAt: syncedAt,
-          lastSyncCount: itemCount,
-        ));
+        emit(
+          state.copyWith(
+            status: SyncUIStatus.completed,
+            lastSyncAt: syncedAt,
+            lastSyncCount: itemCount,
+          ),
+        );
       case SyncError(:final message):
-        emit(state.copyWith(
-          status: SyncUIStatus.error,
-          errorMessage: message,
-        ));
+        emit(state.copyWith(status: SyncUIStatus.error, errorMessage: message));
     }
   }
 
@@ -48,16 +47,17 @@ class SyncCubit extends Cubit<SyncState> {
     emit(state.copyWith(status: SyncUIStatus.syncing));
     try {
       final count = await _syncService.syncProducts();
-      emit(state.copyWith(
-        status: SyncUIStatus.completed,
-        lastSyncAt: DateTime.now(),
-        lastSyncCount: count,
-      ));
+      emit(
+        state.copyWith(
+          status: SyncUIStatus.completed,
+          lastSyncAt: DateTime.now(),
+          lastSyncCount: count,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: SyncUIStatus.error,
-        errorMessage: e.toString(),
-      ));
+      emit(
+        state.copyWith(status: SyncUIStatus.error, errorMessage: e.toString()),
+      );
     }
   }
 
@@ -65,16 +65,17 @@ class SyncCubit extends Cubit<SyncState> {
     emit(state.copyWith(status: SyncUIStatus.syncing));
     try {
       final count = await _syncService.syncCustomers();
-      emit(state.copyWith(
-        status: SyncUIStatus.completed,
-        lastSyncAt: DateTime.now(),
-        lastSyncCount: count,
-      ));
+      emit(
+        state.copyWith(
+          status: SyncUIStatus.completed,
+          lastSyncAt: DateTime.now(),
+          lastSyncCount: count,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: SyncUIStatus.error,
-        errorMessage: e.toString(),
-      ));
+      emit(
+        state.copyWith(status: SyncUIStatus.error, errorMessage: e.toString()),
+      );
     }
   }
 
@@ -82,16 +83,17 @@ class SyncCubit extends Cubit<SyncState> {
     emit(state.copyWith(status: SyncUIStatus.syncing));
     try {
       final count = await _syncService.syncCategories();
-      emit(state.copyWith(
-        status: SyncUIStatus.completed,
-        lastSyncAt: DateTime.now(),
-        lastSyncCount: count,
-      ));
+      emit(
+        state.copyWith(
+          status: SyncUIStatus.completed,
+          lastSyncAt: DateTime.now(),
+          lastSyncCount: count,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: SyncUIStatus.error,
-        errorMessage: e.toString(),
-      ));
+      emit(
+        state.copyWith(status: SyncUIStatus.error, errorMessage: e.toString()),
+      );
     }
   }
 

@@ -25,10 +25,10 @@ class SyncService {
     required ApiClient apiClient,
     required DatabaseHelper databaseHelper,
     required ConnectivityChecker connectivityChecker,
-  })  : _syncRepository = syncRepository,
-        _apiClient = apiClient,
-        _databaseHelper = databaseHelper,
-        _connectivityChecker = connectivityChecker;
+  }) : _syncRepository = syncRepository,
+       _apiClient = apiClient,
+       _databaseHelper = databaseHelper,
+       _connectivityChecker = connectivityChecker;
 
   /// Stream of sync status updates
   Stream<SyncStatus> get statusStream => _statusController.stream;
@@ -36,11 +36,11 @@ class SyncService {
   /// Start listening for connectivity changes and schedule periodic sync
   void initialize() {
     // Sync when connectivity is restored
-    _connectivitySub = _connectivityChecker.onConnectivityChanged.listen(
-      (isOnline) {
-        if (isOnline) syncAll();
-      },
-    );
+    _connectivitySub = _connectivityChecker.onConnectivityChanged.listen((
+      isOnline,
+    ) {
+      if (isOnline) syncAll();
+    });
 
     // Periodic sync every 15 minutes
     _periodicTimer = Timer.periodic(
@@ -76,10 +76,9 @@ class SyncService {
 
       final totalSynced = results.fold<int>(0, (sum, count) => sum + count);
 
-      _statusController.add(SyncStatus.completed(
-        syncedAt: DateTime.now(),
-        itemCount: totalSynced,
-      ));
+      _statusController.add(
+        SyncStatus.completed(syncedAt: DateTime.now(), itemCount: totalSynced),
+      );
     } catch (e) {
       _statusController.add(SyncStatus.error(message: e.toString()));
     } finally {
@@ -100,8 +99,9 @@ class SyncService {
   Future<SyncInfo> getSyncInfo() async {
     final productsLastSync = await _databaseHelper.getLastSyncAt('products');
     final customersLastSync = await _databaseHelper.getLastSyncAt('customers');
-    final categoriesLastSync =
-        await _databaseHelper.getLastSyncAt('categories');
+    final categoriesLastSync = await _databaseHelper.getLastSyncAt(
+      'categories',
+    );
 
     final db = await _databaseHelper.database;
     final productCount =
@@ -128,10 +128,7 @@ class SyncService {
 
   /// Enqueue an offline action (e.g. quick sale done while offline)
   Future<void> enqueueOfflineAction(String actionType, Object payload) async {
-    await _databaseHelper.enqueueAction(
-      actionType,
-      jsonEncode(payload),
-    );
+    await _databaseHelper.enqueueAction(actionType, jsonEncode(payload));
   }
 
   // ---------------------------------------------------------------------------

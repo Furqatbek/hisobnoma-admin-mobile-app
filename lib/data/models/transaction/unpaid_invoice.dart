@@ -52,7 +52,8 @@ class UnpaidInvoice {
       lines: (json['lines'] as List? ?? [])
           .map((e) => InvoiceLine.fromJson(e as Map<String, dynamic>))
           .toList(),
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+      createdAt:
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime.now(),
     );
   }

@@ -18,12 +18,12 @@ class DeviceRegistration {
   });
 
   Map<String, dynamic> toJson() => {
-        'deviceId': deviceId,
-        'fcmToken': fcmToken,
-        'platform': platform,
-        'deviceName': deviceName,
-        'deviceModel': deviceModel,
-        'osVersion': osVersion,
-        'appVersion': appVersion,
-      };
+    'deviceId': deviceId,
+    'fcmToken': fcmToken,
+    'platform': platform,
+    'deviceName': deviceName,
+    'deviceModel': deviceModel,
+    'osVersion': osVersion,
+    'appVersion': appVersion,
+  };
 }

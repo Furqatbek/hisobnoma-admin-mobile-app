@@ -73,7 +73,8 @@ class SaleDetail {
       payments: (json['payments'] as List? ?? [])
           .map((e) => SaleDetailPayment.fromJson(e as Map<String, dynamic>))
           .toList(),
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+      createdAt:
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime.now(),
       completedAt: json['completedAt'] != null
           ? DateTime.tryParse(json['completedAt'] as String)

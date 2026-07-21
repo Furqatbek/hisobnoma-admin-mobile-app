@@ -329,9 +329,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
         // Toggle bar when cart has items
         if (_cart.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             child: Row(
               children: [
                 GestureDetector(
@@ -353,8 +351,9 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                         _showSearch
                             ? t.cartCount('${_cart.length}')
                             : t.addMoreItems,
-                        style: AppTypography.subheadline
-                            .copyWith(color: AppColors.royalBlue),
+                        style: AppTypography.subheadline.copyWith(
+                          color: AppColors.royalBlue,
+                        ),
                       ),
                     ],
                   ),
@@ -366,9 +365,12 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                       HapticFeedback.lightImpact();
                       setState(() => _cart.clear());
                     },
-                    child: Text(t.clearAll,
-                        style: AppTypography.subheadline
-                            .copyWith(color: AppColors.error)),
+                    child: Text(
+                      t.clearAll,
+                      style: AppTypography.subheadline.copyWith(
+                        color: AppColors.error,
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -421,7 +423,8 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
                         setState(() => _step = _SaleStep.checkout);
                       },
                       child: Text(
-                          '${t.checkout} \u00B7 ${Formatters.currency(_totalAmount)}'),
+                        '${t.checkout} \u00B7 ${Formatters.currency(_totalAmount)}',
+                      ),
                     ),
                   ),
                 ],
@@ -454,8 +457,10 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
     });
     // ...then hit the server (debounced) so items beyond the loaded page are
     // reachable too.
-    _searchDebounce =
-        Timer(const Duration(milliseconds: 350), () => _runServerSearch(q));
+    _searchDebounce = Timer(
+      const Duration(milliseconds: 350),
+      () => _runServerSearch(q),
+    );
   }
 
   Future<void> _runServerSearch(String query) async {
@@ -496,8 +501,9 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
               _searchController.text.isEmpty
                   ? t.searchToAdd
                   : t.noProductsFound,
-              style: AppTypography.subheadline
-                  .copyWith(color: AppColors.textSecondary),
+              style: AppTypography.subheadline.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -629,19 +635,26 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(item.product.name,
-                        style: AppTypography.subheadline,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
+                    child: Text(
+                      item.product.name,
+                      style: AppTypography.subheadline,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   Text(
-                      '${formatQuantity(item.quantity)} x ${Formatters.currency(price)}',
-                      style: AppTypography.caption1
-                          .copyWith(color: AppColors.textSecondary)),
+                    '${formatQuantity(item.quantity)} x ${Formatters.currency(price)}',
+                    style: AppTypography.caption1.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(Formatters.currency(item.totalPrice),
-                      style: AppTypography.subheadline
-                          .copyWith(fontWeight: FontWeight.w600)),
+                  Text(
+                    Formatters.currency(item.totalPrice),
+                    style: AppTypography.subheadline.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -651,9 +664,12 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(t.total, style: AppTypography.title3),
-              Text(Formatters.currency(_totalAmount),
-                  style: AppTypography.title2
-                      .copyWith(color: AppColors.royalBlue)),
+              Text(
+                Formatters.currency(_totalAmount),
+                style: AppTypography.title2.copyWith(
+                  color: AppColors.royalBlue,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -783,8 +799,9 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
               icon: const Icon(Icons.person_add_outlined, size: 18),
               label: Text(t.selectClient),
               style: OutlinedButton.styleFrom(
-                foregroundColor:
-                    _clientMissing ? AppColors.error : AppColors.royalBlue,
+                foregroundColor: _clientMissing
+                    ? AppColors.error
+                    : AppColors.royalBlue,
                 side: BorderSide(
                   color: _clientMissing
                       ? AppColors.error
@@ -819,8 +836,9 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
             child: Center(
               child: Text(
                 (_selectedClient!['name'] as String? ?? '?')[0].toUpperCase(),
-                style:
-                    AppTypography.headline.copyWith(color: AppColors.royalBlue),
+                style: AppTypography.headline.copyWith(
+                  color: AppColors.royalBlue,
+                ),
               ),
             ),
           ),
@@ -831,14 +849,16 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
               children: [
                 Text(
                   '${t.selectedClient}: ${_selectedClient!['name']}',
-                  style: AppTypography.subheadline
-                      .copyWith(fontWeight: FontWeight.w600),
+                  style: AppTypography.subheadline.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 if (_selectedClient!['phone'] != null)
                   Text(
                     '${_selectedClient!['phone']}',
-                    style: AppTypography.caption1
-                        .copyWith(color: AppColors.textSecondary),
+                    style: AppTypography.caption1.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
               ],
             ),
@@ -853,8 +873,9 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
             },
             child: Text(
               t.changeClient,
-              style: AppTypography.subheadline
-                  .copyWith(color: AppColors.royalBlue),
+              style: AppTypography.subheadline.copyWith(
+                color: AppColors.royalBlue,
+              ),
             ),
           ),
         ],
@@ -883,8 +904,9 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
   Future<void> _showQuantityDialog(int index) async {
     final t = S.of(context);
     final item = _cart[index];
-    final controller =
-        TextEditingController(text: formatQuantity(item.quantity));
+    final controller = TextEditingController(
+      text: formatQuantity(item.quantity),
+    );
     final result = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -924,8 +946,9 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
     final t = S.of(context);
     final item = _cart[index];
     final currentPrice = item.customPrice ?? item.product.sellingPrice;
-    final controller =
-        TextEditingController(text: currentPrice.toStringAsFixed(0));
+    final controller = TextEditingController(
+      text: currentPrice.toStringAsFixed(0),
+    );
     final result = await showDialog<double>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -959,9 +982,7 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
         HapticFeedback.heavyImpact();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              '${t.unitPrice} ≥ ${Formatters.currency(floor)}',
-            ),
+            content: Text('${t.unitPrice} ≥ ${Formatters.currency(floor)}'),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
@@ -1030,13 +1051,16 @@ class _AddSaleSheetState extends State<AddSaleSheet> {
         customerId: _selectedClient?['id'] as int?,
         customerName: _selectedClient?['name'] as String?,
         items: _cart
-            .map((item) => QuickSaleItem(
-                  productId: item.product.id,
-                  quantity: item.quantity,
-                  // Round to a fixed money scale to avoid IEEE double drift.
-                  unitPrice:
-                      roundMoney(item.customPrice ?? item.product.sellingPrice),
-                ))
+            .map(
+              (item) => QuickSaleItem(
+                productId: item.product.id,
+                quantity: item.quantity,
+                // Round to a fixed money scale to avoid IEEE double drift.
+                unitPrice: roundMoney(
+                  item.customPrice ?? item.product.sellingPrice,
+                ),
+              ),
+            )
             .toList(),
         paymentType: _paymentType,
         // For CREDIT (debt), tender 0 so nothing is settled — the backend
@@ -1175,8 +1199,9 @@ class _CartItemTile extends StatelessWidget {
                 item.product.name.isNotEmpty
                     ? item.product.name[0].toUpperCase()
                     : '?',
-                style:
-                    AppTypography.headline.copyWith(color: AppColors.royalBlue),
+                style: AppTypography.headline.copyWith(
+                  color: AppColors.royalBlue,
+                ),
               ),
             ),
           ),
@@ -1209,16 +1234,18 @@ class _CartItemTile extends StatelessWidget {
                           color: hasCustomPrice
                               ? AppColors.warning
                               : (isDark
-                                  ? AppColors.darkTextSecondary
-                                  : AppColors.textSecondary),
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.textSecondary),
                         ),
                       ),
                       const SizedBox(width: 2),
-                      Icon(Icons.edit,
-                          size: 10,
-                          color: isDark
-                              ? AppColors.darkTextSecondary
-                              : AppColors.textSecondary),
+                      Icon(
+                        Icons.edit,
+                        size: 10,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
                     ],
                   ),
                 ),
@@ -1253,8 +1280,11 @@ class _CartItemTile extends StatelessWidget {
                 onTap: onRemoved,
                 child: Padding(
                   padding: const EdgeInsets.only(top: 2),
-                  child: Icon(Icons.delete_outline,
-                      size: 16, color: AppColors.error.withValues(alpha: 0.7)),
+                  child: Icon(
+                    Icons.delete_outline,
+                    size: 16,
+                    color: AppColors.error.withValues(alpha: 0.7),
+                  ),
                 ),
               ),
             ],
@@ -1376,8 +1406,9 @@ class _InventoryProductTile extends StatelessWidget {
               child: Center(
                 child: Text(
                   product.name.isNotEmpty ? product.name[0].toUpperCase() : '?',
-                  style: AppTypography.headline
-                      .copyWith(color: AppColors.royalBlue),
+                  style: AppTypography.headline.copyWith(
+                    color: AppColors.royalBlue,
+                  ),
                 ),
               ),
             ),
@@ -1412,10 +1443,14 @@ class _InventoryProductTile extends StatelessWidget {
                           product.categoryName!.isNotEmpty) ...[
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.xs),
-                          child: Text('·',
-                              style: AppTypography.caption1
-                                  .copyWith(color: AppColors.textTertiary)),
+                            horizontal: AppSpacing.xs,
+                          ),
+                          child: Text(
+                            '·',
+                            style: AppTypography.caption1.copyWith(
+                              color: AppColors.textTertiary,
+                            ),
+                          ),
                         ),
                         Flexible(
                           child: Text(
@@ -1455,8 +1490,8 @@ class _InventoryProductTile extends StatelessWidget {
                     color: product.stockQuantity <= 0
                         ? AppColors.error
                         : product.stockQuantity < 10
-                            ? AppColors.warning
-                            : AppColors.income,
+                        ? AppColors.warning
+                        : AppColors.income,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

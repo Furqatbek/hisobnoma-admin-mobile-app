@@ -11,8 +11,8 @@ class DashboardCubit extends Cubit<DashboardState> {
   final DashboardRepository _dashboardRepository;
 
   DashboardCubit({required DashboardRepository dashboardRepository})
-      : _dashboardRepository = dashboardRepository,
-        super(const DashboardInitial());
+    : _dashboardRepository = dashboardRepository,
+      super(const DashboardInitial());
 
   String _chartPeriod = 'daily';
   String get chartPeriod => _chartPeriod;
@@ -32,8 +32,9 @@ class DashboardCubit extends Cubit<DashboardState> {
     final currentState = state;
     if (currentState is DashboardLoaded) {
       try {
-        final chartData =
-            await _dashboardRepository.getRevenueChart(period: period);
+        final chartData = await _dashboardRepository.getRevenueChart(
+          period: period,
+        );
         emit(currentState.copyWith(chartData: chartData));
       } catch (_) {
         // Keep current chart data on failure
@@ -52,26 +53,38 @@ class DashboardCubit extends Cubit<DashboardState> {
 
     // Fetch all independently — don't let one failure block others
     await Future.wait([
-      _dashboardRepository.getRevenueSummary().then((v) {
-        revenue = v;
-      }).catchError((Object e) {
-        errors.add('Revenue');
-      }),
-      _dashboardRepository.getInventorySummary().then((v) {
-        inventory = v;
-      }).catchError((Object e) {
-        errors.add('Inventory');
-      }),
-      _dashboardRepository.getFinancialSummary().then((v) {
-        financial = v;
-      }).catchError((Object e) {
-        errors.add('Financial');
-      }),
-      _dashboardRepository.getRevenueChart(period: _chartPeriod).then((v) {
-        chartData = v;
-      }).catchError((Object e) {
-        errors.add('Chart');
-      }),
+      _dashboardRepository
+          .getRevenueSummary()
+          .then((v) {
+            revenue = v;
+          })
+          .catchError((Object e) {
+            errors.add('Revenue');
+          }),
+      _dashboardRepository
+          .getInventorySummary()
+          .then((v) {
+            inventory = v;
+          })
+          .catchError((Object e) {
+            errors.add('Inventory');
+          }),
+      _dashboardRepository
+          .getFinancialSummary()
+          .then((v) {
+            financial = v;
+          })
+          .catchError((Object e) {
+            errors.add('Financial');
+          }),
+      _dashboardRepository
+          .getRevenueChart(period: _chartPeriod)
+          .then((v) {
+            chartData = v;
+          })
+          .catchError((Object e) {
+            errors.add('Chart');
+          }),
       _fetchUsdRate().then((v) {
         usdRate = v?.$1;
         usdDiff = v?.$2;
@@ -81,36 +94,42 @@ class DashboardCubit extends Cubit<DashboardState> {
     // If all failed and no previous data, show error
     if (revenue == null && inventory == null && financial == null) {
       if (previous == null) {
-        emit(DashboardError(
-          message: 'Unable to load dashboard data. Check your connection.',
-        ));
+        emit(
+          DashboardError(
+            message: 'Unable to load dashboard data. Check your connection.',
+          ),
+        );
         return;
       }
       // On refresh failure, keep previous data with error banner
-      emit(DashboardLoaded(
-        revenue: previous.revenue,
-        inventory: previous.inventory,
-        financial: previous.financial,
-        chartData: previous.chartData,
-        lastUpdated: previous.lastUpdated,
-        partialErrors: errors,
-        usdRate: previous.usdRate,
-        usdDiff: previous.usdDiff,
-      ));
+      emit(
+        DashboardLoaded(
+          revenue: previous.revenue,
+          inventory: previous.inventory,
+          financial: previous.financial,
+          chartData: previous.chartData,
+          lastUpdated: previous.lastUpdated,
+          partialErrors: errors,
+          usdRate: previous.usdRate,
+          usdDiff: previous.usdDiff,
+        ),
+      );
       return;
     }
 
     // On refresh, fall back to previous data for any failed section
-    emit(DashboardLoaded(
-      revenue: revenue ?? previous?.revenue ?? _emptyRevenue,
-      inventory: inventory ?? previous?.inventory ?? _emptyInventory,
-      financial: financial ?? previous?.financial ?? _emptyFinancial,
-      chartData: chartData ?? previous?.chartData ?? [],
-      lastUpdated: DateTime.now(),
-      partialErrors: errors.isEmpty ? null : errors,
-      usdRate: usdRate ?? previous?.usdRate,
-      usdDiff: usdDiff ?? previous?.usdDiff,
-    ));
+    emit(
+      DashboardLoaded(
+        revenue: revenue ?? previous?.revenue ?? _emptyRevenue,
+        inventory: inventory ?? previous?.inventory ?? _emptyInventory,
+        financial: financial ?? previous?.financial ?? _emptyFinancial,
+        chartData: chartData ?? previous?.chartData ?? [],
+        lastUpdated: DateTime.now(),
+        partialErrors: errors.isEmpty ? null : errors,
+        usdRate: usdRate ?? previous?.usdRate,
+        usdDiff: usdDiff ?? previous?.usdDiff,
+      ),
+    );
   }
 
   Future<(String, String)?> _fetchUsdRate() async {
@@ -132,20 +151,35 @@ class DashboardCubit extends Cubit<DashboardState> {
   }
 
   static const _emptyRevenue = RevenueSummary(
-    todayRevenue: 0, yesterdayRevenue: 0, thisWeekRevenue: 0,
-    lastWeekRevenue: 0, thisMonthRevenue: 0, lastMonthRevenue: 0,
-    todayChangePercent: 0, weekChangePercent: 0, monthChangePercent: 0,
-    todayTransactionCount: 0, thisWeekTransactionCount: 0,
-    thisMonthTransactionCount: 0, averageTransactionValue: 0,
+    todayRevenue: 0,
+    yesterdayRevenue: 0,
+    thisWeekRevenue: 0,
+    lastWeekRevenue: 0,
+    thisMonthRevenue: 0,
+    lastMonthRevenue: 0,
+    todayChangePercent: 0,
+    weekChangePercent: 0,
+    monthChangePercent: 0,
+    todayTransactionCount: 0,
+    thisWeekTransactionCount: 0,
+    thisMonthTransactionCount: 0,
+    averageTransactionValue: 0,
   );
 
   static const _emptyInventory = InventorySummary(
-    totalSkuCount: 0, activeSkuCount: 0, totalInventoryValue: 0,
-    lowStockCount: 0, outOfStockCount: 0, expiringCount: 0,
+    totalSkuCount: 0,
+    activeSkuCount: 0,
+    totalInventoryValue: 0,
+    lowStockCount: 0,
+    outOfStockCount: 0,
+    expiringCount: 0,
   );
 
   static const _emptyFinancial = FinancialSummary(
-    totalBankBalance: 0, totalCashBalance: 0, arOutstanding: 0,
-    apOutstanding: 0, netCashPosition: 0,
+    totalBankBalance: 0,
+    totalCashBalance: 0,
+    arOutstanding: 0,
+    apOutstanding: 0,
+    netCashPosition: 0,
   );
 }

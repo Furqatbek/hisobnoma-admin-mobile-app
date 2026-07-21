@@ -52,33 +52,42 @@ void main() {
       blocTest<AuthCubit, AuthState>(
         'emits AuthAuthenticated when token exists',
         setUp: () {
-          when(() => mockRepository.isAuthenticated())
-              .thenAnswer((_) async => true);
-          when(() => mockRepository.getPermissions())
-              .thenAnswer((_) async => ['ADMIN', 'SALES']);
+          when(
+            () => mockRepository.isAuthenticated(),
+          ).thenAnswer((_) async => true);
+          when(
+            () => mockRepository.getPermissions(),
+          ).thenAnswer((_) async => ['ADMIN', 'SALES']);
         },
         build: () => AuthCubit(authRepository: mockRepository),
         act: (cubit) => cubit.checkAuth(),
         expect: () => [
-          isA<AuthAuthenticated>()
-              .having((s) => s.permissions, 'permissions', ['ADMIN', 'SALES']),
+          isA<AuthAuthenticated>().having((s) => s.permissions, 'permissions', [
+            'ADMIN',
+            'SALES',
+          ]),
         ],
       );
 
       blocTest<AuthCubit, AuthState>(
         'emits AuthUnauthenticated then loads users when no token',
         setUp: () {
-          when(() => mockRepository.isAuthenticated())
-              .thenAnswer((_) async => false);
-          when(() => mockRepository.getUsers())
-              .thenAnswer((_) async => _testUsers);
+          when(
+            () => mockRepository.isAuthenticated(),
+          ).thenAnswer((_) async => false);
+          when(
+            () => mockRepository.getUsers(),
+          ).thenAnswer((_) async => _testUsers);
         },
         build: () => AuthCubit(authRepository: mockRepository),
         act: (cubit) => cubit.checkAuth(),
         expect: () => [
           isA<AuthUnauthenticated>(),
-          isA<AuthUsersLoaded>()
-              .having((s) => s.users.length, 'users.length', 2),
+          isA<AuthUsersLoaded>().having(
+            (s) => s.users.length,
+            'users.length',
+            2,
+          ),
         ],
       );
     });
@@ -87,28 +96,36 @@ void main() {
       blocTest<AuthCubit, AuthState>(
         'emits AuthUsersLoaded on success',
         setUp: () {
-          when(() => mockRepository.getUsers())
-              .thenAnswer((_) async => _testUsers);
+          when(
+            () => mockRepository.getUsers(),
+          ).thenAnswer((_) async => _testUsers);
         },
         build: () => AuthCubit(authRepository: mockRepository),
         act: (cubit) => cubit.loadUsers(),
         expect: () => [
-          isA<AuthUsersLoaded>()
-              .having((s) => s.users.length, 'users.length', 2),
+          isA<AuthUsersLoaded>().having(
+            (s) => s.users.length,
+            'users.length',
+            2,
+          ),
         ],
       );
 
       blocTest<AuthCubit, AuthState>(
         'emits AuthError on failure',
         setUp: () {
-          when(() => mockRepository.getUsers())
-              .thenThrow(Exception('SocketException'));
+          when(
+            () => mockRepository.getUsers(),
+          ).thenThrow(Exception('SocketException'));
         },
         build: () => AuthCubit(authRepository: mockRepository),
         act: (cubit) => cubit.loadUsers(),
         expect: () => [
-          isA<AuthError>().having((s) => s.message, 'message',
-              'No internet connection. Please check your network.'),
+          isA<AuthError>().having(
+            (s) => s.message,
+            'message',
+            'No internet connection. Please check your network.',
+          ),
         ],
       );
     });
@@ -117,8 +134,9 @@ void main() {
       blocTest<AuthCubit, AuthState>(
         'emits [AuthLoading, AuthAuthenticated] on success',
         setUp: () {
-          when(() => mockRepository.getUsers())
-              .thenAnswer((_) async => _testUsers);
+          when(
+            () => mockRepository.getUsers(),
+          ).thenAnswer((_) async => _testUsers);
           when(() => mockRepository.login(any())).thenAnswer(
             (_) async => const LoginResponse(
               accessToken: 'token',
@@ -132,35 +150,34 @@ void main() {
           );
         },
         build: () => AuthCubit(authRepository: mockRepository),
-        seed: () => AuthAccountSelected(
-          users: _testUsers,
-          selectedUser: _testUsers[0],
-        ),
+        seed: () =>
+            AuthAccountSelected(users: _testUsers, selectedUser: _testUsers[0]),
         act: (cubit) => cubit.login(username: 'admin', pin: '1234'),
         expect: () => [
           isA<AuthLoading>(),
-          isA<AuthAuthenticated>()
-              .having((s) => s.userId, 'userId', 1),
+          isA<AuthAuthenticated>().having((s) => s.userId, 'userId', 1),
         ],
       );
 
       blocTest<AuthCubit, AuthState>(
         'emits [AuthLoading, AuthError] on failure with user preserved',
         setUp: () {
-          when(() => mockRepository.login(any()))
-              .thenThrow(Exception('UNAUTHORIZED'));
+          when(
+            () => mockRepository.login(any()),
+          ).thenThrow(Exception('UNAUTHORIZED'));
         },
         build: () => AuthCubit(authRepository: mockRepository),
-        seed: () => AuthAccountSelected(
-          users: _testUsers,
-          selectedUser: _testUsers[0],
-        ),
+        seed: () =>
+            AuthAccountSelected(users: _testUsers, selectedUser: _testUsers[0]),
         act: (cubit) => cubit.login(username: 'admin', pin: '0000'),
         expect: () => [
           isA<AuthLoading>(),
           isA<AuthError>()
-              .having((s) => s.message, 'message',
-                  'Invalid username or PIN. Please try again.')
+              .having(
+                (s) => s.message,
+                'message',
+                'Invalid username or PIN. Please try again.',
+              )
               .having((s) => s.selectedUser?.username, 'selectedUser', 'admin'),
         ],
       );
@@ -171,8 +188,9 @@ void main() {
         'emits [AuthLoading, AuthUnauthenticated, AuthUsersLoaded] on success',
         setUp: () {
           when(() => mockRepository.logout()).thenAnswer((_) async {});
-          when(() => mockRepository.getUsers())
-              .thenAnswer((_) async => _testUsers);
+          when(
+            () => mockRepository.getUsers(),
+          ).thenAnswer((_) async => _testUsers);
         },
         build: () => AuthCubit(authRepository: mockRepository),
         act: (cubit) => cubit.logout(),

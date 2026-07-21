@@ -9,43 +9,48 @@ import 'package:hisobnoma/core/config/app_config.dart';
 import 'package:hisobnoma/core/di/injection.dart';
 
 void main() async {
-  runZonedGuarded(() async {
-    final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded(
+    () async {
+      final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
-    FlutterError.onError = (details) {
-      FlutterError.presentError(details);
-    };
+      FlutterError.onError = (details) {
+        FlutterError.presentError(details);
+      };
 
-    // Preserve native splash until auth state is resolved (skip on web)
-    if (!kIsWeb) {
-      try {
-        FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-      } catch (_) {}
-    }
+      // Preserve native splash until auth state is resolved (skip on web)
+      if (!kIsWeb) {
+        try {
+          FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+        } catch (_) {}
+      }
 
-    // Set environment: release builds default to prod, debug to dev.
-    const env = String.fromEnvironment('ENV',
-        defaultValue: kReleaseMode ? 'prod' : 'dev');
-    AppConfig.current = AppConfig.fromString(env);
+      // Set environment: release builds default to prod, debug to dev.
+      const env = String.fromEnvironment(
+        'ENV',
+        defaultValue: kReleaseMode ? 'prod' : 'dev',
+      );
+      AppConfig.current = AppConfig.fromString(env);
 
-    if (kDebugMode && AppConfig.current.isProd) {
-      debugPrint('⚠️ WARNING: Running in DEBUG mode with PRODUCTION API');
-    }
+      if (kDebugMode && AppConfig.current.isProd) {
+        debugPrint('⚠️ WARNING: Running in DEBUG mode with PRODUCTION API');
+      }
 
-    // Lock to portrait orientation (skip on web)
-    if (!kIsWeb) {
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]);
-    }
+      // Lock to portrait orientation (skip on web)
+      if (!kIsWeb) {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ]);
+      }
 
-    // Initialize dependency injection
-    await configureDependencies();
+      // Initialize dependency injection
+      await configureDependencies();
 
-    runApp(const HisobnomaApp());
-  }, (error, stackTrace) {
-    debugPrint('Uncaught error: $error');
-    debugPrint('$stackTrace');
-  });
+      runApp(const HisobnomaApp());
+    },
+    (error, stackTrace) {
+      debugPrint('Uncaught error: $error');
+      debugPrint('$stackTrace');
+    },
+  );
 }

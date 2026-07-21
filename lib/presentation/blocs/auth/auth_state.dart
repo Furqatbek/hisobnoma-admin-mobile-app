@@ -30,10 +30,7 @@ class AuthAccountSelected extends AuthState {
   final List<UserAccount> users;
   final UserAccount selectedUser;
 
-  const AuthAccountSelected({
-    required this.users,
-    required this.selectedUser,
-  });
+  const AuthAccountSelected({required this.users, required this.selectedUser});
 
   @override
   List<Object?> get props => [users, selectedUser];
@@ -58,11 +55,7 @@ class AuthError extends AuthState {
   final List<UserAccount>? users;
   final UserAccount? selectedUser;
 
-  const AuthError({
-    required this.message,
-    this.users,
-    this.selectedUser,
-  });
+  const AuthError({required this.message, this.users, this.selectedUser});
 
   @override
   List<Object?> get props => [message, users, selectedUser];

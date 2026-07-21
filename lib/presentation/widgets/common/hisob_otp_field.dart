@@ -35,8 +35,7 @@ class _HisobOtpFieldState extends State<HisobOtpField>
   @override
   void initState() {
     super.initState();
-    _controllers =
-        List.generate(widget.length, (_) => TextEditingController());
+    _controllers = List.generate(widget.length, (_) => TextEditingController());
     _focusNodes = List.generate(widget.length, (_) => FocusNode());
 
     _shakeController = AnimationController(
@@ -75,8 +74,7 @@ class _HisobOtpFieldState extends State<HisobOtpField>
     super.dispose();
   }
 
-  String get _currentCode =>
-      _controllers.map((c) => c.text).join();
+  String get _currentCode => _controllers.map((c) => c.text).join();
 
   void _onChanged(int index, String value) {
     if (value.length == 1 && index < widget.length - 1) {
@@ -117,7 +115,8 @@ class _HisobOtpFieldState extends State<HisobOtpField>
     return AnimatedBuilder(
       animation: _shakeAnimation,
       builder: (context, child) {
-        final dx = _shakeAnimation.value *
+        final dx =
+            _shakeAnimation.value *
             8 *
             (_shakeController.status == AnimationStatus.forward ? 1 : -1);
         return Transform.translate(offset: Offset(dx, 0), child: child);
@@ -147,8 +146,8 @@ class _HisobOtpFieldState extends State<HisobOtpField>
                   color: widget.hasError
                       ? AppColors.error
                       : (isDark
-                          ? AppColors.darkTextPrimary
-                          : AppColors.textPrimary),
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary),
                 ),
                 decoration: InputDecoration(
                   counterText: '',
@@ -156,20 +155,22 @@ class _HisobOtpFieldState extends State<HisobOtpField>
                   filled: true,
                   fillColor: isDark ? AppColors.darkFill : AppColors.fill,
                   enabledBorder: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusButton),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusButton,
+                    ),
                     borderSide: BorderSide(
                       color: widget.hasError
                           ? AppColors.error
                           : (hasValue
-                              ? AppColors.royalBlue
-                              : Colors.transparent),
+                                ? AppColors.royalBlue
+                                : Colors.transparent),
                       width: 1.5,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusButton),
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusButton,
+                    ),
                     borderSide: BorderSide(
                       color: widget.hasError
                           ? AppColors.error

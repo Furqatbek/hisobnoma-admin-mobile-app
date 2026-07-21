@@ -39,15 +39,15 @@ class SyncCustomer {
   }
 
   Map<String, dynamic> toDbRow() => {
-        'id': id,
-        'code': code,
-        'name': name,
-        'phone': phone,
-        'email': email,
-        'price_list_id': priceListId,
-        'credit_limit': creditLimit,
-        'current_balance': currentBalance,
-        'active': active ? 1 : 0,
-        'updated_at': updatedAt.toIso8601String(),
-      };
+    'id': id,
+    'code': code,
+    'name': name,
+    'phone': phone,
+    'email': email,
+    'price_list_id': priceListId,
+    'credit_limit': creditLimit,
+    'current_balance': currentBalance,
+    'active': active ? 1 : 0,
+    'updated_at': updatedAt.toIso8601String(),
+  };
 }

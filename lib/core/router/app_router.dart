@@ -90,27 +90,23 @@ GoRouter createAppRouter(AuthCubit authCubit) {
         routes: [
           GoRoute(
             path: AppRoutes.home,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: DashboardScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: DashboardScreen()),
           ),
           GoRoute(
             path: AppRoutes.transactions,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: TransactionsScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: TransactionsScreen()),
           ),
           GoRoute(
             path: AppRoutes.reports,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: ReportsScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: ReportsScreen()),
           ),
           GoRoute(
             path: AppRoutes.settings,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: SettingsScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: SettingsScreen()),
           ),
         ],
       ),

@@ -46,17 +46,17 @@ class SyncProduct {
 
   /// Convert to local database row
   Map<String, dynamic> toDbRow() => {
-        'id': id,
-        'sku': sku,
-        'barcode': barcode,
-        'name': name,
-        'category_id': categoryId,
-        'category_name': categoryName,
-        'selling_price': sellingPrice,
-        'cost_price': costPrice,
-        'unit_of_measure': unitOfMeasure,
-        'track_inventory': trackInventory ? 1 : 0,
-        'active': active ? 1 : 0,
-        'updated_at': updatedAt.toIso8601String(),
-      };
+    'id': id,
+    'sku': sku,
+    'barcode': barcode,
+    'name': name,
+    'category_id': categoryId,
+    'category_name': categoryName,
+    'selling_price': sellingPrice,
+    'cost_price': costPrice,
+    'unit_of_measure': unitOfMeasure,
+    'track_inventory': trackInventory ? 1 : 0,
+    'active': active ? 1 : 0,
+    'updated_at': updatedAt.toIso8601String(),
+  };
 }

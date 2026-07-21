@@ -43,8 +43,8 @@ class PushNotificationService {
   PushNotificationService({
     required DeviceRepository deviceRepository,
     required SharedPreferences preferences,
-  })  : _deviceRepository = deviceRepository,
-        _preferences = preferences {
+  }) : _deviceRepository = deviceRepository,
+       _preferences = preferences {
     _channel.setMethodCallHandler(_handleNativeCall);
   }
 

@@ -6,18 +6,23 @@ void main() {
     test('fromString parses all known types', () {
       expect(AlertType.fromString('LOW_STOCK'), AlertType.lowStock);
       expect(AlertType.fromString('OUT_OF_STOCK'), AlertType.outOfStock);
-      expect(AlertType.fromString('EXPIRING_INVENTORY'),
-          AlertType.expiringInventory);
-      expect(AlertType.fromString('LARGE_TRANSACTION'),
-          AlertType.largeTransaction);
+      expect(
+        AlertType.fromString('EXPIRING_INVENTORY'),
+        AlertType.expiringInventory,
+      );
+      expect(
+        AlertType.fromString('LARGE_TRANSACTION'),
+        AlertType.largeTransaction,
+      );
       expect(AlertType.fromString('DAILY_SUMMARY'), AlertType.dailySummary);
       expect(AlertType.fromString('PRICE_CHANGE'), AlertType.priceChange);
       expect(AlertType.fromString('NEW_ORDER'), AlertType.newOrder);
-      expect(AlertType.fromString('PAYMENT_RECEIVED'),
-          AlertType.paymentReceived);
-      expect(AlertType.fromString('PAYMENT_DUE'), AlertType.paymentDue);
       expect(
-          AlertType.fromString('PAYMENT_OVERDUE'), AlertType.paymentOverdue);
+        AlertType.fromString('PAYMENT_RECEIVED'),
+        AlertType.paymentReceived,
+      );
+      expect(AlertType.fromString('PAYMENT_DUE'), AlertType.paymentDue);
+      expect(AlertType.fromString('PAYMENT_OVERDUE'), AlertType.paymentOverdue);
       expect(AlertType.fromString('SYSTEM'), AlertType.system);
     });
 

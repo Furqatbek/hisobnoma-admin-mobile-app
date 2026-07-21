@@ -29,18 +29,24 @@ class SafeLogInterceptor extends Interceptor {
   void _log(String message) => developer.log(message, name: 'API');
 
   Map<String, dynamic> _redactHeaders(Map<String, dynamic> headers) {
-    return headers.map((k, v) => MapEntry(
-        k, _sensitiveHeaders.contains(k.toLowerCase()) ? _redacted : v));
+    return headers.map(
+      (k, v) => MapEntry(
+        k,
+        _sensitiveHeaders.contains(k.toLowerCase()) ? _redacted : v,
+      ),
+    );
   }
 
   Object? _redactData(Object? data) {
     if (data is Map) {
-      return data.map((k, v) => MapEntry(
-            k,
-            _sensitiveKeys.contains(k.toString().toLowerCase())
-                ? _redacted
-                : _redactData(v),
-          ));
+      return data.map(
+        (k, v) => MapEntry(
+          k,
+          _sensitiveKeys.contains(k.toString().toLowerCase())
+              ? _redacted
+              : _redactData(v),
+        ),
+      );
     }
     if (data is List) return data.map(_redactData).toList();
     return data;
@@ -63,8 +69,10 @@ class SafeLogInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    _log('<-- ERROR ${err.response?.statusCode} '
-        '${err.requestOptions.uri} (${err.type})');
+    _log(
+      '<-- ERROR ${err.response?.statusCode} '
+      '${err.requestOptions.uri} (${err.type})',
+    );
     if (err.response?.data != null) {
       _log('error body: ${_redactData(err.response?.data)}');
     }

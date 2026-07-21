@@ -43,7 +43,8 @@ class SaleRecord {
     String? paymentType;
     final payments = json['payments'] as List?;
     if (payments != null && payments.isNotEmpty) {
-      paymentType = (payments[0] as Map<String, dynamic>)['paymentType'] as String?;
+      paymentType =
+          (payments[0] as Map<String, dynamic>)['paymentType'] as String?;
     }
 
     return SaleRecord(
@@ -61,7 +62,8 @@ class SaleRecord {
       itemCount: (json['itemCount'] as num?)?.toInt() ?? 0,
       lineCount: (json['lineCount'] as num?)?.toInt() ?? 0,
       paymentType: paymentType,
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+      createdAt:
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime.now(),
       completedAt: json['completedAt'] != null
           ? DateTime.tryParse(json['completedAt'] as String)

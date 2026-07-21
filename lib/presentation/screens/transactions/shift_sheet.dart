@@ -99,12 +99,12 @@ class _ShiftSheetState extends State<ShiftSheet> {
     HapticFeedback.mediumImpact();
     setState(() => _isSubmitting = true);
     context.read<ShiftCubit>().openShift(
-          terminalId: _selectedTerminal!.id,
-          openingCash: openingCash,
-          notes: _openNotesController.text.trim().isEmpty
-              ? null
-              : _openNotesController.text.trim(),
-        );
+      terminalId: _selectedTerminal!.id,
+      openingCash: openingCash,
+      notes: _openNotesController.text.trim().isEmpty
+          ? null
+          : _openNotesController.text.trim(),
+    );
   }
 
   void _onCloseShift() {
@@ -114,12 +114,12 @@ class _ShiftSheetState extends State<ShiftSheet> {
     HapticFeedback.mediumImpact();
     setState(() => _isSubmitting = true);
     context.read<ShiftCubit>().closeShift(
-          shiftId: _currentShift!.id,
-          closingCash: closingCash,
-          closingNotes: _closingNotesController.text.trim().isEmpty
-              ? null
-              : _closingNotesController.text.trim(),
-        );
+      shiftId: _currentShift!.id,
+      closingCash: closingCash,
+      closingNotes: _closingNotesController.text.trim().isEmpty
+          ? null
+          : _closingNotesController.text.trim(),
+    );
   }
 
   Future<void> _onCashOperation() async {
@@ -140,13 +140,13 @@ class _ShiftSheetState extends State<ShiftSheet> {
 
     try {
       await context.read<ShiftCubit>().transactionRepository.cashOperation(
-            shiftId: _currentShift!.id,
-            operationType: opType,
-            amount: amount,
-            reason: _cashOpReasonController.text.trim().isEmpty
-                ? null
-                : _cashOpReasonController.text.trim(),
-          );
+        shiftId: _currentShift!.id,
+        operationType: opType,
+        amount: amount,
+        reason: _cashOpReasonController.text.trim().isEmpty
+            ? null
+            : _cashOpReasonController.text.trim(),
+      );
       if (!mounted) return;
       // Reset form and reload shift
       setState(() {
@@ -204,8 +204,8 @@ class _ShiftSheetState extends State<ShiftSheet> {
           setState(() {
             _currentShift = state.shift;
             if (state.shift.isOpen) {
-              _closingCashController.text =
-                  (state.shift.expectedCash ?? 0.0).toStringAsFixed(2);
+              _closingCashController.text = (state.shift.expectedCash ?? 0.0)
+                  .toStringAsFixed(2);
             }
           });
         } else if (state is ShiftNone) {
@@ -281,8 +281,9 @@ class _ShiftSheetState extends State<ShiftSheet> {
               t.shiftManagement,
               style: AppTypography.title3.copyWith(
                 fontWeight: FontWeight.w600,
-                color:
-                    isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
               ),
             ),
           ),
@@ -326,8 +327,9 @@ class _ShiftSheetState extends State<ShiftSheet> {
         Text(
           t.noOpenShiftHint,
           style: AppTypography.subheadline.copyWith(
-            color:
-                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
           ),
           textAlign: TextAlign.center,
         ),
@@ -335,8 +337,9 @@ class _ShiftSheetState extends State<ShiftSheet> {
         Text(
           'Terminal',
           style: AppTypography.footnote.copyWith(
-            color:
-                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
           ),
         ),
         const SizedBox(height: AppSpacing.xs),
@@ -368,14 +371,13 @@ class _ShiftSheetState extends State<ShiftSheet> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
-              disabledBackgroundColor:
-                  isDark ? AppColors.darkFill : AppColors.fill,
+              disabledBackgroundColor: isDark
+                  ? AppColors.darkFill
+                  : AppColors.fill,
             ),
             child: Text(
               t.openShift,
-              style: AppTypography.headline.copyWith(
-                color: AppColors.white,
-              ),
+              style: AppTypography.headline.copyWith(color: AppColors.white),
             ),
           ),
         ),
@@ -414,8 +416,9 @@ class _ShiftSheetState extends State<ShiftSheet> {
         child: Text(
           'No terminals available',
           style: AppTypography.body.copyWith(
-            color:
-                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
           ),
         ),
       );
@@ -434,8 +437,9 @@ class _ShiftSheetState extends State<ShiftSheet> {
           isExpanded: true,
           icon: Icon(
             Icons.keyboard_arrow_down,
-            color:
-                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
           ),
           dropdownColor: isDark ? AppColors.darkCard : AppColors.white,
           style: AppTypography.body.copyWith(
@@ -498,11 +502,7 @@ class _ShiftSheetState extends State<ShiftSheet> {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.receipt_long,
-                size: 18,
-                color: AppColors.royalBlue,
-              ),
+              Icon(Icons.receipt_long, size: 18, color: AppColors.royalBlue),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 t.currentShift,
@@ -516,23 +516,11 @@ class _ShiftSheetState extends State<ShiftSheet> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          _infoRow(
-            isDark,
-            t.shiftNumber,
-            shift.shiftNumber,
-          ),
+          _infoRow(isDark, t.shiftNumber, shift.shiftNumber),
           const SizedBox(height: AppSpacing.sm),
-          _infoRow(
-            isDark,
-            'Terminal',
-            shift.terminalName,
-          ),
+          _infoRow(isDark, 'Terminal', shift.terminalName),
           const SizedBox(height: AppSpacing.sm),
-          _infoRow(
-            isDark,
-            t.cashier,
-            shift.cashierName,
-          ),
+          _infoRow(isDark, t.cashier, shift.cashierName),
           const SizedBox(height: AppSpacing.sm),
           _infoRow(
             isDark,
@@ -557,8 +545,9 @@ class _ShiftSheetState extends State<ShiftSheet> {
         Text(
           label,
           style: AppTypography.footnote.copyWith(
-            color:
-                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
           ),
         ),
         Text(
@@ -597,12 +586,7 @@ class _ShiftSheetState extends State<ShiftSheet> {
     );
   }
 
-  Widget _statCard(
-    bool isDark,
-    String label,
-    String value,
-    Color accentColor,
-  ) {
+  Widget _statCard(bool isDark, String label, String value, Color accentColor) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
@@ -687,8 +671,9 @@ class _ShiftSheetState extends State<ShiftSheet> {
               label: t.amount,
               hint: '0.00',
               controller: _cashOpAmountController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
               ],
@@ -731,8 +716,9 @@ class _ShiftSheetState extends State<ShiftSheet> {
                           : AppColors.expense,
                       foregroundColor: AppColors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusSm),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusSm,
+                        ),
                       ),
                     ),
                     child: Text(
@@ -795,8 +781,8 @@ class _ShiftSheetState extends State<ShiftSheet> {
                 color: isSelected
                     ? color
                     : (isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.textPrimary),
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary),
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
@@ -872,9 +858,7 @@ class _ShiftSheetState extends State<ShiftSheet> {
               ),
               child: Text(
                 t.closeShift,
-                style: AppTypography.headline.copyWith(
-                  color: AppColors.white,
-                ),
+                style: AppTypography.headline.copyWith(color: AppColors.white),
               ),
             ),
           ),

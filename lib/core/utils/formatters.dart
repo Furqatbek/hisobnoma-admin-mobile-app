@@ -50,7 +50,8 @@ abstract final class Formatters {
 
     if (dateOnly == today) return 'Today';
     if (dateOnly == today.subtract(const Duration(days: 1))) return 'Yesterday';
-    if (dateOnly.year == today.year) return DateFormat('MMM d').format(dateTime);
+    if (dateOnly.year == today.year)
+      return DateFormat('MMM d').format(dateTime);
     return DateFormat('MMM d, y').format(dateTime);
   }
 

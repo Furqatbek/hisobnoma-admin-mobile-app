@@ -25,10 +25,7 @@ void main() {
 
     test('an unknown route still respects the type fallback', () {
       expect(
-        resolveNotificationRoute({
-          'route': '/orders/555',
-          'type': 'new_order',
-        }),
+        resolveNotificationRoute({'route': '/orders/555', 'type': 'new_order'}),
         AppRoutes.transactions,
       );
     });
@@ -47,7 +44,9 @@ void main() {
     test('falls back to Alerts for other/unknown/missing types', () {
       expect(resolveNotificationRoute({'type': 'low_stock'}), AppRoutes.alerts);
       expect(
-          resolveNotificationRoute({'type': 'payment_due'}), AppRoutes.alerts);
+        resolveNotificationRoute({'type': 'payment_due'}),
+        AppRoutes.alerts,
+      );
       expect(resolveNotificationRoute({'type': 'system'}), AppRoutes.alerts);
       expect(resolveNotificationRoute({}), AppRoutes.alerts);
     });

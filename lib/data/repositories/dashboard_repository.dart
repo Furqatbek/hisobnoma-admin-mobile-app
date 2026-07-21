@@ -12,7 +12,8 @@ class DashboardRepository {
   Future<RevenueSummary> getRevenueSummary() async {
     final response = await _apiClient.get(ApiEndpoints.revenueSummary);
     return RevenueSummary.fromJson(
-        response.data['data'] as Map<String, dynamic>);
+      response.data['data'] as Map<String, dynamic>,
+    );
   }
 
   /// Get revenue chart data
@@ -31,7 +32,8 @@ class DashboardRepository {
       'yearly' => 'yearlyRevenue',
       _ => 'dailyRevenue',
     };
-    final list = data[key] as List? ?? data.values.whereType<List>().firstOrNull ?? [];
+    final list =
+        data[key] as List? ?? data.values.whereType<List>().firstOrNull ?? [];
     return list
         .map((e) => RevenueChartData.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -41,13 +43,15 @@ class DashboardRepository {
   Future<InventorySummary> getInventorySummary() async {
     final response = await _apiClient.get(ApiEndpoints.inventorySummary);
     return InventorySummary.fromJson(
-        response.data['data'] as Map<String, dynamic>);
+      response.data['data'] as Map<String, dynamic>,
+    );
   }
 
   /// Get financial summary
   Future<FinancialSummary> getFinancialSummary() async {
     final response = await _apiClient.get(ApiEndpoints.financialSummary);
     return FinancialSummary.fromJson(
-        response.data['data'] as Map<String, dynamic>);
+      response.data['data'] as Map<String, dynamic>,
+    );
   }
 }

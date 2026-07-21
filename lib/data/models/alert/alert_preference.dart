@@ -32,12 +32,12 @@ class AlertPreference {
   }
 
   Map<String, dynamic> toJson() => {
-        'pushEnabled': pushEnabled,
-        'inAppEnabled': inAppEnabled,
-        'emailEnabled': emailEnabled,
-        'smsEnabled': smsEnabled,
-        if (thresholdValue != null) 'thresholdValue': thresholdValue,
-      };
+    'pushEnabled': pushEnabled,
+    'inAppEnabled': inAppEnabled,
+    'emailEnabled': emailEnabled,
+    'smsEnabled': smsEnabled,
+    if (thresholdValue != null) 'thresholdValue': thresholdValue,
+  };
 
   AlertPreference copyWith({
     bool? pushEnabled,

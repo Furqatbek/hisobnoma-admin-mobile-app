@@ -35,9 +35,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(t.reports, style: AppTypography.headline),
-      ),
+      appBar: AppBar(title: Text(t.reports, style: AppTypography.headline)),
       body: BlocBuilder<ReportsCubit, ReportsState>(
         builder: (context, state) {
           if (state is ReportsLoading) {
@@ -63,16 +61,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.bar_chart,
-              size: 48,
-              color: AppColors.textTertiary,
-            ),
+            Icon(Icons.bar_chart, size: 48, color: AppColors.textTertiary),
             const SizedBox(height: AppSpacing.md),
-            Text(
-              t.unableToLoadReports,
-              style: AppTypography.headline,
-            ),
+            Text(t.unableToLoadReports, style: AppTypography.headline),
             const SizedBox(height: AppSpacing.sm),
             Text(
               state.message,
@@ -97,9 +88,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return RefreshIndicator(
       onRefresh: () async {
         HapticFeedback.mediumImpact();
-        await context
-            .read<ReportsCubit>()
-            .loadReports(period: state.selectedPeriod);
+        await context.read<ReportsCubit>().loadReports(
+          period: state.selectedPeriod,
+        );
       },
       child: ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
@@ -175,8 +166,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   isDark: isDark,
                 ),
               ),
-            if (state.financial != null)
-              const SizedBox(height: AppSpacing.lg),
+            if (state.financial != null) const SizedBox(height: AppSpacing.lg),
 
             // Transaction stats
             FadeScaleIn(
@@ -197,8 +187,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   isDark: isDark,
                 ),
               ),
-            if (state.inventory != null)
-              const SizedBox(height: AppSpacing.lg),
+            if (state.inventory != null) const SizedBox(height: AppSpacing.lg),
 
             // Period comparison
             FadeScaleIn(
@@ -252,9 +241,7 @@ class _RevenueHeroCard extends StatelessWidget {
         children: [
           Text(
             t.monthlyRevenue,
-            style: AppTypography.subheadline.copyWith(
-              color: Colors.white70,
-            ),
+            style: AppTypography.subheadline.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
@@ -268,8 +255,7 @@ class _RevenueHeroCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: (isPositive ? AppColors.income : AppColors.expense)
                       .withValues(alpha: 0.25),
@@ -279,9 +265,7 @@ class _RevenueHeroCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      isPositive
-                          ? Icons.trending_up
-                          : Icons.trending_down,
+                      isPositive ? Icons.trending_up : Icons.trending_down,
                       color: Colors.white,
                       size: 14,
                     ),
@@ -299,8 +283,7 @@ class _RevenueHeroCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Text(
                 t.vsLastMonth,
-                style:
-                    AppTypography.caption1.copyWith(color: Colors.white60),
+                style: AppTypography.caption1.copyWith(color: Colors.white60),
               ),
             ],
           ),
@@ -324,14 +307,12 @@ class _RevenueHeroCard extends StatelessWidget {
                 Container(width: 1, height: 30, color: Colors.white24),
                 _HeroMiniStat(
                   label: t.thisWeek,
-                  value:
-                      Formatters.compactCurrency(revenue.thisWeekRevenue),
+                  value: Formatters.compactCurrency(revenue.thisWeekRevenue),
                 ),
                 Container(width: 1, height: 30, color: Colors.white24),
                 _HeroMiniStat(
                   label: t.yesterday,
-                  value: Formatters.compactCurrency(
-                      revenue.yesterdayRevenue),
+                  value: Formatters.compactCurrency(revenue.yesterdayRevenue),
                 ),
               ],
             ),
@@ -363,9 +344,7 @@ class _HeroMiniStat extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: AppTypography.caption2.copyWith(
-              color: Colors.white60,
-            ),
+            style: AppTypography.caption2.copyWith(color: Colors.white60),
           ),
         ],
       ),
@@ -464,8 +443,7 @@ class _SummaryCard extends StatelessWidget {
             value,
             style: AppTypography.headline.copyWith(
               fontSize: 15,
-              color:
-                  isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 2),
@@ -499,10 +477,7 @@ class _CashFlowSection extends StatelessWidget {
   final FinancialSummary financial;
   final bool isDark;
 
-  const _CashFlowSection({
-    required this.financial,
-    required this.isDark,
-  });
+  const _CashFlowSection({required this.financial, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -533,8 +508,7 @@ class _CashFlowSection extends StatelessWidget {
           Text(
             t.cashFlow,
             style: AppTypography.headline.copyWith(
-              color:
-                  isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -550,8 +524,7 @@ class _CashFlowSection extends StatelessWidget {
                     child: Container(color: AppColors.income),
                   ),
                   Flexible(
-                    flex:
-                        ((1 - inflowFraction) * 100).round().clamp(1, 99),
+                    flex: ((1 - inflowFraction) * 100).round().clamp(1, 99),
                     child: Container(color: AppColors.expense),
                   ),
                 ],
@@ -700,8 +673,7 @@ class _TransactionStats extends StatelessWidget {
           Text(
             t.transactionStats,
             style: AppTypography.headline.copyWith(
-              color:
-                  isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -718,8 +690,7 @@ class _TransactionStats extends StatelessWidget {
               Expanded(
                 child: _StatItem(
                   label: t.thisWeek,
-                  value:
-                      Formatters.integer(revenue.thisWeekTransactionCount),
+                  value: Formatters.integer(revenue.thisWeekTransactionCount),
                   icon: Icons.date_range_outlined,
                   isDark: isDark,
                 ),
@@ -727,8 +698,7 @@ class _TransactionStats extends StatelessWidget {
               Expanded(
                 child: _StatItem(
                   label: t.thisMonthLabel,
-                  value:
-                      Formatters.integer(revenue.thisMonthTransactionCount),
+                  value: Formatters.integer(revenue.thisMonthTransactionCount),
                   icon: Icons.calendar_month_outlined,
                   isDark: isDark,
                 ),
@@ -820,13 +790,14 @@ class _InventoryReport extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = S.of(context);
     final total = inventory.totalSkuCount;
-    final healthy =
-        total - inventory.lowStockCount - inventory.outOfStockCount;
+    final healthy = total - inventory.lowStockCount - inventory.outOfStockCount;
     final healthyPercent = total > 0 ? (healthy / total * 100) : 0.0;
-    final lowPercent =
-        total > 0 ? (inventory.lowStockCount / total * 100) : 0.0;
-    final outPercent =
-        total > 0 ? (inventory.outOfStockCount / total * 100) : 0.0;
+    final lowPercent = total > 0
+        ? (inventory.lowStockCount / total * 100)
+        : 0.0;
+    final outPercent = total > 0
+        ? (inventory.outOfStockCount / total * 100)
+        : 0.0;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -849,8 +820,7 @@ class _InventoryReport extends StatelessWidget {
           Text(
             t.inventoryReport,
             style: AppTypography.headline.copyWith(
-              color:
-                  isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -941,8 +911,7 @@ class _InventoryReport extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      Formatters.compactCurrency(
-                          inventory.totalInventoryValue),
+                      Formatters.compactCurrency(inventory.totalInventoryValue),
                       style: AppTypography.headline.copyWith(
                         color: isDark
                             ? AppColors.darkTextPrimary
@@ -1080,8 +1049,7 @@ class _PeriodComparison extends StatelessWidget {
           Text(
             t.periodComparison,
             style: AppTypography.headline.copyWith(
-              color:
-                  isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -1133,8 +1101,7 @@ class _ComparisonRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPositive = changePercent >= 0;
     // Calculate bar widths relative to the larger value
-    final maxVal =
-        current > previous ? current : (previous > 0 ? previous : 1);
+    final maxVal = current > previous ? current : (previous > 0 ? previous : 1);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1181,9 +1148,7 @@ class _ComparisonRow extends StatelessWidget {
         _ProgressBar(
           label: Formatters.compactCurrency(previous),
           fraction: maxVal > 0 ? previous / maxVal : 0,
-          color: isDark
-              ? AppColors.darkSeparator
-              : AppColors.separator,
+          color: isDark ? AppColors.darkSeparator : AppColors.separator,
           isDark: isDark,
         ),
       ],

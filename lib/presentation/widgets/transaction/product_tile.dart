@@ -57,9 +57,7 @@ class ProductTile extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  product.name.isNotEmpty
-                      ? product.name[0].toUpperCase()
-                      : '?',
+                  product.name.isNotEmpty ? product.name[0].toUpperCase() : '?',
                   style: AppTypography.headline.copyWith(
                     color: AppColors.royalBlue,
                   ),
@@ -168,9 +166,7 @@ class _StockBadge extends StatelessWidget {
     if (!trackInventory) {
       return Text(
         t.untracked,
-        style: AppTypography.caption2.copyWith(
-          color: AppColors.textTertiary,
-        ),
+        style: AppTypography.caption2.copyWith(color: AppColors.textTertiary),
       );
     }
 

@@ -9,7 +9,7 @@ class TransactionRepository {
   final ApiClient _apiClient;
 
   TransactionRepository({required ApiClient apiClient})
-      : _apiClient = apiClient;
+    : _apiClient = apiClient;
 
   /// Get active POS terminals
   Future<List<PosTerminal>> getActiveTerminals() async {
@@ -55,11 +55,10 @@ class TransactionRepository {
 
   /// Barcode product lookup
   Future<ProductLookup> barcodeLookup(String barcode) async {
-    final response = await _apiClient.get(
-      ApiEndpoints.barcodeLookup(barcode),
-    );
+    final response = await _apiClient.get(ApiEndpoints.barcodeLookup(barcode));
     return ProductLookup.fromJson(
-        response.data['data'] as Map<String, dynamic>);
+      response.data['data'] as Map<String, dynamic>,
+    );
   }
 
   /// Quick stock count
@@ -69,7 +68,8 @@ class TransactionRepository {
       data: request.toJson(),
     );
     return QuickCountResponse.fromJson(
-        response.data['data'] as Map<String, dynamic>);
+      response.data['data'] as Map<String, dynamic>,
+    );
   }
 
   /// Quick sale. Safe to auto-retry ONLY when the request carries a
@@ -84,7 +84,8 @@ class TransactionRepository {
           : null,
     );
     return QuickSaleResponse.fromJson(
-        response.data['data'] as Map<String, dynamic>);
+      response.data['data'] as Map<String, dynamic>,
+    );
   }
 
   /// Search products (paginated)
@@ -139,11 +140,10 @@ class TransactionRepository {
 
   /// Get customer balance report (debtors)
   Future<CustomerBalanceReport> getCustomerBalances() async {
-    final response = await _apiClient.get(
-      ApiEndpoints.arCustomerBalance,
-    );
+    final response = await _apiClient.get(ApiEndpoints.arCustomerBalance);
     return CustomerBalanceReport.fromJson(
-        response.data as Map<String, dynamic>);
+      response.data as Map<String, dynamic>,
+    );
   }
 
   /// Get POS transactions (paginated, optionally filtered by date)

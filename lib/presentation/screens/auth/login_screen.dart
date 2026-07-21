@@ -49,7 +49,8 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height -
+              minHeight:
+                  MediaQuery.of(context).size.height -
                   MediaQuery.of(context).padding.top -
                   MediaQuery.of(context).padding.bottom,
             ),
@@ -102,20 +103,19 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         }
                         if (state.users != null && state.users!.isNotEmpty) {
-                          return _buildAccountList(state.users!, isDark,
-                              errorMessage: state.message);
+                          return _buildAccountList(
+                            state.users!,
+                            isDark,
+                            errorMessage: state.message,
+                          );
                         }
                         return _buildErrorRetry(state.message, isDark);
                       }
                       if (state is AuthLoading) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
+                        return const Center(child: CircularProgressIndicator());
                       }
                       // AuthInitial / AuthUnauthenticated — loading users
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
+                      return const Center(child: CircularProgressIndicator());
                     },
                   ),
 
@@ -143,9 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Text(
             t.selectAccount,
             style: AppTypography.title3.copyWith(
-              color: isDark
-                  ? AppColors.darkTextPrimary
-                  : AppColors.textPrimary,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -240,11 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildPinEntry(
-    UserAccount user,
-    bool isDark, {
-    String? errorMessage,
-  }) {
+  Widget _buildPinEntry(UserAccount user, bool isDark, {String? errorMessage}) {
     final t = S.of(context);
     return FadeScaleIn(
       child: Column(
@@ -351,8 +345,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         : AppColors.textSecondary,
                     size: 20,
                   ),
-                  onPressed: () =>
-                      setState(() => _obscurePin = !_obscurePin),
+                  onPressed: () => setState(() => _obscurePin = !_obscurePin),
                 ),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
@@ -362,9 +355,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   vertical: AppSpacing.md,
                 ),
               ),
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -375,9 +366,7 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: Text(
                 errorMessage,
-                style: AppTypography.footnote.copyWith(
-                  color: AppColors.error,
-                ),
+                style: AppTypography.footnote.copyWith(color: AppColors.error),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -402,9 +391,7 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           Text(
             message,
-            style: AppTypography.subheadline.copyWith(
-              color: AppColors.error,
-            ),
+            style: AppTypography.subheadline.copyWith(color: AppColors.error),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.lg),

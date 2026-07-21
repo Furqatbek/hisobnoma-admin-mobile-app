@@ -9,9 +9,7 @@ class SyncRepository {
   SyncRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Get products for sync
-  Future<SyncResponse<SyncProduct>> syncProducts({
-    DateTime? lastSyncAt,
-  }) async {
+  Future<SyncResponse<SyncProduct>> syncProducts({DateTime? lastSyncAt}) async {
     final response = await _apiClient.get(
       ApiEndpoints.syncProducts,
       queryParameters: {

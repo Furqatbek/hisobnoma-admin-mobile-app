@@ -76,14 +76,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             ),
             child: HisobSegmentedControl<_TabFilter>(
               segments: [
-                HisobSegment(
-                  value: _TabFilter.inventory,
-                  label: t.inventory,
-                ),
-                HisobSegment(
-                  value: _TabFilter.debtors,
-                  label: t.debtors,
-                ),
+                HisobSegment(value: _TabFilter.inventory, label: t.inventory),
+                HisobSegment(value: _TabFilter.debtors, label: t.debtors),
                 HisobSegment(
                   value: _TabFilter.transactions,
                   label: t.transactions,
@@ -241,9 +235,7 @@ class _InventoryTile extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                product.name.isNotEmpty
-                    ? product.name[0].toUpperCase()
-                    : '?',
+                product.name.isNotEmpty ? product.name[0].toUpperCase() : '?',
                 style: AppTypography.headline.copyWith(
                   color: AppColors.royalBlue,
                 ),
@@ -348,11 +340,7 @@ class _DebtorsTab extends StatelessWidget {
   final List<CustomerBalance> debtors;
   final bool isDark;
 
-  const _DebtorsTab({
-    super.key,
-    required this.debtors,
-    required this.isDark,
-  });
+  const _DebtorsTab({super.key, required this.debtors, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -702,10 +690,7 @@ class _SaleTile extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 1,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
                   color: paymentColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
@@ -754,11 +739,20 @@ class _TransactionDetailSheetState extends State<_TransactionDetailSheet> {
 
   Future<void> _load() async {
     try {
-      final detail = await getIt<TransactionRepository>()
-          .getTransactionDetail(widget.transactionId);
-      if (mounted) setState(() { _detail = detail; _loading = false; });
+      final detail = await getIt<TransactionRepository>().getTransactionDetail(
+        widget.transactionId,
+      );
+      if (mounted)
+        setState(() {
+          _detail = detail;
+          _loading = false;
+        });
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString(); _loading = false; });
+      if (mounted)
+        setState(() {
+          _error = e.toString();
+          _loading = false;
+        });
     }
   }
 
@@ -828,10 +822,7 @@ class _TransactionDetailContent extends StatelessWidget {
   final SaleDetail detail;
   final bool isDark;
 
-  const _TransactionDetailContent({
-    required this.detail,
-    required this.isDark,
-  });
+  const _TransactionDetailContent({required this.detail, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -870,13 +861,13 @@ class _TransactionDetailContent extends StatelessWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: (detail.isCompleted
-                          ? AppColors.income
-                          : AppColors.warning)
-                      .withValues(alpha: 0.1),
+                  color:
+                      (detail.isCompleted
+                              ? AppColors.income
+                              : AppColors.warning)
+                          .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -898,25 +889,50 @@ class _TransactionDetailContent extends StatelessWidget {
             runSpacing: AppSpacing.xs,
             children: [
               if (detail.cashierName != null)
-                _MetaChip(icon: Icons.person_outline, label: detail.cashierName!, isDark: isDark),
+                _MetaChip(
+                  icon: Icons.person_outline,
+                  label: detail.cashierName!,
+                  isDark: isDark,
+                ),
               if (detail.terminalName != null)
-                _MetaChip(icon: Icons.point_of_sale, label: detail.terminalName!, isDark: isDark),
-              _MetaChip(icon: Icons.access_time, label: Formatters.time(detail.completedAt ?? detail.createdAt), isDark: isDark),
-              _MetaChip(icon: Icons.calendar_today, label: Formatters.shortDate(detail.completedAt ?? detail.createdAt), isDark: isDark),
+                _MetaChip(
+                  icon: Icons.point_of_sale,
+                  label: detail.terminalName!,
+                  isDark: isDark,
+                ),
+              _MetaChip(
+                icon: Icons.access_time,
+                label: Formatters.time(detail.completedAt ?? detail.createdAt),
+                isDark: isDark,
+              ),
+              _MetaChip(
+                icon: Icons.calendar_today,
+                label: Formatters.shortDate(
+                  detail.completedAt ?? detail.createdAt,
+                ),
+                isDark: isDark,
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
 
           // Line items
           if (detail.lines.isNotEmpty) ...[
-            Text(t.items, style: AppTypography.headline.copyWith(
-              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-            )),
+            Text(
+              t.items,
+              style: AppTypography.headline.copyWith(
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
+              ),
+            ),
             const SizedBox(height: AppSpacing.sm),
-            ...detail.lines.map((line) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: _LineItemRow(line: line, isDark: isDark),
-            )),
+            ...detail.lines.map(
+              (line) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: _LineItemRow(line: line, isDark: isDark),
+              ),
+            ),
             const SizedBox(height: AppSpacing.sm),
           ],
 
@@ -930,13 +946,35 @@ class _TransactionDetailContent extends StatelessWidget {
             child: Column(
               children: [
                 if (detail.discountAmount > 0)
-                  _TotalRow(label: t.discount, value: '-${Formatters.currency(detail.discountAmount)}', color: AppColors.expense, isDark: isDark),
+                  _TotalRow(
+                    label: t.discount,
+                    value: '-${Formatters.currency(detail.discountAmount)}',
+                    color: AppColors.expense,
+                    isDark: isDark,
+                  ),
                 if (detail.taxAmount > 0)
-                  _TotalRow(label: t.tax, value: Formatters.currency(detail.taxAmount), isDark: isDark),
-                _TotalRow(label: t.total, value: Formatters.currency(detail.totalAmount), isBold: true, isDark: isDark),
-                _TotalRow(label: t.paid, value: Formatters.currency(detail.paidAmount), isDark: isDark),
+                  _TotalRow(
+                    label: t.tax,
+                    value: Formatters.currency(detail.taxAmount),
+                    isDark: isDark,
+                  ),
+                _TotalRow(
+                  label: t.total,
+                  value: Formatters.currency(detail.totalAmount),
+                  isBold: true,
+                  isDark: isDark,
+                ),
+                _TotalRow(
+                  label: t.paid,
+                  value: Formatters.currency(detail.paidAmount),
+                  isDark: isDark,
+                ),
                 if (detail.changeAmount > 0)
-                  _TotalRow(label: t.change, value: Formatters.currency(detail.changeAmount), isDark: isDark),
+                  _TotalRow(
+                    label: t.change,
+                    value: Formatters.currency(detail.changeAmount),
+                    isDark: isDark,
+                  ),
               ],
             ),
           ),
@@ -944,31 +982,54 @@ class _TransactionDetailContent extends StatelessWidget {
 
           // Payments
           if (detail.payments.isNotEmpty) ...[
-            Text(t.payment, style: AppTypography.headline.copyWith(
-              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-            )),
-            const SizedBox(height: AppSpacing.sm),
-            ...detail.payments.map((p) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-              child: Row(
-                children: [
-                  Icon(
-                    switch (p.paymentType) { 'CREDIT' => Icons.credit_score, 'CARD' => Icons.credit_card, _ => Icons.payments_outlined },
-                    size: 18,
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(p.paymentType, style: AppTypography.subheadline.copyWith(
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                  )),
-                  const Spacer(),
-                  Text(Formatters.currency(p.amount), style: AppTypography.subheadline.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-                  )),
-                ],
+            Text(
+              t.payment,
+              style: AppTypography.headline.copyWith(
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
               ),
-            )),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            ...detail.payments.map(
+              (p) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                child: Row(
+                  children: [
+                    Icon(
+                      switch (p.paymentType) {
+                        'CREDIT' => Icons.credit_score,
+                        'CARD' => Icons.credit_card,
+                        _ => Icons.payments_outlined,
+                      },
+                      size: 18,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      p.paymentType,
+                      style: AppTypography.subheadline.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      Formatters.currency(p.amount),
+                      style: AppTypography.subheadline.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
           const SizedBox(height: AppSpacing.lg),
         ],
@@ -982,18 +1043,31 @@ class _MetaChip extends StatelessWidget {
   final String label;
   final bool isDark;
 
-  const _MetaChip({required this.icon, required this.label, required this.isDark});
+  const _MetaChip({
+    required this.icon,
+    required this.label,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: isDark ? AppColors.darkTextSecondary : AppColors.textTertiary),
+        Icon(
+          icon,
+          size: 14,
+          color: isDark ? AppColors.darkTextSecondary : AppColors.textTertiary,
+        ),
         const SizedBox(width: 4),
-        Text(label, style: AppTypography.caption1.copyWith(
-          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-        )),
+        Text(
+          label,
+          style: AppTypography.caption1.copyWith(
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
+          ),
+        ),
       ],
     );
   }
@@ -1018,26 +1092,39 @@ class _LineItemRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(line.productName, style: AppTypography.body.copyWith(
-                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-              )),
-              Text('$qtyLabel × ${Formatters.currency(line.unitPrice)}',
+              Text(
+                line.productName,
+                style: AppTypography.body.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                '$qtyLabel × ${Formatters.currency(line.unitPrice)}',
                 style: AppTypography.caption1.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-              )),
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+              ),
             ],
           ),
         ),
-        Text(Formatters.currency(line.lineTotal), style: AppTypography.subheadline.copyWith(
-          fontWeight: FontWeight.w500,
-          color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-        )),
+        Text(
+          Formatters.currency(line.lineTotal),
+          style: AppTypography.subheadline.copyWith(
+            fontWeight: FontWeight.w500,
+            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+          ),
+        ),
       ],
     );
   }
 
-  String _fmtQty(double qty) =>
-      qty == qty.roundToDouble() ? qty.toInt().toString() : qty.toStringAsFixed(2);
+  String _fmtQty(double qty) => qty == qty.roundToDouble()
+      ? qty.toInt().toString()
+      : qty.toStringAsFixed(2);
 }
 
 class _TotalRow extends StatelessWidget {
@@ -1047,7 +1134,13 @@ class _TotalRow extends StatelessWidget {
   final Color? color;
   final bool isDark;
 
-  const _TotalRow({required this.label, required this.value, this.isBold = false, this.color, required this.isDark});
+  const _TotalRow({
+    required this.label,
+    required this.value,
+    this.isBold = false,
+    this.color,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1056,13 +1149,27 @@ class _TotalRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: (isBold ? AppTypography.headline : AppTypography.subheadline).copyWith(
-            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-          )),
-          Text(value, style: (isBold ? AppTypography.headline : AppTypography.subheadline).copyWith(
-            fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
-            color: color ?? (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
-          )),
+          Text(
+            label,
+            style: (isBold ? AppTypography.headline : AppTypography.subheadline)
+                .copyWith(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+          ),
+          Text(
+            value,
+            style: (isBold ? AppTypography.headline : AppTypography.subheadline)
+                .copyWith(
+                  fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+                  color:
+                      color ??
+                      (isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary),
+                ),
+          ),
         ],
       ),
     );
@@ -1102,9 +1209,17 @@ class _DebtorDetailSheetState extends State<_DebtorDetailSheet> {
     try {
       final invoices = await getIt<TransactionRepository>()
           .getCustomerUnpaidInvoices(widget.customerId);
-      if (mounted) setState(() { _invoices = invoices; _loading = false; });
+      if (mounted)
+        setState(() {
+          _invoices = invoices;
+          _loading = false;
+        });
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString(); _loading = false; });
+      if (mounted)
+        setState(() {
+          _error = e.toString();
+          _loading = false;
+        });
     }
   }
 
@@ -1129,9 +1244,12 @@ class _DebtorDetailSheetState extends State<_DebtorDetailSheet> {
           Padding(
             padding: const EdgeInsets.only(top: AppSpacing.sm),
             child: Container(
-              width: 36, height: 5,
+              width: 36,
+              height: 5,
               decoration: BoxDecoration(
-                color: widget.isDark ? AppColors.darkSeparator : AppColors.separator,
+                color: widget.isDark
+                    ? AppColors.darkSeparator
+                    : AppColors.separator,
                 borderRadius: BorderRadius.circular(2.5),
               ),
             ),
@@ -1142,15 +1260,20 @@ class _DebtorDetailSheetState extends State<_DebtorDetailSheet> {
             child: Row(
               children: [
                 Container(
-                  width: 40, height: 40,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: AppColors.expense.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: Text(
-                      widget.customerName.isNotEmpty ? widget.customerName[0].toUpperCase() : '?',
-                      style: AppTypography.headline.copyWith(color: AppColors.expense),
+                      widget.customerName.isNotEmpty
+                          ? widget.customerName[0].toUpperCase()
+                          : '?',
+                      style: AppTypography.headline.copyWith(
+                        color: AppColors.expense,
+                      ),
                     ),
                   ),
                 ),
@@ -1159,12 +1282,19 @@ class _DebtorDetailSheetState extends State<_DebtorDetailSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(widget.customerName, style: AppTypography.title3.copyWith(
-                        color: widget.isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-                      )),
+                      Text(
+                        widget.customerName,
+                        style: AppTypography.title3.copyWith(
+                          color: widget.isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.textPrimary,
+                        ),
+                      ),
                       Text(
                         '${t.balanceDue}: ${Formatters.currency(widget.netBalance)}',
-                        style: AppTypography.caption1.copyWith(color: AppColors.expense),
+                        style: AppTypography.caption1.copyWith(
+                          color: AppColors.expense,
+                        ),
                       ),
                     ],
                   ),
@@ -1172,7 +1302,12 @@ class _DebtorDetailSheetState extends State<_DebtorDetailSheet> {
               ],
             ),
           ),
-          Divider(height: 1, color: widget.isDark ? AppColors.darkSeparator : AppColors.separator),
+          Divider(
+            height: 1,
+            color: widget.isDark
+                ? AppColors.darkSeparator
+                : AppColors.separator,
+          ),
           if (_loading)
             const Padding(
               padding: EdgeInsets.all(AppSpacing.xxl),
@@ -1181,21 +1316,30 @@ class _DebtorDetailSheetState extends State<_DebtorDetailSheet> {
           else if (_error != null)
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Text(_error!, style: AppTypography.body.copyWith(color: AppColors.error)),
+              child: Text(
+                _error!,
+                style: AppTypography.body.copyWith(color: AppColors.error),
+              ),
             )
           else if (_invoices != null && _invoices!.isEmpty)
             Padding(
               padding: const EdgeInsets.all(AppSpacing.xxl),
-              child: Text(t.noUnpaidInvoices, style: AppTypography.subheadline.copyWith(
-                color: widget.isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-              )),
+              child: Text(
+                t.noUnpaidInvoices,
+                style: AppTypography.subheadline.copyWith(
+                  color: widget.isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+              ),
             )
           else if (_invoices != null)
             Flexible(
               child: ListView.separated(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 itemCount: _invoices!.length,
-                separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: AppSpacing.sm),
                 itemBuilder: (_, index) => _InvoiceCard(
                   invoice: _invoices![index],
                   isDark: widget.isDark,
@@ -1223,13 +1367,15 @@ class _InvoiceCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : AppColors.cardBackground,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-        boxShadow: isDark ? null : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1238,14 +1384,22 @@ class _InvoiceCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(invoice.invoiceNumber, style: AppTypography.body.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-                )),
+                child: Text(
+                  invoice.invoiceNumber,
+                  style: AppTypography.body.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                  ),
+                ),
               ),
               if (invoice.overdue)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
@@ -1264,57 +1418,99 @@ class _InvoiceCard extends StatelessWidget {
           // Date row
           Row(
             children: [
-              Icon(Icons.calendar_today, size: 12,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textTertiary),
+              Icon(
+                Icons.calendar_today,
+                size: 12,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textTertiary,
+              ),
               const SizedBox(width: 4),
-              Text(invoice.invoiceDate, style: AppTypography.caption1.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-              )),
+              Text(
+                invoice.invoiceDate,
+                style: AppTypography.caption1.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+              ),
               const SizedBox(width: AppSpacing.md),
-              Icon(Icons.event, size: 12,
-                color: invoice.overdue ? AppColors.error : AppColors.textTertiary),
+              Icon(
+                Icons.event,
+                size: 12,
+                color: invoice.overdue
+                    ? AppColors.error
+                    : AppColors.textTertiary,
+              ),
               const SizedBox(width: 4),
-              Text('${t.dueDate}: ${invoice.dueDate}', style: AppTypography.caption1.copyWith(
-                color: invoice.overdue ? AppColors.error : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
-              )),
+              Text(
+                '${t.dueDate}: ${invoice.dueDate}',
+                style: AppTypography.caption1.copyWith(
+                  color: invoice.overdue
+                      ? AppColors.error
+                      : (isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary),
+                ),
+              ),
             ],
           ),
           // Line items
           if (invoice.lines.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
-            Divider(height: 1, color: isDark ? AppColors.darkSeparator : AppColors.separator),
+            Divider(
+              height: 1,
+              color: isDark ? AppColors.darkSeparator : AppColors.separator,
+            ),
             const SizedBox(height: AppSpacing.sm),
-            ...invoice.lines.map((line) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(line.productName, style: AppTypography.caption1.copyWith(
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-                    )),
-                  ),
-                  Text(
-                    '${_fmtQty(line.quantity)} × ${Formatters.currency(line.unitPrice)}',
-                    style: AppTypography.caption2.copyWith(
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+            ...invoice.lines.map(
+              (line) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        line.productName,
+                        style: AppTypography.caption1.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.textPrimary,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    Text(
+                      '${_fmtQty(line.quantity)} × ${Formatters.currency(line.unitPrice)}',
+                      style: AppTypography.caption2.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            )),
+            ),
           ],
           const SizedBox(height: AppSpacing.sm),
           // Total row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(t.balanceDue, style: AppTypography.subheadline.copyWith(
-                fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-              )),
-              Text(Formatters.currency(invoice.balanceDue), style: AppTypography.headline.copyWith(
-                color: AppColors.expense,
-              )),
+              Text(
+                t.balanceDue,
+                style: AppTypography.subheadline.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+              ),
+              Text(
+                Formatters.currency(invoice.balanceDue),
+                style: AppTypography.headline.copyWith(
+                  color: AppColors.expense,
+                ),
+              ),
             ],
           ),
         ],
@@ -1322,6 +1518,7 @@ class _InvoiceCard extends StatelessWidget {
     );
   }
 
-  String _fmtQty(double qty) =>
-      qty == qty.roundToDouble() ? qty.toInt().toString() : qty.toStringAsFixed(2);
+  String _fmtQty(double qty) => qty == qty.roundToDouble()
+      ? qty.toInt().toString()
+      : qty.toStringAsFixed(2);
 }

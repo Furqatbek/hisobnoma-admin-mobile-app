@@ -65,7 +65,8 @@ class HisobListTile extends StatelessWidget {
                       Text(
                         title,
                         style: AppTypography.body.copyWith(
-                          color: titleColor ??
+                          color:
+                              titleColor ??
                               (isDark
                                   ? AppColors.darkTextPrimary
                                   : AppColors.textPrimary),

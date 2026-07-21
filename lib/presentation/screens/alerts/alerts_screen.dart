@@ -38,9 +38,9 @@ class _AlertsScreenState extends State<AlertsScreen> {
   void _onFilterChanged(_AlertFilter filter) {
     HapticFeedback.selectionClick();
     setState(() => _filter = filter);
-    context
-        .read<AlertsCubit>()
-        .loadAlerts(unreadOnly: filter == _AlertFilter.unread);
+    context.read<AlertsCubit>().loadAlerts(
+      unreadOnly: filter == _AlertFilter.unread,
+    );
   }
 
   void _onMarkAllRead() {
@@ -107,8 +107,8 @@ class _AlertsScreenState extends State<AlertsScreen> {
                     message: state.message,
                     actionLabel: t.retry,
                     onAction: () => context.read<AlertsCubit>().loadAlerts(
-                          unreadOnly: _filter == _AlertFilter.unread,
-                        ),
+                      unreadOnly: _filter == _AlertFilter.unread,
+                    ),
                   );
                 }
                 if (state is AlertsLoaded) {
@@ -176,9 +176,9 @@ class _AlertList extends StatelessWidget {
     final keys = groups.keys.toList();
 
     return RefreshIndicator(
-      onRefresh: () => context
-          .read<AlertsCubit>()
-          .loadAlerts(unreadOnly: filter == _AlertFilter.unread),
+      onRefresh: () => context.read<AlertsCubit>().loadAlerts(
+        unreadOnly: filter == _AlertFilter.unread,
+      ),
       child: ListView.builder(
         padding: const EdgeInsets.only(
           left: AppSpacing.screenPadding,
@@ -224,8 +224,9 @@ class _AlertList extends StatelessWidget {
                 // Alert cards in group
                 Container(
                   decoration: BoxDecoration(
-                    color:
-                        isDark ? AppColors.darkCard : AppColors.cardBackground,
+                    color: isDark
+                        ? AppColors.darkCard
+                        : AppColors.cardBackground,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
                     boxShadow: isDark
                         ? null
@@ -259,9 +260,9 @@ class _AlertList extends StatelessWidget {
 
   void _loadMore(BuildContext context) {
     context.read<AlertsCubit>().loadAlerts(
-          unreadOnly: filter == _AlertFilter.unread,
-          page: page + 1,
-        );
+      unreadOnly: filter == _AlertFilter.unread,
+      page: page + 1,
+    );
   }
 }
 
@@ -284,16 +285,14 @@ class _AlertTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dismissible(
       key: ValueKey(alert.id),
-      direction:
-          alert.isRead ? DismissDirection.none : DismissDirection.endToStart,
+      direction: alert.isRead
+          ? DismissDirection.none
+          : DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSpacing.lg),
         color: AppColors.royalBlue,
-        child: const Icon(
-          Icons.done_all,
-          color: Colors.white,
-        ),
+        child: const Icon(Icons.done_all, color: Colors.white),
       ),
       confirmDismiss: (_) async {
         HapticFeedback.mediumImpact();
@@ -407,8 +406,9 @@ class _AlertTile extends StatelessWidget {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor:
-          isDark ? AppColors.darkElevated : AppColors.cardBackground,
+      backgroundColor: isDark
+          ? AppColors.darkElevated
+          : AppColors.cardBackground,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusLg),
@@ -523,11 +523,7 @@ class _AlertIcon extends StatelessWidget {
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(size * 0.28),
       ),
-      child: Icon(
-        _alertTypeIcon(alertType),
-        size: size * 0.5,
-        color: color,
-      ),
+      child: Icon(_alertTypeIcon(alertType), size: size * 0.5, color: color),
     );
   }
 }

@@ -47,7 +47,8 @@ class AuthInterceptor extends QueuedInterceptor {
     RequestInterceptorHandler handler,
   ) async {
     // Skip auth header for login/refresh endpoints
-    final isAuthEndpoint = options.path.contains('/auth/pin-login') ||
+    final isAuthEndpoint =
+        options.path.contains('/auth/pin-login') ||
         options.path.contains('/auth/users/list') ||
         options.path.contains('/auth/refresh');
 
@@ -70,7 +71,7 @@ class AuthInterceptor extends QueuedInterceptor {
     // Skip refresh for auth endpoints themselves
     final isAuthEndpoint =
         err.requestOptions.path.contains('/auth/pin-login') ||
-            err.requestOptions.path.contains('/auth/refresh');
+        err.requestOptions.path.contains('/auth/refresh');
     if (isAuthEndpoint) {
       return handler.next(err);
     }
@@ -87,10 +88,12 @@ class AuthInterceptor extends QueuedInterceptor {
         err.requestOptions.headers['Authorization'] = 'Bearer $token';
 
         try {
-          final dio = Dio(BaseOptions(
-            baseUrl: err.requestOptions.baseUrl,
-            headers: err.requestOptions.headers,
-          ));
+          final dio = Dio(
+            BaseOptions(
+              baseUrl: err.requestOptions.baseUrl,
+              headers: err.requestOptions.headers,
+            ),
+          );
           applyTlsPolicy(dio, allowedHost: err.requestOptions.uri.host);
           final response = await dio.fetch(err.requestOptions);
           return handler.resolve(response);
@@ -114,17 +117,20 @@ class AuthInterceptor extends QueuedInterceptor {
   }
 
   Future<_RefreshOutcome> _tryRefreshToken(
-      RequestOptions originalRequest) async {
+    RequestOptions originalRequest,
+  ) async {
     final refreshToken = await _secureStorage.read(key: _refreshTokenKey);
     // No refresh token at all → the user must log in again.
     if (refreshToken == null) return _RefreshOutcome.rejected;
 
     try {
-      final dio = Dio(BaseOptions(
-        baseUrl: originalRequest.baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-      ));
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: originalRequest.baseUrl,
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+      );
       applyTlsPolicy(dio, allowedHost: originalRequest.uri.host);
       final response = await dio.post(
         '/auth/refresh',

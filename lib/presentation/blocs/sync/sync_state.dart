@@ -34,6 +34,11 @@ class SyncState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, lastSyncAt, lastSyncCount, errorMessage, syncInfo];
+  List<Object?> get props => [
+    status,
+    lastSyncAt,
+    lastSyncCount,
+    errorMessage,
+    syncInfo,
+  ];
 }

@@ -361,8 +361,9 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.royalBlue,
                   foregroundColor: AppColors.white,
-                  disabledBackgroundColor:
-                      AppColors.royalBlue.withValues(alpha: 0.5),
+                  disabledBackgroundColor: AppColors.royalBlue.withValues(
+                    alpha: 0.5,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
@@ -523,8 +524,9 @@ class _ClientSelectionSheetState extends State<ClientSelectionSheet> {
             Icon(
               Icons.chevron_right,
               size: 20,
-              color:
-                  isDark ? AppColors.darkTextSecondary : AppColors.textTertiary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textTertiary,
             ),
           ],
         ),

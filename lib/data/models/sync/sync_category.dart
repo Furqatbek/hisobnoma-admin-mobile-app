@@ -27,11 +27,11 @@ class SyncCategory {
   }
 
   Map<String, dynamic> toDbRow() => {
-        'id': id,
-        'name': name,
-        'parent_id': parentId,
-        'sort_order': sortOrder,
-        'active': active ? 1 : 0,
-        'updated_at': updatedAt.toIso8601String(),
-      };
+    'id': id,
+    'name': name,
+    'parent_id': parentId,
+    'sort_order': sortOrder,
+    'active': active ? 1 : 0,
+    'updated_at': updatedAt.toIso8601String(),
+  };
 }

@@ -28,17 +28,17 @@ class QuickSaleRequest {
   });
 
   Map<String, dynamic> toJson() => {
-        'terminalId': terminalId,
-        if (customerId != null) 'customerId': customerId,
-        if (customerName != null) 'customerName': customerName,
-        'items': items.map((e) => e.toJson()).toList(),
-        'paymentType': paymentType,
-        'tenderedAmount': tenderedAmount,
-        if (notes != null) 'notes': notes,
-        if (deliveryRegionId != null) 'deliveryRegionId': deliveryRegionId,
-        if (deliveryVillageId != null) 'deliveryVillageId': deliveryVillageId,
-        if (clientRequestId != null) 'clientRequestId': clientRequestId,
-      };
+    'terminalId': terminalId,
+    if (customerId != null) 'customerId': customerId,
+    if (customerName != null) 'customerName': customerName,
+    'items': items.map((e) => e.toJson()).toList(),
+    'paymentType': paymentType,
+    'tenderedAmount': tenderedAmount,
+    if (notes != null) 'notes': notes,
+    if (deliveryRegionId != null) 'deliveryRegionId': deliveryRegionId,
+    if (deliveryVillageId != null) 'deliveryVillageId': deliveryVillageId,
+    if (clientRequestId != null) 'clientRequestId': clientRequestId,
+  };
 }
 
 class QuickSaleItem {
@@ -55,11 +55,11 @@ class QuickSaleItem {
   });
 
   Map<String, dynamic> toJson() => {
-        'productId': productId,
-        'quantity': quantity,
-        'unitPrice': unitPrice,
-        'discountAmount': discountAmount,
-      };
+    'productId': productId,
+    'quantity': quantity,
+    'unitPrice': unitPrice,
+    'discountAmount': discountAmount,
+  };
 
   double get totalAmount => (unitPrice * quantity) - discountAmount;
 }

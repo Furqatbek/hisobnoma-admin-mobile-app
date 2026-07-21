@@ -45,8 +45,7 @@ class RevenueBarChart extends StatelessWidget {
           Text(
             title,
             style: AppTypography.headline.copyWith(
-              color:
-                  isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -69,9 +68,7 @@ class RevenueBarChart extends StatelessWidget {
                         backDrawRodData: BackgroundBarChartRodData(
                           show: true,
                           toY: maxY * 1.2,
-                          color: isDark
-                              ? AppColors.darkFill
-                              : AppColors.fill,
+                          color: isDark ? AppColors.darkFill : AppColors.fill,
                         ),
                       ),
                     ],

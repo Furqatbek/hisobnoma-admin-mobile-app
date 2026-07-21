@@ -21,7 +21,8 @@ class SyncResponse<T> {
       lastSyncAt: DateTime.parse(json['lastSyncAt'] as String),
       syncVersion: json['syncVersion'] as String? ?? '1.0',
       fullSyncRequired: json['fullSyncRequired'] as bool? ?? false,
-      items: (json[itemsKey] as List?)
+      items:
+          (json[itemsKey] as List?)
               ?.map((e) => fromJsonT(e as Map<String, dynamic>))
               .toList() ??
           [],

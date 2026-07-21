@@ -26,10 +26,7 @@ void main() {
       });
 
       test('formats with custom symbol', () {
-        expect(
-          Formatters.compactCurrency(500, symbol: 'USD'),
-          contains('USD'),
-        );
+        expect(Formatters.compactCurrency(500, symbol: 'USD'), contains('USD'));
       });
     });
 

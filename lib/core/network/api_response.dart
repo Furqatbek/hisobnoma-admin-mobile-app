@@ -5,11 +5,7 @@ class ApiResponse<T> {
   final T? data;
   final ApiErrorBody? error;
 
-  const ApiResponse({
-    required this.success,
-    this.data,
-    this.error,
-  });
+  const ApiResponse({required this.success, this.data, this.error});
 
   factory ApiResponse.fromJson(
     Map<String, dynamic> json,
@@ -95,11 +91,7 @@ class ApiErrorBody {
   final String message;
   final List<String>? details;
 
-  const ApiErrorBody({
-    required this.code,
-    required this.message,
-    this.details,
-  });
+  const ApiErrorBody({required this.code, required this.message, this.details});
 
   factory ApiErrorBody.fromJson(Map<String, dynamic> json) {
     return ApiErrorBody(

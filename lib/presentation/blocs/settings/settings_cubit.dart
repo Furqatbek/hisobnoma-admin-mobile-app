@@ -14,15 +14,11 @@ class SettingsCubit extends Cubit<SettingsState> {
   static const _currencyKey = 'currency';
   static const _localeKey = 'locale';
 
-  static const supportedLocales = [
-    Locale('en'),
-    Locale('uz'),
-    Locale('ru'),
-  ];
+  static const supportedLocales = [Locale('en'), Locale('uz'), Locale('ru')];
 
   SettingsCubit({required SharedPreferences preferences})
-      : _preferences = preferences,
-        super(const SettingsState());
+    : _preferences = preferences,
+      super(const SettingsState());
 
   void loadSettings() {
     final themeModeIndex = _preferences.getInt(_themeKey) ?? 0;
@@ -38,11 +34,13 @@ class SettingsCubit extends Cubit<SettingsState> {
       _preferences.setString(_localeKey, locale.languageCode);
     }
 
-    emit(SettingsState(
-      themeMode: ThemeMode.values[themeModeIndex],
-      currency: currency,
-      locale: locale,
-    ));
+    emit(
+      SettingsState(
+        themeMode: ThemeMode.values[themeModeIndex],
+        currency: currency,
+        locale: locale,
+      ),
+    );
   }
 
   Locale _resolveSystemLocale() {

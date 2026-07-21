@@ -179,30 +179,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             // Revenue chart with period selector
             _animate(
-              _ChartSection(
-                chartData: state.chartData,
-                isDark: isDark,
-              ),
+              _ChartSection(chartData: state.chartData, isDark: isDark),
               delay: const Duration(milliseconds: 240),
             ),
             const SizedBox(height: AppSpacing.lg),
 
             // Inventory overview
             _animate(
-              _InventorySection(
-                inventory: state.inventory,
-                isDark: isDark,
-              ),
+              _InventorySection(inventory: state.inventory, isDark: isDark),
               delay: const Duration(milliseconds: 320),
             ),
 
             // Financial overview
             const SizedBox(height: AppSpacing.lg),
             _animate(
-              _FinancialSection(
-                financial: state.financial,
-                isDark: isDark,
-              ),
+              _FinancialSection(financial: state.financial, isDark: isDark),
               delay: const Duration(milliseconds: 400),
             ),
 
@@ -315,11 +306,7 @@ class _CurrencyRateBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.attach_money,
-            size: 20,
-            color: AppColors.royalBlue,
-          ),
+          Icon(Icons.attach_money, size: 20, color: AppColors.royalBlue),
           const SizedBox(width: AppSpacing.xs),
           Text(
             'USD',
@@ -424,9 +411,7 @@ class _BalanceHeroCard extends StatelessWidget {
         children: [
           Text(
             t.currentBalance,
-            style: AppTypography.subheadline.copyWith(
-              color: Colors.white70,
-            ),
+            style: AppTypography.subheadline.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
@@ -442,10 +427,11 @@ class _BalanceHeroCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: (changePercent >= 0
-                          ? AppColors.income
-                          : AppColors.expense)
-                      .withValues(alpha: 0.25),
+                  color:
+                      (changePercent >= 0
+                              ? AppColors.income
+                              : AppColors.expense)
+                          .withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
@@ -538,9 +524,7 @@ class _HeroMiniStat extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: AppTypography.caption2.copyWith(
-              color: Colors.white60,
-            ),
+            style: AppTypography.caption2.copyWith(color: Colors.white60),
           ),
         ],
       ),
@@ -636,10 +620,7 @@ class _SummaryPill extends StatelessWidget {
               Container(
                 width: 8,
                 height: 8,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
               const SizedBox(width: AppSpacing.xs),
               Text(
@@ -668,8 +649,9 @@ class _SummaryPill extends StatelessWidget {
                   child: Text(
                     '${Formatters.percentage(change!)} ${t.thisMonth}',
                     style: AppTypography.caption1.copyWith(
-                      color:
-                          change! >= 0 ? AppColors.income : AppColors.expense,
+                      color: change! >= 0
+                          ? AppColors.income
+                          : AppColors.expense,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -790,8 +772,8 @@ class _PeriodChip extends StatelessWidget {
             color: selected
                 ? Colors.white
                 : (isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary),
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary),
             fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
@@ -805,10 +787,7 @@ class _InventorySection extends StatelessWidget {
   final InventorySummary inventory;
   final bool isDark;
 
-  const _InventorySection({
-    required this.inventory,
-    required this.isDark,
-  });
+  const _InventorySection({required this.inventory, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -865,8 +844,9 @@ class _InventorySection extends StatelessWidget {
             children: [
               Expanded(
                 child: _MetricCard(
-                  value:
-                      Formatters.compactCurrency(inventory.totalInventoryValue),
+                  value: Formatters.compactCurrency(
+                    inventory.totalInventoryValue,
+                  ),
                   label: t.totalValue,
                   icon: Icons.account_balance_wallet_outlined,
                   isDark: isDark,
@@ -904,10 +884,7 @@ class _FinancialSection extends StatelessWidget {
   final FinancialSummary financial;
   final bool isDark;
 
-  const _FinancialSection({
-    required this.financial,
-    required this.isDark,
-  });
+  const _FinancialSection({required this.financial, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -1056,7 +1033,8 @@ class _FinancialRow extends StatelessWidget {
           Icon(
             icon,
             size: 20,
-            color: color ??
+            color:
+                color ??
                 (isDark
                     ? AppColors.darkTextSecondary
                     : AppColors.textSecondary),
@@ -1076,7 +1054,8 @@ class _FinancialRow extends StatelessWidget {
             value,
             style: AppTypography.subheadline.copyWith(
               fontWeight: FontWeight.w600,
-              color: color ??
+              color:
+                  color ??
                   (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
             ),
           ),
@@ -1124,16 +1103,14 @@ class _MetricCard extends StatelessWidget {
           Icon(
             icon,
             size: 22,
-            color: color ??
+            color:
+                color ??
                 (isDark
                     ? AppColors.darkTextSecondary
                     : AppColors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(
-            value,
-            style: AppTypography.headline.copyWith(color: color),
-          ),
+          Text(value, style: AppTypography.headline.copyWith(color: color)),
           const SizedBox(height: 2),
           Text(
             label,

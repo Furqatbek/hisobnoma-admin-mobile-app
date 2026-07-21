@@ -27,8 +27,7 @@ class _IncomeExpenseDonutState extends State<IncomeExpenseDonut> {
   int _touchedIndex = -1;
 
   double get _total => widget.income + widget.expense;
-  double get _incomePercent =>
-      _total > 0 ? (widget.income / _total) * 100 : 0;
+  double get _incomePercent => _total > 0 ? (widget.income / _total) * 100 : 0;
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +54,7 @@ class _IncomeExpenseDonutState extends State<IncomeExpenseDonut> {
           Text(
             S.of(context).incomeVsExpense,
             style: AppTypography.headline.copyWith(
-              color:
-                  isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -82,7 +80,8 @@ class _IncomeExpenseDonutState extends State<IncomeExpenseDonut> {
                                   return;
                                 }
                                 _touchedIndex = response
-                                    .touchedSection!.touchedSectionIndex;
+                                    .touchedSection!
+                                    .touchedSectionIndex;
                               });
                             },
                           ),
@@ -187,10 +186,7 @@ class _LegendItem extends StatelessWidget {
         Container(
           width: 10,
           height: 10,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(

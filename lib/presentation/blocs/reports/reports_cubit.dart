@@ -10,8 +10,8 @@ class ReportsCubit extends Cubit<ReportsState> {
   final DashboardRepository _dashboardRepository;
 
   ReportsCubit({required DashboardRepository dashboardRepository})
-      : _dashboardRepository = dashboardRepository,
-        super(const ReportsInitial());
+    : _dashboardRepository = dashboardRepository,
+      super(const ReportsInitial());
 
   Future<void> loadReports({String period = 'daily'}) async {
     emit(const ReportsLoading());
@@ -22,18 +22,30 @@ class ReportsCubit extends Cubit<ReportsState> {
       FinancialSummary? financial;
 
       await Future.wait([
-        _dashboardRepository.getRevenueChart(period: period).then((v) {
-          chartData = v;
-        }).catchError((Object _) {}),
-        _dashboardRepository.getRevenueSummary().then((v) {
-          revenueSummary = v;
-        }).catchError((Object _) {}),
-        _dashboardRepository.getInventorySummary().then((v) {
-          inventory = v;
-        }).catchError((Object _) {}),
-        _dashboardRepository.getFinancialSummary().then((v) {
-          financial = v;
-        }).catchError((Object _) {}),
+        _dashboardRepository
+            .getRevenueChart(period: period)
+            .then((v) {
+              chartData = v;
+            })
+            .catchError((Object _) {}),
+        _dashboardRepository
+            .getRevenueSummary()
+            .then((v) {
+              revenueSummary = v;
+            })
+            .catchError((Object _) {}),
+        _dashboardRepository
+            .getInventorySummary()
+            .then((v) {
+              inventory = v;
+            })
+            .catchError((Object _) {}),
+        _dashboardRepository
+            .getFinancialSummary()
+            .then((v) {
+              financial = v;
+            })
+            .catchError((Object _) {}),
       ]);
 
       if (revenueSummary == null) {
@@ -41,13 +53,15 @@ class ReportsCubit extends Cubit<ReportsState> {
         return;
       }
 
-      emit(ReportsLoaded(
-        chartData: chartData ?? [],
-        revenueSummary: revenueSummary!,
-        selectedPeriod: period,
-        inventory: inventory,
-        financial: financial,
-      ));
+      emit(
+        ReportsLoaded(
+          chartData: chartData ?? [],
+          revenueSummary: revenueSummary!,
+          selectedPeriod: period,
+          inventory: inventory,
+          financial: financial,
+        ),
+      );
     } catch (e) {
       emit(ReportsError(message: extractErrorMessage(e)));
     }

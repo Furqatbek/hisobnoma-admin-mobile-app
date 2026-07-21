@@ -11,8 +11,8 @@ class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
 
   AuthCubit({required AuthRepository authRepository})
-      : _authRepository = authRepository,
-        super(const AuthInitial());
+    : _authRepository = authRepository,
+      super(const AuthInitial());
 
   Future<void> checkAuth() async {
     final isAuth = await _authRepository.isAuthenticated();
@@ -41,10 +41,10 @@ class AuthCubit extends Cubit<AuthState> {
     final users = currentState is AuthUsersLoaded
         ? currentState.users
         : currentState is AuthAccountSelected
-            ? currentState.users
-            : currentState is AuthError
-                ? currentState.users ?? []
-                : <UserAccount>[];
+        ? currentState.users
+        : currentState is AuthError
+        ? currentState.users ?? []
+        : <UserAccount>[];
     emit(AuthAccountSelected(users: users, selectedUser: user));
   }
 
@@ -54,43 +54,44 @@ class AuthCubit extends Cubit<AuthState> {
     final users = currentState is AuthAccountSelected
         ? currentState.users
         : currentState is AuthError
-            ? currentState.users ?? []
-            : <UserAccount>[];
+        ? currentState.users ?? []
+        : <UserAccount>[];
     emit(AuthUsersLoaded(users: users));
   }
 
   /// Login with username + pin
-  Future<void> login({
-    required String username,
-    required String pin,
-  }) async {
+  Future<void> login({required String username, required String pin}) async {
     final currentState = state;
     final users = currentState is AuthAccountSelected
         ? currentState.users
         : currentState is AuthError
-            ? currentState.users
-            : null;
+        ? currentState.users
+        : null;
     final selectedUser = currentState is AuthAccountSelected
         ? currentState.selectedUser
         : currentState is AuthError
-            ? currentState.selectedUser
-            : null;
+        ? currentState.selectedUser
+        : null;
 
     emit(const AuthLoading());
     try {
       final response = await _authRepository.login(
         LoginRequest(username: username, pin: pin),
       );
-      emit(AuthAuthenticated(
-        userId: response.userId,
-        permissions: response.permissions,
-      ));
+      emit(
+        AuthAuthenticated(
+          userId: response.userId,
+          permissions: response.permissions,
+        ),
+      );
     } catch (e) {
-      emit(AuthError(
-        message: _parseError(e),
-        users: users,
-        selectedUser: selectedUser,
-      ));
+      emit(
+        AuthError(
+          message: _parseError(e),
+          users: users,
+          selectedUser: selectedUser,
+        ),
+      );
     }
   }
 

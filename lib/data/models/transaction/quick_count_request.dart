@@ -12,9 +12,9 @@ class QuickCountRequest {
   });
 
   Map<String, dynamic> toJson() => {
-        'productId': productId,
-        'locationId': locationId,
-        'countedQuantity': countedQuantity,
-        if (notes != null) 'notes': notes,
-      };
+    'productId': productId,
+    'locationId': locationId,
+    'countedQuantity': countedQuantity,
+    if (notes != null) 'notes': notes,
+  };
 }

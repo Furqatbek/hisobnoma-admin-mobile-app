@@ -11,8 +11,8 @@ class AuthRepository {
   AuthRepository({
     required ApiClient apiClient,
     required AuthInterceptor authInterceptor,
-  })  : _apiClient = apiClient,
-        _authInterceptor = authInterceptor;
+  }) : _apiClient = apiClient,
+       _authInterceptor = authInterceptor;
 
   /// Fetch list of user accounts
   Future<List<UserAccount>> getUsers() async {

@@ -48,8 +48,7 @@ class LoadingShimmer extends StatelessWidget {
 
     return Shimmer.fromColors(
       baseColor: isDark ? AppColors.darkFill : const Color(0xFFE8E8ED),
-      highlightColor:
-          isDark ? AppColors.darkElevated : const Color(0xFFF5F5F7),
+      highlightColor: isDark ? AppColors.darkElevated : const Color(0xFFF5F5F7),
       child: Container(
         width: width,
         height: height,
@@ -81,12 +80,16 @@ class DashboardShimmer extends StatelessWidget {
             children: [
               const Expanded(
                 child: LoadingShimmer(
-                    height: 90, borderRadius: AppSpacing.radiusCard),
+                  height: 90,
+                  borderRadius: AppSpacing.radiusCard,
+                ),
               ),
               const SizedBox(width: AppSpacing.sm),
               const Expanded(
                 child: LoadingShimmer(
-                    height: 90, borderRadius: AppSpacing.radiusCard),
+                  height: 90,
+                  borderRadius: AppSpacing.radiusCard,
+                ),
               ),
             ],
           ),
@@ -99,17 +102,23 @@ class DashboardShimmer extends StatelessWidget {
             children: [
               const Expanded(
                 child: LoadingShimmer(
-                    height: 80, borderRadius: AppSpacing.radiusCard),
+                  height: 80,
+                  borderRadius: AppSpacing.radiusCard,
+                ),
               ),
               const SizedBox(width: AppSpacing.sm),
               const Expanded(
                 child: LoadingShimmer(
-                    height: 80, borderRadius: AppSpacing.radiusCard),
+                  height: 80,
+                  borderRadius: AppSpacing.radiusCard,
+                ),
               ),
               const SizedBox(width: AppSpacing.sm),
               const Expanded(
                 child: LoadingShimmer(
-                    height: 80, borderRadius: AppSpacing.radiusCard),
+                  height: 80,
+                  borderRadius: AppSpacing.radiusCard,
+                ),
               ),
             ],
           ),

@@ -22,9 +22,7 @@ class SettingsScreen extends StatelessWidget {
     final t = S.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(t.settings, style: AppTypography.headline),
-      ),
+      appBar: AppBar(title: Text(t.settings, style: AppTypography.headline)),
       body: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, state) {
           return ListView(
@@ -56,9 +54,7 @@ class SettingsScreen extends StatelessWidget {
               _SectionHeader(title: t.notifications),
               _SettingsGroup(
                 isDark: isDark,
-                children: const [
-                  _NotificationsTile(),
-                ],
+                children: const [_NotificationsTile()],
               ),
               const SizedBox(height: AppSpacing.lg),
 
@@ -173,10 +169,7 @@ class SettingsScreen extends StatelessWidget {
               Navigator.of(dialogContext).pop();
               context.read<AuthCubit>().logout();
             },
-            child: Text(
-              t.logout,
-              style: TextStyle(color: AppColors.error),
-            ),
+            child: Text(t.logout, style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -268,10 +261,7 @@ class _NotificationsTileState extends State<_NotificationsTile> {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Switch.adaptive(
-            value: _enabled,
-            onChanged: _onChanged,
-          ),
+          Switch.adaptive(value: _enabled, onChanged: _onChanged),
         ],
       ),
     );
@@ -301,10 +291,7 @@ class _SettingsGroup extends StatelessWidget {
                 ),
               ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
 }
@@ -362,9 +349,9 @@ class _ThemeTile extends StatelessWidget {
                   isDark: isDark,
                   onTap: () {
                     HapticFeedback.selectionClick();
-                    context
-                        .read<SettingsCubit>()
-                        .setThemeMode(ThemeMode.system);
+                    context.read<SettingsCubit>().setThemeMode(
+                      ThemeMode.system,
+                    );
                   },
                 ),
                 _ThemeOption(
@@ -442,11 +429,11 @@ class _ThemeOption extends StatelessWidget {
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 color: isSelected
                     ? (isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.textPrimary)
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary)
                     : (isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.textSecondary),
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary),
               ),
             ),
           ),
@@ -527,8 +514,8 @@ class _LanguagePickerSheet extends StatelessWidget {
                         color: isSelected
                             ? AppColors.royalBlue
                             : (isDark
-                                ? AppColors.darkTextPrimary
-                                : AppColors.textPrimary),
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary),
                         fontSize: 14,
                       ),
                     ),
@@ -618,8 +605,11 @@ class _SyncInfoSheetState extends State<_SyncInfoSheet> {
                             height: 48,
                             child: CircularProgressIndicator.adaptive(),
                           )
-                        : Icon(Icons.sync,
-                            size: 48, color: AppColors.royalBlue),
+                        : Icon(
+                            Icons.sync,
+                            size: 48,
+                            color: AppColors.royalBlue,
+                          ),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
@@ -721,8 +711,9 @@ class _SyncItem extends StatelessWidget {
           Icon(
             icon,
             size: 20,
-            color:
-                isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(

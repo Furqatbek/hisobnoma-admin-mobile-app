@@ -48,13 +48,13 @@ class HisobCard extends StatelessWidget {
 
     final card = AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      padding:
-          padding ?? const EdgeInsets.all(AppSpacing.cardPadding),
+      padding: padding ?? const EdgeInsets.all(AppSpacing.cardPadding),
       margin: margin,
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius:
-            BorderRadius.circular(borderRadius ?? AppSpacing.radiusCard),
+        borderRadius: BorderRadius.circular(
+          borderRadius ?? AppSpacing.radiusCard,
+        ),
         boxShadow: elevated && !isDark
             ? [
                 BoxShadow(
@@ -92,8 +92,7 @@ class _HisobHeroCard extends HisobCard {
   @override
   Widget build(BuildContext context) {
     final card = Container(
-      padding:
-          padding ?? const EdgeInsets.all(AppSpacing.lg),
+      padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
       margin: margin,
       decoration: BoxDecoration(
         gradient: const LinearGradient(

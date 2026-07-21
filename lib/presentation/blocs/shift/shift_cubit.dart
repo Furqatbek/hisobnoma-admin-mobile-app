@@ -9,10 +9,9 @@ part 'shift_state.dart';
 class ShiftCubit extends Cubit<ShiftState> {
   final TransactionRepository _transactionRepository;
 
-  ShiftCubit({
-    required TransactionRepository transactionRepository,
-  })  : _transactionRepository = transactionRepository,
-        super(const ShiftInitial());
+  ShiftCubit({required TransactionRepository transactionRepository})
+    : _transactionRepository = transactionRepository,
+      super(const ShiftInitial());
 
   TransactionRepository get transactionRepository => _transactionRepository;
 
@@ -35,8 +34,9 @@ class ShiftCubit extends Cubit<ShiftState> {
   Future<void> loadCurrentShiftForTerminal(int terminalId) async {
     emit(const ShiftLoading());
     try {
-      final shift =
-          await _transactionRepository.getCurrentShiftForTerminal(terminalId);
+      final shift = await _transactionRepository.getCurrentShiftForTerminal(
+        terminalId,
+      );
       if (shift != null) {
         emit(ShiftLoaded(shift: shift));
       } else {

@@ -49,10 +49,7 @@ class RevenueLineChart extends StatelessWidget {
 
     return Container(
       height: 200,
-      padding: const EdgeInsets.only(
-        right: AppSpacing.md,
-        top: AppSpacing.sm,
-      ),
+      padding: const EdgeInsets.only(right: AppSpacing.md, top: AppSpacing.sm),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : AppColors.cardBackground,
         borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
@@ -143,13 +140,13 @@ class RevenueLineChart extends StatelessWidget {
           borderData: FlBorderData(show: false),
           lineTouchData: LineTouchData(
             touchTooltipData: LineTouchTooltipData(
-              getTooltipColor: (spot) => isDark
-                  ? AppColors.darkElevated
-                  : AppColors.cardBackground,
+              getTooltipColor: (spot) =>
+                  isDark ? AppColors.darkElevated : AppColors.cardBackground,
               getTooltipItems: (spots) => spots.map((spot) {
                 final index = spot.x.toInt();
-                final label =
-                    index >= 0 && index < data.length ? data[index].label : '';
+                final label = index >= 0 && index < data.length
+                    ? data[index].label
+                    : '';
                 return LineTooltipItem(
                   '$label\n',
                   AppTypography.caption2.copyWith(
@@ -186,13 +183,13 @@ class RevenueLineChart extends StatelessWidget {
                 show: data.length <= 14,
                 getDotPainter: (spot, percent, bar, index) =>
                     FlDotCirclePainter(
-                  radius: 3,
-                  color: AppColors.royalBlue,
-                  strokeWidth: 1.5,
-                  strokeColor: isDark
-                      ? AppColors.darkCard
-                      : AppColors.cardBackground,
-                ),
+                      radius: 3,
+                      color: AppColors.royalBlue,
+                      strokeWidth: 1.5,
+                      strokeColor: isDark
+                          ? AppColors.darkCard
+                          : AppColors.cardBackground,
+                    ),
               ),
               belowBarData: BarAreaData(
                 show: true,

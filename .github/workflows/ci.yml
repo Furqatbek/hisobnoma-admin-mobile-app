@@ -20,6 +20,11 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
+          # Pin the Flutter (and therefore Dart) version so the toolchain —
+          # notably `dart format` — is deterministic. Leaving `channel: stable`
+          # unpinned lets a new stable's formatter reformat the repo and break
+          # `dart format --set-exit-if-changed`. Bump deliberately, not by drift.
+          flutter-version: 3.44.7
           channel: stable
           cache: true
 

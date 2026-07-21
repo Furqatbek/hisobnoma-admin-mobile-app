@@ -10,8 +10,8 @@ class AlertsCubit extends Cubit<AlertsState> {
   final AlertRepository _alertRepository;
 
   AlertsCubit({required AlertRepository alertRepository})
-      : _alertRepository = alertRepository,
-        super(const AlertsInitial());
+    : _alertRepository = alertRepository,
+      super(const AlertsInitial());
 
   Future<void> loadAlerts({bool unreadOnly = false, int page = 0}) async {
     emit(const AlertsLoading());
@@ -20,12 +20,14 @@ class AlertsCubit extends Cubit<AlertsState> {
         unreadOnly: unreadOnly,
         page: page,
       );
-      emit(AlertsLoaded(
-        alerts: data.content,
-        page: data.page,
-        totalPages: data.totalPages,
-        hasMore: data.hasMore,
-      ));
+      emit(
+        AlertsLoaded(
+          alerts: data.content,
+          page: data.page,
+          totalPages: data.totalPages,
+          hasMore: data.hasMore,
+        ),
+      );
     } catch (e) {
       emit(AlertsError(message: extractErrorMessage(e)));
     }
@@ -53,10 +55,12 @@ class AlertsCubit extends Cubit<AlertsState> {
         final updated = current.alerts
             .map((a) => a.id == alertId ? a.copyWith(isRead: true) : a)
             .toList();
-        emit(current.copyWith(
-          alerts: updated,
-          unreadCount: current.unreadCount > 0 ? current.unreadCount - 1 : 0,
-        ));
+        emit(
+          current.copyWith(
+            alerts: updated,
+            unreadCount: current.unreadCount > 0 ? current.unreadCount - 1 : 0,
+          ),
+        );
       }
     } catch (e) {
       emit(AlertsError(message: extractErrorMessage(e)));
@@ -68,8 +72,9 @@ class AlertsCubit extends Cubit<AlertsState> {
       await _alertRepository.markAllAsRead();
       final current = state;
       if (current is AlertsLoaded) {
-        final updated =
-            current.alerts.map((a) => a.copyWith(isRead: true)).toList();
+        final updated = current.alerts
+            .map((a) => a.copyWith(isRead: true))
+            .toList();
         emit(current.copyWith(alerts: updated, unreadCount: 0));
       }
     } catch (e) {

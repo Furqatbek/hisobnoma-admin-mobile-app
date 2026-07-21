@@ -9,21 +9,20 @@ void main() {
 
   group('HisobCard', () {
     testWidgets('renders child content', (tester) async {
-      await tester.pumpWidget(buildApp(
-        const HisobCard(child: Text('Card Content')),
-      ));
+      await tester.pumpWidget(
+        buildApp(const HisobCard(child: Text('Card Content'))),
+      );
 
       expect(find.text('Card Content'), findsOneWidget);
     });
 
     testWidgets('responds to tap when onTap provided', (tester) async {
       var tapped = false;
-      await tester.pumpWidget(buildApp(
-        HisobCard(
-          onTap: () => tapped = true,
-          child: const Text('Tappable'),
+      await tester.pumpWidget(
+        buildApp(
+          HisobCard(onTap: () => tapped = true, child: const Text('Tappable')),
         ),
-      ));
+      );
 
       await tester.tap(find.text('Tappable'));
       await tester.pump();
@@ -31,17 +30,15 @@ void main() {
     });
 
     testWidgets('does not respond to tap when no onTap', (tester) async {
-      await tester.pumpWidget(buildApp(
-        const HisobCard(child: Text('Static')),
-      ));
+      await tester.pumpWidget(buildApp(const HisobCard(child: Text('Static'))));
 
       expect(find.byType(GestureDetector), findsNothing);
     });
 
     testWidgets('hero variant renders content', (tester) async {
-      await tester.pumpWidget(buildApp(
-        HisobCard.hero(child: const Text('Hero')),
-      ));
+      await tester.pumpWidget(
+        buildApp(HisobCard.hero(child: const Text('Hero'))),
+      );
 
       expect(find.text('Hero'), findsOneWidget);
     });
