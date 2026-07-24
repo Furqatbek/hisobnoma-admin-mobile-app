@@ -45,6 +45,16 @@ abstract final class ApiEndpoints {
   // Devices / push notifications
   static const String pushToken = '/mobile/devices/push-token';
 
+  // Finance — expenses, AR payments (proposed contracts; see
+  // docs/finance/BACKEND_HANDOFF.md)
+  static const String expenses = '/mobile/finance/expenses';
+  static const String expenseCategories = '/mobile/finance/expense-categories';
+  static const String arPayments = '/mobile/finance/ar-payments';
+
+  // HR — employees, salary/advance payments
+  static const String employees = '/mobile/hr/employees';
+  static const String salaryPayments = '/mobile/hr/salary-payments';
+
   // POS Terminals
   static const String activeTerminals = '/pos/terminals/active';
 

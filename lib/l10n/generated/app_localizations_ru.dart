@@ -510,6 +510,66 @@ class SRu extends S {
   String get notNow => 'Не сейчас';
 
   @override
+  String get paymentType => 'Тип оплаты';
+
+  @override
+  String get finance => 'Финансы';
+
+  @override
+  String get recordExpense => 'Записать расход';
+
+  @override
+  String get expenseRecorded => 'Расход записан';
+
+  @override
+  String get category => 'Категория';
+
+  @override
+  String get paymentSource => 'Источник оплаты';
+
+  @override
+  String get bank => 'Банк';
+
+  @override
+  String get debtorPayments => 'Оплаты должников';
+
+  @override
+  String get receivePayment => 'Принять оплату';
+
+  @override
+  String get selectCustomer => 'Выберите клиента';
+
+  @override
+  String get customer => 'Клиент';
+
+  @override
+  String get paymentMethod => 'Способ оплаты';
+
+  @override
+  String get paymentRecorded => 'Оплата записана';
+
+  @override
+  String get salaryAdvances => 'Зарплаты и авансы';
+
+  @override
+  String get paySalary => 'Выплата зарплаты / аванса';
+
+  @override
+  String get employee => 'Сотрудник';
+
+  @override
+  String get selectEmployee => 'Выберите сотрудника';
+
+  @override
+  String get salary => 'Зарплата';
+
+  @override
+  String get advance => 'Аванс';
+
+  @override
+  String get fieldRequired => 'Обязательно';
+
+  @override
   String get alertPreferences => 'Настройки оповещений';
 
   @override

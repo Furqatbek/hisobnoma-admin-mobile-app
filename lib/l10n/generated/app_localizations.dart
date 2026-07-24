@@ -952,6 +952,126 @@ abstract class S {
   /// **'Not now'**
   String get notNow;
 
+  /// No description provided for @paymentType.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment type'**
+  String get paymentType;
+
+  /// No description provided for @finance.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance'**
+  String get finance;
+
+  /// No description provided for @recordExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Record Expense'**
+  String get recordExpense;
+
+  /// No description provided for @expenseRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense recorded'**
+  String get expenseRecorded;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @paymentSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment source'**
+  String get paymentSource;
+
+  /// No description provided for @bank.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank'**
+  String get bank;
+
+  /// No description provided for @debtorPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Debtor Payments'**
+  String get debtorPayments;
+
+  /// No description provided for @receivePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive Payment'**
+  String get receivePayment;
+
+  /// No description provided for @selectCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Select customer'**
+  String get selectCustomer;
+
+  /// No description provided for @customer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get customer;
+
+  /// No description provided for @paymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment method'**
+  String get paymentMethod;
+
+  /// No description provided for @paymentRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment recorded'**
+  String get paymentRecorded;
+
+  /// No description provided for @salaryAdvances.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary & Advances'**
+  String get salaryAdvances;
+
+  /// No description provided for @paySalary.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay Salary / Advance'**
+  String get paySalary;
+
+  /// No description provided for @employee.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee'**
+  String get employee;
+
+  /// No description provided for @selectEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'Select employee'**
+  String get selectEmployee;
+
+  /// No description provided for @salary.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary'**
+  String get salary;
+
+  /// No description provided for @advance.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance'**
+  String get advance;
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get fieldRequired;
+
   /// No description provided for @alertPreferences.
   ///
   /// In en, this message translates to:

@@ -23,6 +23,20 @@ void showErrorSnackBar(BuildContext context, Object error) {
   );
 }
 
+/// Shows a floating success snackbar.
+void showSuccessSnackBar(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      ),
+      backgroundColor: AppColors.income,
+    ),
+  );
+}
+
 /// Shows a modal error dialog with the backend error message.
 Future<void> showErrorDialog(BuildContext context, Object error) {
   final message = extractErrorMessage(error);

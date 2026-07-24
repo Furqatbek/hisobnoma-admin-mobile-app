@@ -9,6 +9,9 @@ import 'package:hisobnoma/presentation/screens/transactions/transactions_screen.
 import 'package:hisobnoma/presentation/screens/reports/reports_screen.dart';
 import 'package:hisobnoma/presentation/screens/settings/settings_screen.dart';
 import 'package:hisobnoma/presentation/screens/alerts/alerts_screen.dart';
+import 'package:hisobnoma/presentation/screens/finance/expense_screen.dart';
+import 'package:hisobnoma/presentation/screens/finance/debtor_payment_screen.dart';
+import 'package:hisobnoma/presentation/screens/finance/salary_payment_screen.dart';
 import 'package:hisobnoma/presentation/screens/shell_screen.dart';
 import 'package:hisobnoma/presentation/screens/splash/splash_screen.dart';
 
@@ -21,6 +24,9 @@ abstract final class AppRoutes {
   static const String reports = '/reports';
   static const String settings = '/settings';
   static const String alerts = '/alerts';
+  static const String expenses = '/finance/expenses';
+  static const String debtorPayments = '/finance/debtor-payments';
+  static const String salaryPayments = '/finance/salary-payments';
 }
 
 /// Creates the app router with auth-aware redirect.
@@ -115,6 +121,18 @@ GoRouter createAppRouter(AuthCubit authCubit) {
       GoRoute(
         path: AppRoutes.alerts,
         builder: (context, state) => const AlertsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.expenses,
+        builder: (context, state) => const ExpenseScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.debtorPayments,
+        builder: (context, state) => const DebtorPaymentScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.salaryPayments,
+        builder: (context, state) => const SalaryPaymentScreen(),
       ),
     ],
   );

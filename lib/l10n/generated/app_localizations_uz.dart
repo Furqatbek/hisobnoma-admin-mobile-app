@@ -509,6 +509,66 @@ class SUz extends S {
   String get notNow => 'Ҳозир эмас';
 
   @override
+  String get paymentType => 'Тўлов тури';
+
+  @override
+  String get finance => 'Молия';
+
+  @override
+  String get recordExpense => 'Харажат киритиш';
+
+  @override
+  String get expenseRecorded => 'Харажат сақланди';
+
+  @override
+  String get category => 'Тоифа';
+
+  @override
+  String get paymentSource => 'Тўлов манбаи';
+
+  @override
+  String get bank => 'Банк';
+
+  @override
+  String get debtorPayments => 'Қарздор тўловлари';
+
+  @override
+  String get receivePayment => 'Тўловни қабул қилиш';
+
+  @override
+  String get selectCustomer => 'Мижозни танланг';
+
+  @override
+  String get customer => 'Мижоз';
+
+  @override
+  String get paymentMethod => 'Тўлов усули';
+
+  @override
+  String get paymentRecorded => 'Тўлов сақланди';
+
+  @override
+  String get salaryAdvances => 'Ойлик ва аванслар';
+
+  @override
+  String get paySalary => 'Ойлик / аванс тўлаш';
+
+  @override
+  String get employee => 'Ходим';
+
+  @override
+  String get selectEmployee => 'Ходимни танланг';
+
+  @override
+  String get salary => 'Ойлик';
+
+  @override
+  String get advance => 'Аванс';
+
+  @override
+  String get fieldRequired => 'Мажбурий';
+
+  @override
   String get alertPreferences => 'Огоҳлантириш созламалари';
 
   @override

@@ -509,6 +509,66 @@ class SEn extends S {
   String get notNow => 'Not now';
 
   @override
+  String get paymentType => 'Payment type';
+
+  @override
+  String get finance => 'Finance';
+
+  @override
+  String get recordExpense => 'Record Expense';
+
+  @override
+  String get expenseRecorded => 'Expense recorded';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get paymentSource => 'Payment source';
+
+  @override
+  String get bank => 'Bank';
+
+  @override
+  String get debtorPayments => 'Debtor Payments';
+
+  @override
+  String get receivePayment => 'Receive Payment';
+
+  @override
+  String get selectCustomer => 'Select customer';
+
+  @override
+  String get customer => 'Customer';
+
+  @override
+  String get paymentMethod => 'Payment method';
+
+  @override
+  String get paymentRecorded => 'Payment recorded';
+
+  @override
+  String get salaryAdvances => 'Salary & Advances';
+
+  @override
+  String get paySalary => 'Pay Salary / Advance';
+
+  @override
+  String get employee => 'Employee';
+
+  @override
+  String get selectEmployee => 'Select employee';
+
+  @override
+  String get salary => 'Salary';
+
+  @override
+  String get advance => 'Advance';
+
+  @override
+  String get fieldRequired => 'Required';
+
+  @override
   String get alertPreferences => 'Alert Preferences';
 
   @override

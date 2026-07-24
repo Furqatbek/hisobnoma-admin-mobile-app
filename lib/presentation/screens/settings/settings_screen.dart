@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/di/injection.dart';
+import 'package:hisobnoma/core/router/app_router.dart';
 import 'package:hisobnoma/core/services/push_notification_service.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/auth/auth_cubit.dart';
@@ -55,6 +57,46 @@ class SettingsScreen extends StatelessWidget {
               _SettingsGroup(
                 isDark: isDark,
                 children: const [_NotificationsTile()],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // -- Finance --
+              _SectionHeader(title: t.finance),
+              _SettingsGroup(
+                isDark: isDark,
+                children: [
+                  HisobListTile(
+                    title: t.recordExpense,
+                    leading: Icon(
+                      Icons.receipt_long_outlined,
+                      size: 22,
+                      color: AppColors.royalBlue,
+                    ),
+                    showChevron: true,
+                    onTap: () => context.push(AppRoutes.expenses),
+                  ),
+                  HisobListTile(
+                    title: t.receivePayment,
+                    leading: Icon(
+                      Icons.payments_outlined,
+                      size: 22,
+                      color: AppColors.royalBlue,
+                    ),
+                    showChevron: true,
+                    onTap: () => context.push(AppRoutes.debtorPayments),
+                  ),
+                  HisobListTile(
+                    title: t.salaryAdvances,
+                    leading: Icon(
+                      Icons.badge_outlined,
+                      size: 22,
+                      color: AppColors.royalBlue,
+                    ),
+                    showChevron: true,
+                    showDivider: false,
+                    onTap: () => context.push(AppRoutes.salaryPayments),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.lg),
 
