@@ -80,14 +80,46 @@ class InvoiceLine {
   });
 
   factory InvoiceLine.fromJson(Map<String, dynamic> json) {
+    final sku = _firstString(json, ['productSku', 'sku']);
     return InvoiceLine(
-      id: json['id'] as int,
-      productName: json['productName'] as String? ?? '',
-      productSku: json['productSku'] as String? ?? '',
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      // The AR-invoice line field name varies by backend version; try the
+      // common ones (and a nested product) before falling back to SKU so the
+      // item name is never blank.
+      productName: _lineName(json, sku),
+      productSku: sku,
       quantity: (json['quantity'] as num?)?.toDouble() ?? 0,
       unitPrice: (json['unitPrice'] as num?)?.toDouble() ?? 0,
       lineTotal: (json['lineTotal'] as num?)?.toDouble() ?? 0,
       discountAmount: (json['discountAmount'] as num?)?.toDouble() ?? 0,
     );
+  }
+
+  static String _lineName(Map<String, dynamic> json, String sku) {
+    final direct = _firstString(json, [
+      'productName',
+      'name',
+      'itemName',
+      'description',
+      'lineDescription',
+    ]);
+    if (direct.isNotEmpty) return direct;
+    final product = json['product'];
+    if (product is Map) {
+      final nested = _firstString(product.cast<String, dynamic>(), [
+        'name',
+        'productName',
+      ]);
+      if (nested.isNotEmpty) return nested;
+    }
+    return sku; // last resort so the row is never nameless
+  }
+
+  static String _firstString(Map<String, dynamic> json, List<String> keys) {
+    for (final key in keys) {
+      final v = json[key];
+      if (v is String && v.trim().isNotEmpty) return v;
+    }
+    return '';
   }
 }
