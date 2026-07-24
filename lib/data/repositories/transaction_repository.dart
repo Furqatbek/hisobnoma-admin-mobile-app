@@ -53,23 +53,59 @@ class TransactionRepository {
         .toList();
   }
 
-  /// Barcode product lookup
+  /// Barcode product lookup. Uses the documented path, falling back to the
+  /// pre-doc path if the backend returns 404 (endpoint not yet deployed).
   Future<ProductLookup> barcodeLookup(String barcode) async {
-    final response = await _apiClient.get(ApiEndpoints.barcodeLookup(barcode));
+    final response = await _getWithFallback(
+      ApiEndpoints.barcodeLookup(barcode),
+      ApiEndpoints.barcodeLookupLegacy(barcode),
+    );
     return ProductLookup.fromJson(
       response.data['data'] as Map<String, dynamic>,
     );
   }
 
-  /// Quick stock count
+  /// Quick stock count. Documented path with a 404 fallback to the pre-doc
+  /// path. A 404 means nothing was recorded server-side, so retrying the
+  /// fallback can't double-count.
   Future<QuickCountResponse> quickCount(QuickCountRequest request) async {
-    final response = await _apiClient.post(
+    final response = await _postWithFallback(
       ApiEndpoints.quickCount,
-      data: request.toJson(),
+      ApiEndpoints.quickCountLegacy,
+      request.toJson(),
     );
     return QuickCountResponse.fromJson(
       response.data['data'] as Map<String, dynamic>,
     );
+  }
+
+  /// GET [primary]; if it 404s (path not deployed), retry [fallback].
+  Future<Response> _getWithFallback(String primary, String fallback) async {
+    try {
+      return await _apiClient.get(primary);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return await _apiClient.get(fallback);
+      }
+      rethrow;
+    }
+  }
+
+  /// POST [data] to [primary]; if it 404s, retry [fallback]. Safe only when a
+  /// 404 guarantees no server-side effect (true for an unmatched route).
+  Future<Response> _postWithFallback(
+    String primary,
+    String fallback,
+    dynamic data,
+  ) async {
+    try {
+      return await _apiClient.post(primary, data: data);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return await _apiClient.post(fallback, data: data);
+      }
+      rethrow;
+    }
   }
 
   /// Quick sale. Safe to auto-retry ONLY when the request carries a

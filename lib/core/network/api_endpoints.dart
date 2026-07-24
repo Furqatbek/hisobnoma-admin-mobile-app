@@ -28,10 +28,15 @@ abstract final class ApiEndpoints {
   static String updateAlertPreference(String alertType) =>
       '/mobile/alerts/settings/$alertType';
 
-  // Quick Actions
+  // Quick Actions. Documented paths are primary; the pre-doc paths are kept as
+  // a 404 fallback so the app works whether or not the deployed backend has
+  // shipped the documented contract yet.
   static String barcodeLookup(String barcode) =>
       '/mobile/inventory/barcode/$barcode';
+  static String barcodeLookupLegacy(String barcode) =>
+      '/mobile/barcode/$barcode';
   static const String quickCount = '/mobile/inventory/quick-count';
+  static const String quickCountLegacy = '/mobile/quick-count';
   static const String quickSale = '/mobile/pos/quick-sale';
   static const String searchProducts = '/mobile/products/search';
   static const String searchCustomers = '/mobile/customers/search';
