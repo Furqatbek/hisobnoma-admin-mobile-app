@@ -238,23 +238,32 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
         ),
       );
     }
-    return ListView.builder(
-      controller: controller,
-      itemCount: _filtered.length,
-      itemBuilder: (context, i) {
-        final c = _filtered[i];
-        final balance = (c['currentBalance'] as num?)?.toDouble();
-        return ListTile(
-          title: Text(
-            (c['name'] ?? '').toString(),
-            style: AppTypography.body.copyWith(
-              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+    // Wrap in a transparent Material so ListTile ink/background paints on it
+    // rather than being hidden by the decorated sheet Container above.
+    return Material(
+      type: MaterialType.transparency,
+      child: ListView.builder(
+        controller: controller,
+        itemCount: _filtered.length,
+        itemBuilder: (context, i) {
+          final c = _filtered[i];
+          final balance = (c['currentBalance'] as num?)?.toDouble();
+          return ListTile(
+            title: Text(
+              (c['name'] ?? '').toString(),
+              style: AppTypography.body.copyWith(
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
+              ),
             ),
-          ),
-          subtitle: balance != null ? Text(Formatters.currency(balance)) : null,
-          onTap: () => Navigator.of(context).pop(c),
-        );
-      },
+            subtitle: balance != null
+                ? Text(Formatters.currency(balance))
+                : null,
+            onTap: () => Navigator.of(context).pop(c),
+          );
+        },
+      ),
     );
   }
 }

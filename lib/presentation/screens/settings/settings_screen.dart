@@ -515,74 +515,83 @@ class _LanguagePickerSheet extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.sm),
-              child: Container(
-                width: 36,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSeparator : AppColors.separator,
-                  borderRadius: BorderRadius.circular(2.5),
+        // Transparent Material so the ListTile rows below paint ink/background
+        // on it rather than being hidden by this decorated Container.
+        child: Material(
+          type: MaterialType.transparency,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.sm),
+                child: Container(
+                  width: 36,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.darkSeparator
+                        : AppColors.separator,
+                    borderRadius: BorderRadius.circular(2.5),
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Text(t.selectLanguage, style: AppTypography.headline),
-            ),
-            const Divider(height: 1),
-            ..._languages.map((lang) {
-              final code = lang.$1;
-              final label = lang.$2;
-              final badge = lang.$3;
-              final isSelected = selectedLocale?.languageCode == code;
-              return ListTile(
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.royalBlue.withValues(alpha: 0.1)
-                        : (isDark ? AppColors.darkFill : AppColors.fill),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                  ),
-                  child: Center(
-                    child: Text(
-                      badge,
-                      style: AppTypography.headline.copyWith(
-                        color: isSelected
-                            ? AppColors.royalBlue
-                            : (isDark
-                                  ? AppColors.darkTextPrimary
-                                  : AppColors.textPrimary),
-                        fontSize: 14,
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Text(t.selectLanguage, style: AppTypography.headline),
+              ),
+              const Divider(height: 1),
+              ..._languages.map((lang) {
+                final code = lang.$1;
+                final label = lang.$2;
+                final badge = lang.$3;
+                final isSelected = selectedLocale?.languageCode == code;
+                return ListTile(
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.royalBlue.withValues(alpha: 0.1)
+                          : (isDark ? AppColors.darkFill : AppColors.fill),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                    ),
+                    child: Center(
+                      child: Text(
+                        badge,
+                        style: AppTypography.headline.copyWith(
+                          color: isSelected
+                              ? AppColors.royalBlue
+                              : (isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.textPrimary),
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                title: Text(
-                  label,
-                  style: AppTypography.body.copyWith(
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.textPrimary,
+                  title: Text(
+                    label,
+                    style: AppTypography.body.copyWith(
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                trailing: isSelected
-                    ? Icon(Icons.check_circle, color: AppColors.royalBlue)
-                    : null,
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  onSelected(Locale(code));
-                },
-              );
-            }),
-            const SizedBox(height: AppSpacing.md),
-          ],
+                  trailing: isSelected
+                      ? Icon(Icons.check_circle, color: AppColors.royalBlue)
+                      : null,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    onSelected(Locale(code));
+                  },
+                );
+              }),
+              const SizedBox(height: AppSpacing.md),
+            ],
+          ),
         ),
       ),
     );

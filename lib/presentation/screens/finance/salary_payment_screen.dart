@@ -265,22 +265,29 @@ class _EmployeePickerSheetState extends State<_EmployeePickerSheet> {
         ),
       );
     }
-    return ListView.builder(
-      controller: controller,
-      itemCount: _employees.length,
-      itemBuilder: (context, i) {
-        final e = _employees[i];
-        return ListTile(
-          title: Text(
-            e.name,
-            style: AppTypography.body.copyWith(
-              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+    // Wrap in a transparent Material so ListTile ink/background paints on it
+    // rather than being hidden by the decorated sheet Container above.
+    return Material(
+      type: MaterialType.transparency,
+      child: ListView.builder(
+        controller: controller,
+        itemCount: _employees.length,
+        itemBuilder: (context, i) {
+          final e = _employees[i];
+          return ListTile(
+            title: Text(
+              e.name,
+              style: AppTypography.body.copyWith(
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
+              ),
             ),
-          ),
-          subtitle: e.position != null ? Text(e.position!) : null,
-          onTap: () => Navigator.of(context).pop(e),
-        );
-      },
+            subtitle: e.position != null ? Text(e.position!) : null,
+            onTap: () => Navigator.of(context).pop(e),
+          );
+        },
+      ),
     );
   }
 }
