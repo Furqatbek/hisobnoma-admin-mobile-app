@@ -1,9 +1,20 @@
-# Finance/HR Mobile Features — Backend Handoff (proposed contracts)
+# Finance/HR Mobile Features — Backend Handoff
 
-The mobile app now has three new pages built against the contracts below:
-**Expenses**, **Debtor (AR) payments**, and **Employee salary/advance**. These
-endpoints do **not exist yet** — this doc proposes the exact shapes the app
-calls so the backend team can implement them to match (same as the push flow).
+> **STATUS: implemented.** The backend shipped these endpoints (see
+> `MOBILE_MODULE_API.md`), and the app has been realigned to the **actual**
+> contracts. The proposal below is kept for history; the app now uses the real
+> shapes (`POST /mobile/expenses` with `totalAmount`/`createDate`;
+> `POST /mobile/finance/debtor-payment` with no date field;
+> `POST /mobile/hr/salary` and `POST /mobile/hr/advance` — two endpoints).
+>
+> **Two gaps still open on the backend:**
+> 1. **No employee-list endpoint** is documented. The salary/advance screen
+>    needs `GET /mobile/hr/employees` (id, name, position) to populate the payee
+>    picker — the app calls it optimistically; if it 404s the picker shows an
+>    error. Please add it (or point us at the HR-module path).
+> 2. **No GET/list for expenses** — fine for now (create-only), noted for later.
+
+The proposed contracts below (pre-implementation):
 
 Conventions (match the rest of the mobile module):
 - Base path `/api/v1/mobile`. All authenticated (Bearer); derive tenant/user

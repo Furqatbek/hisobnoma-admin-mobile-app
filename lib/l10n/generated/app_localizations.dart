@@ -1072,6 +1072,12 @@ abstract class S {
   /// **'Required'**
   String get fieldRequired;
 
+  /// No description provided for @period.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get period;
+
   /// No description provided for @alertPreferences.
   ///
   /// In en, this message translates to:

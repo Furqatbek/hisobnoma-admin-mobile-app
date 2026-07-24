@@ -569,6 +569,9 @@ class SUz extends S {
   String get fieldRequired => 'Мажбурий';
 
   @override
+  String get period => 'Давр';
+
+  @override
   String get alertPreferences => 'Огоҳлантириш созламалари';
 
   @override

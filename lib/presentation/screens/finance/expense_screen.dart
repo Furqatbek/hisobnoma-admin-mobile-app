@@ -5,14 +5,13 @@ import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
 import 'package:hisobnoma/core/di/injection.dart';
 import 'package:hisobnoma/core/utils/money.dart';
-import 'package:hisobnoma/data/models/finance/finance_models.dart';
 import 'package:hisobnoma/data/repositories/finance_repository.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/screens/finance/finance_form_widgets.dart';
 import 'package:hisobnoma/presentation/widgets/common/error_handler.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_text_field.dart';
 
-/// Record a business expense (cash or bank outflow).
+/// Record a business expense.
 class ExpenseScreen extends StatefulWidget {
   const ExpenseScreen({super.key});
 
@@ -26,18 +25,15 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
 
   final _amount = TextEditingController();
   final _category = TextEditingController();
-  final _description = TextEditingController();
   final _notes = TextEditingController();
 
   DateTime _date = DateTime.now();
-  PaymentSource _source = PaymentSource.cash;
   bool _submitting = false;
 
   @override
   void dispose() {
     _amount.dispose();
     _category.dispose();
-    _description.dispose();
     _notes.dispose();
     super.dispose();
   }
@@ -49,10 +45,8 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
     setState(() => _submitting = true);
     try {
       await _repo.createExpense(
-        amount: parseMoney(_amount.text),
-        description: _description.text.trim(),
-        expenseDate: formatDateYmd(_date),
-        paymentSource: _source,
+        totalAmount: parseMoney(_amount.text),
+        createDate: formatDateYmd(_date),
         category: _category.text.trim(),
         notes: _notes.text.trim(),
       );
@@ -83,14 +77,6 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
             AmountField(controller: _amount),
             const SizedBox(height: AppSpacing.md),
             HisobTextField(
-              label: t.description,
-              controller: _description,
-              textInputAction: TextInputAction.next,
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? t.fieldRequired : null,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            HisobTextField(
               label: t.category,
               controller: _category,
               textInputAction: TextInputAction.next,
@@ -102,20 +88,10 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
               onChanged: (d) => setState(() => _date = d),
             ),
             const SizedBox(height: AppSpacing.md),
-            ChoiceRow<PaymentSource>(
-              label: t.paymentSource,
-              value: _source,
-              options: [
-                ChoiceOption(PaymentSource.cash, t.cash),
-                ChoiceOption(PaymentSource.bank, t.bank),
-              ],
-              onChanged: (v) => setState(() => _source = v),
-            ),
-            const SizedBox(height: AppSpacing.md),
             HisobTextField(
               label: t.notes,
               controller: _notes,
-              maxLines: 2,
+              maxLines: 3,
               textInputAction: TextInputAction.done,
             ),
             const SizedBox(height: AppSpacing.xl),

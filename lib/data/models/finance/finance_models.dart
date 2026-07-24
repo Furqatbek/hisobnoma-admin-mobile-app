@@ -1,5 +1,5 @@
-/// Models for the finance/HR mobile features (expenses, AR payments,
-/// salary/advance). See docs/finance/BACKEND_HANDOFF.md for the contracts.
+/// Models for the finance/HR mobile features (expenses, debtor payments,
+/// salary/advance). Contracts: docs/api/MOBILE_MODULE_API.md.
 
 /// An employee, for the salary/advance payee picker.
 class Employee {
@@ -18,30 +18,8 @@ class Employee {
   }
 }
 
-/// A simple expense category, for the optional dropdown.
-class ExpenseCategory {
-  final int id;
-  final String name;
-
-  const ExpenseCategory({required this.id, required this.name});
-
-  factory ExpenseCategory.fromJson(Map<String, dynamic> json) {
-    return ExpenseCategory(
-      id: (json['id'] as num?)?.toInt() ?? 0,
-      name: (json['name'] ?? '') as String,
-    );
-  }
-}
-
-/// Cash vs bank source for an outflow (expense / salary).
-enum PaymentSource {
-  cash,
-  bank;
-
-  String get apiValue => this == PaymentSource.cash ? 'CASH' : 'BANK';
-}
-
-/// Method for an incoming AR payment.
+/// Method for an incoming debtor payment. Values match the backend's allowed
+/// set (CASH | CREDIT_CARD | BANK_TRANSFER | …).
 enum ArPaymentMethod {
   cash,
   card,
@@ -49,16 +27,10 @@ enum ArPaymentMethod {
 
   String get apiValue => switch (this) {
     ArPaymentMethod.cash => 'CASH',
-    ArPaymentMethod.card => 'CARD',
-    ArPaymentMethod.bank => 'BANK',
+    ArPaymentMethod.card => 'CREDIT_CARD',
+    ArPaymentMethod.bank => 'BANK_TRANSFER',
   };
 }
 
-/// Salary vs advance.
-enum SalaryPaymentType {
-  salary,
-  advance;
-
-  String get apiValue =>
-      this == SalaryPaymentType.salary ? 'SALARY' : 'ADVANCE';
-}
+/// Salary vs advance — selects which endpoint the salary screen posts to.
+enum SalaryPaymentType { salary, advance }

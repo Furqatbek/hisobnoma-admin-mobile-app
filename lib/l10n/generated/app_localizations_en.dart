@@ -569,6 +569,9 @@ class SEn extends S {
   String get fieldRequired => 'Required';
 
   @override
+  String get period => 'Period';
+
+  @override
   String get alertPreferences => 'Alert Preferences';
 
   @override

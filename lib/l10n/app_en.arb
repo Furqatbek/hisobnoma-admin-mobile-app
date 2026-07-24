@@ -206,6 +206,7 @@
   "salary": "Salary",
   "advance": "Advance",
   "fieldRequired": "Required",
+  "period": "Period",
   "alertPreferences": "Alert Preferences",
   "devices": "Devices",
   "account": "Account",

@@ -2,12 +2,11 @@ import 'package:hisobnoma/core/network/api_client.dart';
 import 'package:hisobnoma/core/network/api_endpoints.dart';
 import 'package:hisobnoma/data/models/finance/finance_models.dart';
 
-/// Repository for the finance/HR mobile features: expenses, AR (debtor)
+/// Repository for the finance/HR mobile features: expenses, debtor (AR)
 /// payments, and employee salary/advance payments.
 ///
-/// Contracts are proposed in docs/finance/BACKEND_HANDOFF.md. This is the only
-/// layer that knows the wire shapes — if the backend uses different field names
-/// or paths, change them here and nowhere else.
+/// Wire shapes follow docs/api/MOBILE_MODULE_API.md. This is the only layer
+/// that knows the field names/paths — change them here and nowhere else.
 class FinanceRepository {
   final ApiClient _apiClient;
 
@@ -15,65 +14,50 @@ class FinanceRepository {
 
   // ---------------------------------------------------------------- Expenses
 
-  /// Record an expense (cash or bank outflow).
+  /// Record an expense. Backend fields: totalAmount (required), category
+  /// (optional, defaults to "Boshqa"), createDate, currency, notes.
   Future<void> createExpense({
-    required double amount,
-    required String description,
-    required String expenseDate,
-    required PaymentSource paymentSource,
-    int? categoryId,
+    required double totalAmount,
+    required String createDate,
     String? category,
+    String currency = 'UZS',
     String? notes,
   }) async {
     await _apiClient.post(
       ApiEndpoints.expenses,
       data: {
-        'amount': amount,
-        'description': description,
-        'expenseDate': expenseDate,
-        'paymentSource': paymentSource.apiValue,
-        if (categoryId != null) 'categoryId': categoryId,
+        'totalAmount': totalAmount,
+        'createDate': createDate,
+        'currency': currency,
         if (category != null && category.isNotEmpty) 'category': category,
         if (notes != null && notes.isNotEmpty) 'notes': notes,
       },
     );
   }
 
-  /// Optional expense categories for the dropdown. Returns an empty list if the
-  /// endpoint isn't available (the screen then uses a free-text category).
-  Future<List<ExpenseCategory>> getExpenseCategories() async {
-    try {
-      final response = await _apiClient.get(ApiEndpoints.expenseCategories);
-      final list = response.data['data'] as List? ?? [];
-      return list
-          .map((e) => ExpenseCategory.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } catch (_) {
-      return const [];
-    }
-  }
-
-  // ------------------------------------------------------------- AR payments
+  // -------------------------------------------------------- Debtor payments
 
   /// Record a payment received from a debtor (reduces their AR balance).
   /// [invoiceId] optionally targets one invoice; otherwise the backend
-  /// auto-allocates oldest-first.
-  Future<void> recordArPayment({
+  /// auto-allocates oldest-due-first. Overpayment is kept as credit. There is
+  /// no date field on this endpoint.
+  Future<void> recordDebtorPayment({
     required int customerId,
     required double amount,
     required ArPaymentMethod method,
-    required String paymentDate,
     int? invoiceId,
+    String? referenceNumber,
     String? notes,
   }) async {
     await _apiClient.post(
-      ApiEndpoints.arPayments,
+      ApiEndpoints.debtorPayment,
       data: {
         'customerId': customerId,
         'amount': amount,
         'paymentMethod': method.apiValue,
-        'paymentDate': paymentDate,
         if (invoiceId != null) 'invoiceId': invoiceId,
+        if (referenceNumber != null && referenceNumber.isNotEmpty)
+          'referenceNumber': referenceNumber,
         if (notes != null && notes.isNotEmpty) 'notes': notes,
       },
     );
@@ -81,7 +65,8 @@ class FinanceRepository {
 
   // ------------------------------------------------------------------ Salary
 
-  /// List employees for the salary/advance payee picker.
+  /// List employees for the salary/advance payee picker. Not documented in the
+  /// mobile module doc — assumed to exist in the HR module (like /pos/terminals).
   Future<List<Employee>> getEmployees() async {
     final response = await _apiClient.get(ApiEndpoints.employees);
     final list = response.data['data'] as List? ?? [];
@@ -90,23 +75,48 @@ class FinanceRepository {
         .toList();
   }
 
-  /// Record a salary or advance payment to an employee.
-  Future<void> recordSalaryPayment({
+  /// Record & pay a salary for a period. Salary uses baseAmount (+ optional
+  /// bonus/deduction) and a period year/month — no date, no cash/bank source.
+  Future<void> recordSalary({
     required int employeeId,
-    required double amount,
-    required SalaryPaymentType type,
-    required String paymentDate,
-    required PaymentSource paymentSource,
+    required int periodYear,
+    required int periodMonth,
+    required double baseAmount,
+    double bonusAmount = 0,
+    double deductionAmount = 0,
     String? notes,
   }) async {
     await _apiClient.post(
-      ApiEndpoints.salaryPayments,
+      ApiEndpoints.salaryPayment,
+      data: {
+        'employeeId': employeeId,
+        'periodYear': periodYear,
+        'periodMonth': periodMonth,
+        'baseAmount': baseAmount,
+        'bonusAmount': bonusAmount,
+        'deductionAmount': deductionAmount,
+        if (notes != null && notes.isNotEmpty) 'notes': notes,
+      },
+    );
+  }
+
+  /// Record a paid advance against a period. Uses a flat amount + advanceDate.
+  Future<void> recordAdvance({
+    required int employeeId,
+    required double amount,
+    required int periodYear,
+    required int periodMonth,
+    required String advanceDate,
+    String? notes,
+  }) async {
+    await _apiClient.post(
+      ApiEndpoints.advancePayment,
       data: {
         'employeeId': employeeId,
         'amount': amount,
-        'paymentType': type.apiValue,
-        'paymentDate': paymentDate,
-        'paymentSource': paymentSource.apiValue,
+        'periodYear': periodYear,
+        'periodMonth': periodMonth,
+        'advanceDate': advanceDate,
         if (notes != null && notes.isNotEmpty) 'notes': notes,
       },
     );

@@ -12,7 +12,8 @@ import 'package:hisobnoma/presentation/screens/finance/finance_form_widgets.dart
 import 'package:hisobnoma/presentation/widgets/common/error_handler.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_text_field.dart';
 
-/// Record a salary or advance payment to an employee.
+/// Record a salary (period-based) or an advance to an employee. Salary and
+/// advance post to two different backend endpoints.
 class SalaryPaymentScreen extends StatefulWidget {
   const SalaryPaymentScreen({super.key});
 
@@ -28,9 +29,11 @@ class _SalaryPaymentScreenState extends State<SalaryPaymentScreen> {
   final _notes = TextEditingController();
 
   Employee? _employee;
-  DateTime _date = DateTime.now();
   SalaryPaymentType _type = SalaryPaymentType.salary;
-  PaymentSource _source = PaymentSource.cash;
+  // Period defaults to the current month; advance also carries its own date.
+  int _periodYear = DateTime.now().year;
+  int _periodMonth = DateTime.now().month;
+  DateTime _advanceDate = DateTime.now();
   bool _submitting = false;
 
   @override
@@ -50,6 +53,22 @@ class _SalaryPaymentScreenState extends State<SalaryPaymentScreen> {
     if (selected != null) setState(() => _employee = selected);
   }
 
+  Future<void> _pickPeriod() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(_periodYear, _periodMonth),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(DateTime.now().year + 1, 12, 31),
+      helpText: S.of(context).period,
+    );
+    if (picked != null) {
+      setState(() {
+        _periodYear = picked.year;
+        _periodMonth = picked.month;
+      });
+    }
+  }
+
   Future<void> _submit() async {
     if (_submitting) return;
     final t = S.of(context);
@@ -61,14 +80,25 @@ class _SalaryPaymentScreenState extends State<SalaryPaymentScreen> {
 
     setState(() => _submitting = true);
     try {
-      await _repo.recordSalaryPayment(
-        employeeId: _employee!.id,
-        amount: parseMoney(_amount.text),
-        type: _type,
-        paymentDate: formatDateYmd(_date),
-        paymentSource: _source,
-        notes: _notes.text.trim(),
-      );
+      final amount = parseMoney(_amount.text);
+      if (_type == SalaryPaymentType.salary) {
+        await _repo.recordSalary(
+          employeeId: _employee!.id,
+          periodYear: _periodYear,
+          periodMonth: _periodMonth,
+          baseAmount: amount,
+          notes: _notes.text.trim(),
+        );
+      } else {
+        await _repo.recordAdvance(
+          employeeId: _employee!.id,
+          amount: amount,
+          periodYear: _periodYear,
+          periodMonth: _periodMonth,
+          advanceDate: formatDateYmd(_advanceDate),
+          notes: _notes.text.trim(),
+        );
+      }
       if (!mounted) return;
       HapticFeedback.mediumImpact();
       Navigator.of(context).pop();
@@ -80,9 +110,13 @@ class _SalaryPaymentScreenState extends State<SalaryPaymentScreen> {
     }
   }
 
+  String get _periodText =>
+      '$_periodYear-${_periodMonth.toString().padLeft(2, '0')}';
+
   @override
   Widget build(BuildContext context) {
     final t = S.of(context);
+    final isAdvance = _type == SalaryPaymentType.advance;
     return Scaffold(
       appBar: AppBar(title: Text(t.paySalary, style: AppTypography.headline)),
       body: Form(
@@ -109,21 +143,20 @@ class _SalaryPaymentScreenState extends State<SalaryPaymentScreen> {
             const SizedBox(height: AppSpacing.md),
             AmountField(controller: _amount),
             const SizedBox(height: AppSpacing.md),
-            ChoiceRow<PaymentSource>(
-              label: t.paymentSource,
-              value: _source,
-              options: [
-                ChoiceOption(PaymentSource.cash, t.cash),
-                ChoiceOption(PaymentSource.bank, t.bank),
-              ],
-              onChanged: (v) => setState(() => _source = v),
+            PickerField(
+              label: t.period,
+              selectedText: _periodText,
+              placeholder: _periodText,
+              onTap: _pickPeriod,
             ),
-            const SizedBox(height: AppSpacing.md),
-            DateField(
-              label: t.date,
-              value: _date,
-              onChanged: (d) => setState(() => _date = d),
-            ),
+            if (isAdvance) ...[
+              const SizedBox(height: AppSpacing.md),
+              DateField(
+                label: t.date,
+                value: _advanceDate,
+                onChanged: (d) => setState(() => _advanceDate = d),
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
             HisobTextField(
               label: t.notes,

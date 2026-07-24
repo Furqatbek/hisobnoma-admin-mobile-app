@@ -570,6 +570,9 @@ class SRu extends S {
   String get fieldRequired => 'Обязательно';
 
   @override
+  String get period => 'Период';
+
+  @override
   String get alertPreferences => 'Настройки оповещений';
 
   @override

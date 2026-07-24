@@ -31,7 +31,6 @@ class _DebtorPaymentScreenState extends State<DebtorPaymentScreen> {
   final _notes = TextEditingController();
 
   Map<String, dynamic>? _customer;
-  DateTime _date = DateTime.now();
   ArPaymentMethod _method = ArPaymentMethod.cash;
   bool _submitting = false;
 
@@ -63,11 +62,10 @@ class _DebtorPaymentScreenState extends State<DebtorPaymentScreen> {
 
     setState(() => _submitting = true);
     try {
-      await _repo.recordArPayment(
+      await _repo.recordDebtorPayment(
         customerId: (_customer!['id'] as num).toInt(),
         amount: parseMoney(_amount.text),
         method: _method,
-        paymentDate: formatDateYmd(_date),
         notes: _notes.text.trim(),
       );
       if (!mounted) return;
@@ -112,12 +110,6 @@ class _DebtorPaymentScreenState extends State<DebtorPaymentScreen> {
                 ChoiceOption(ArPaymentMethod.bank, t.bank),
               ],
               onChanged: (v) => setState(() => _method = v),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            DateField(
-              label: t.date,
-              value: _date,
-              onChanged: (d) => setState(() => _date = d),
             ),
             const SizedBox(height: AppSpacing.md),
             HisobTextField(

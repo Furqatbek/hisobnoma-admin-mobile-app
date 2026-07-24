@@ -196,6 +196,7 @@
   "salary": "Зарплата",
   "advance": "Аванс",
   "fieldRequired": "Обязательно",
+  "period": "Период",
   "alertPreferences": "Настройки оповещений",
   "devices": "Устройства",
   "account": "Аккаунт",
