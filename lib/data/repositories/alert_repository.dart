@@ -9,19 +9,17 @@ class AlertRepository {
 
   AlertRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  /// Get paginated alerts
+  /// Get paginated alerts. When [unreadOnly] is true, use the dedicated
+  /// `/mobile/alerts/unread` endpoint (the backend has no `unreadOnly` query
+  /// param on `/mobile/alerts`).
   Future<PaginatedResponse<Alert>> getAlerts({
     bool? unreadOnly,
     int page = 0,
     int size = 20,
   }) async {
     final response = await _apiClient.get(
-      ApiEndpoints.alerts,
-      queryParameters: {
-        if (unreadOnly != null) 'unreadOnly': unreadOnly,
-        'page': page,
-        'size': size,
-      },
+      unreadOnly == true ? ApiEndpoints.unreadAlerts : ApiEndpoints.alerts,
+      queryParameters: {'page': page, 'size': size},
     );
     return PaginatedResponse.fromJson(
       response.data['data'] as Map<String, dynamic>,

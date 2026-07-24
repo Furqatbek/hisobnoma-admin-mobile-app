@@ -248,22 +248,36 @@ class TransactionRepository {
     }
   }
 
-  /// Get current shift for a specific terminal
+  /// Get the open shift for a specific terminal.
+  ///
+  /// The backend has no terminal-scoped current-shift endpoint, so we fetch all
+  /// open shifts for the tenant (`GET /mobile/shifts/open`) and pick the one on
+  /// this terminal.
   Future<Shift?> getCurrentShiftForTerminal(int terminalId) async {
     try {
-      final response = await _apiClient.get(
-        ApiEndpoints.currentShiftForTerminal(terminalId),
-      );
-      final data = response.data;
-      if (data is Map<String, dynamic>) {
-        if (data.containsKey('id')) return Shift.fromJson(data);
-        final nested = data['data'];
-        if (nested is Map<String, dynamic>) return Shift.fromJson(nested);
+      final response = await _apiClient.get(ApiEndpoints.openShifts);
+      final shifts = _parseShiftList(response.data);
+      for (final shift in shifts) {
+        if (shift.terminalId == terminalId) return shift;
       }
       return null;
     } catch (_) {
       return null;
     }
+  }
+
+  /// Parse a list of shifts from either a raw array or an ApiResponse-wrapped
+  /// `{ "data": [...] }` payload.
+  List<Shift> _parseShiftList(dynamic data) {
+    final List raw;
+    if (data is List) {
+      raw = data;
+    } else if (data is Map<String, dynamic> && data['data'] is List) {
+      raw = data['data'] as List;
+    } else {
+      return const [];
+    }
+    return raw.whereType<Map<String, dynamic>>().map(Shift.fromJson).toList();
   }
 
   /// Open a new shift

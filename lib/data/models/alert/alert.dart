@@ -26,6 +26,8 @@ enum AlertType {
       case 'PRICE_CHANGE':
         return AlertType.priceChange;
       case 'NEW_ORDER':
+      case 'ORDER_PLACED':
+      case 'ORDER_CANCELLED':
         return AlertType.newOrder;
       case 'PAYMENT_RECEIVED':
         return AlertType.paymentReceived;
@@ -33,7 +35,12 @@ enum AlertType {
         return AlertType.paymentDue;
       case 'PAYMENT_OVERDUE':
         return AlertType.paymentOverdue;
+      case 'WEEKLY_SUMMARY':
+        return AlertType.dailySummary;
       case 'SYSTEM':
+      case 'SYSTEM_ALERT':
+      case 'APPROVAL_REQUIRED':
+      case 'CUSTOM':
         return AlertType.system;
       default:
         return AlertType.system;

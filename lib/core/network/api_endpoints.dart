@@ -19,6 +19,7 @@ abstract final class ApiEndpoints {
 
   // Alerts
   static const String alerts = '/mobile/alerts';
+  static const String unreadAlerts = '/mobile/alerts/unread';
   static const String unreadCount = '/mobile/alerts/count';
   static String markRead(int id) => '/mobile/alerts/$id/read';
   static const String markAllRead = '/mobile/alerts/read-all';
@@ -28,8 +29,9 @@ abstract final class ApiEndpoints {
       '/mobile/alerts/settings/$alertType';
 
   // Quick Actions
-  static String barcodeLookup(String barcode) => '/mobile/barcode/$barcode';
-  static const String quickCount = '/mobile/quick-count';
+  static String barcodeLookup(String barcode) =>
+      '/mobile/inventory/barcode/$barcode';
+  static const String quickCount = '/mobile/inventory/quick-count';
   static const String quickSale = '/mobile/pos/quick-sale';
   static const String searchProducts = '/mobile/products/search';
   static const String searchCustomers = '/mobile/customers/search';
@@ -61,8 +63,8 @@ abstract final class ApiEndpoints {
   // per the backend team; the mobile endpoints accept the same permissions.
   static const String shifts = '/mobile/shifts';
   static const String currentShift = '/mobile/shifts/current';
-  static String currentShiftForTerminal(int terminalId) =>
-      '/mobile/shifts/current/terminal/$terminalId';
+  // No terminal-scoped current-shift endpoint exists; fetch all open shifts
+  // (documented) and filter by terminal client-side.
   static const String openShifts = '/mobile/shifts/open';
   static const String openShift = '/mobile/shifts/open';
   static String closeShift(int shiftId) => '/mobile/shifts/$shiftId/close';
