@@ -29,10 +29,18 @@ class AlertRepository {
     );
   }
 
-  /// Get unread alert count
+  /// Get unread alert count. The backend documents `data: { "unreadCount": N }`,
+  /// but tolerate a bare integer too so the badge works against either shape.
   Future<int> getUnreadCount() async {
     final response = await _apiClient.get(ApiEndpoints.unreadCount);
-    return response.data['data'] as int;
+    final data = response.data['data'];
+    if (data is int) return data;
+    if (data is num) return data.toInt();
+    if (data is Map) {
+      final count = data['unreadCount'] ?? data['count'];
+      if (count is num) return count.toInt();
+    }
+    return 0;
   }
 
   /// Mark single alert as read

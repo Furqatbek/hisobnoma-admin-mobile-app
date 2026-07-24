@@ -22,9 +22,10 @@ abstract final class ApiEndpoints {
   static const String unreadCount = '/mobile/alerts/count';
   static String markRead(int id) => '/mobile/alerts/$id/read';
   static const String markAllRead = '/mobile/alerts/read-all';
-  static const String alertPreferences = '/mobile/alerts/preferences';
+  // Backend documents these under /settings (not /preferences).
+  static const String alertPreferences = '/mobile/alerts/settings';
   static String updateAlertPreference(String alertType) =>
-      '/mobile/alerts/preferences/$alertType';
+      '/mobile/alerts/settings/$alertType';
 
   // Quick Actions
   static String barcodeLookup(String barcode) => '/mobile/barcode/$barcode';

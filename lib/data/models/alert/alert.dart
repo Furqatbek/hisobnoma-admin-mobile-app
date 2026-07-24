@@ -122,7 +122,9 @@ class Alert {
       priority: AlertPriority.fromString(json['priority'] as String),
       entityType: json['entityType'] as String?,
       entityId: json['entityId'] as int?,
-      isRead: json['isRead'] as bool? ?? false,
+      // Backend documents this field as `read`; older builds used `isRead`.
+      // Accept either so read-state survives both shapes.
+      isRead: json['isRead'] as bool? ?? json['read'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
   }
