@@ -180,6 +180,6 @@ class DashboardCubit extends Cubit<DashboardState> {
     totalCashBalance: 0,
     arOutstanding: 0,
     apOutstanding: 0,
-    netCashPosition: 0,
+    todayRevenue: 0,
   );
 }

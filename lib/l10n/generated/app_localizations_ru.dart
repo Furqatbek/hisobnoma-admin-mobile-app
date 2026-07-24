@@ -573,6 +573,9 @@ class SRu extends S {
   String get period => 'Период';
 
   @override
+  String get todaysRevenue => 'Выручка за сегодня';
+
+  @override
   String get alertPreferences => 'Настройки оповещений';
 
   @override

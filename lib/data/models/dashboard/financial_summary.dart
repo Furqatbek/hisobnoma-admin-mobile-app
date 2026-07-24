@@ -3,14 +3,17 @@ class FinancialSummary {
   final double totalCashBalance;
   final double arOutstanding;
   final double apOutstanding;
-  final double netCashPosition;
+
+  /// Today's completed-sales total (same source as /dashboard/revenue).
+  /// Replaced the removed `netCashPosition` field.
+  final double todayRevenue;
 
   const FinancialSummary({
     required this.totalBankBalance,
     required this.totalCashBalance,
     required this.arOutstanding,
     required this.apOutstanding,
-    required this.netCashPosition,
+    required this.todayRevenue,
   });
 
   factory FinancialSummary.fromJson(Map<String, dynamic> json) {
@@ -19,7 +22,7 @@ class FinancialSummary {
       totalCashBalance: (json['totalCashBalance'] as num?)?.toDouble() ?? 0,
       arOutstanding: (json['arOutstanding'] as num?)?.toDouble() ?? 0,
       apOutstanding: (json['apOutstanding'] as num?)?.toDouble() ?? 0,
-      netCashPosition: (json['netCashPosition'] as num?)?.toDouble() ?? 0,
+      todayRevenue: (json['todayRevenue'] as num?)?.toDouble() ?? 0,
     );
   }
 }

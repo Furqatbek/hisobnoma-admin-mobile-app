@@ -572,6 +572,9 @@ class SEn extends S {
   String get period => 'Period';
 
   @override
+  String get todaysRevenue => 'Today\'s Revenue';
+
+  @override
   String get alertPreferences => 'Alert Preferences';
 
   @override

@@ -572,9 +572,9 @@ class _CashFlowSection extends StatelessWidget {
                 ),
               ),
               Text(
-                Formatters.currency(financial.netCashPosition),
+                Formatters.currency(inflows - outflows),
                 style: AppTypography.headline.copyWith(
-                  color: financial.netCashPosition >= 0
+                  color: (inflows - outflows) >= 0
                       ? AppColors.income
                       : AppColors.expense,
                 ),

@@ -153,7 +153,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             // Hero balance card
             _animate(
               _BalanceHeroCard(
-                balance: state.financial.netCashPosition,
+                balance:
+                    state.financial.totalBankBalance +
+                    state.financial.totalCashBalance,
                 changePercent: state.revenue.monthChangePercent,
                 todayRevenue: state.revenue.todayRevenue,
                 transactionCount: state.revenue.todayTransactionCount,
@@ -899,55 +901,6 @@ class _FinancialSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        // Net position highlight
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: financial.netCashPosition >= 0
-                ? AppColors.income.withValues(alpha: 0.08)
-                : AppColors.expense.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-            border: Border.all(
-              color: financial.netCashPosition >= 0
-                  ? AppColors.income.withValues(alpha: 0.2)
-                  : AppColors.expense.withValues(alpha: 0.2),
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                financial.netCashPosition >= 0
-                    ? Icons.trending_up
-                    : Icons.trending_down,
-                color: financial.netCashPosition >= 0
-                    ? AppColors.income
-                    : AppColors.expense,
-                size: 20,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Text(
-                  t.netCashPosition,
-                  style: AppTypography.subheadline.copyWith(
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.textSecondary,
-                  ),
-                ),
-              ),
-              Text(
-                Formatters.currency(financial.netCashPosition),
-                style: AppTypography.headline.copyWith(
-                  color: financial.netCashPosition >= 0
-                      ? AppColors.income
-                      : AppColors.expense,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
         Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
@@ -966,16 +919,10 @@ class _FinancialSection extends StatelessWidget {
           child: Column(
             children: [
               _FinancialRow(
-                label: t.bankBalance,
-                value: Formatters.currency(financial.totalBankBalance),
-                icon: Icons.account_balance_outlined,
-                isDark: isDark,
-              ),
-              _buildDivider(isDark),
-              _FinancialRow(
-                label: t.cashBalance,
-                value: Formatters.currency(financial.totalCashBalance),
-                icon: Icons.payments_outlined,
+                label: t.todaysRevenue,
+                value: Formatters.currency(financial.todayRevenue),
+                icon: Icons.today_outlined,
+                color: AppColors.income,
                 isDark: isDark,
               ),
               _buildDivider(isDark),

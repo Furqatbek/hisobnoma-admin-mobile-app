@@ -1078,6 +1078,12 @@ abstract class S {
   /// **'Period'**
   String get period;
 
+  /// No description provided for @todaysRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Revenue'**
+  String get todaysRevenue;
+
   /// No description provided for @alertPreferences.
   ///
   /// In en, this message translates to:

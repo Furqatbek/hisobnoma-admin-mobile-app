@@ -572,6 +572,9 @@ class SUz extends S {
   String get period => 'Давр';
 
   @override
+  String get todaysRevenue => 'Бугунги тушум';
+
+  @override
   String get alertPreferences => 'Огоҳлантириш созламалари';
 
   @override
