@@ -7,12 +7,24 @@
 > `POST /mobile/finance/debtor-payment` with no date field;
 > `POST /mobile/hr/salary` and `POST /mobile/hr/advance` — two endpoints).
 >
-> **Two gaps still open on the backend:**
-> 1. **No employee-list endpoint** is documented. The salary/advance screen
->    needs `GET /mobile/hr/employees` (id, name, position) to populate the payee
->    picker — the app calls it optimistically; if it 404s the picker shows an
->    error. Please add it (or point us at the HR-module path).
-> 2. **No GET/list for expenses** — fine for now (create-only), noted for later.
+> **Gap #1 (employee list) — CLOSED.** `GET /mobile/hr/employees` is live at the
+> exact path the app calls, returning `{success, data:[{id, name, position,
+> code}]}` (active employees only; the extra `code` is ignored by the app). It
+> accepts the salary-pay permission, so the picker loads for whoever can pay.
+> No client change was needed — the optimistic call now resolves for real.
+>
+> **Gap #2 (expense GET/list) — still open**, create-only for now (fine).
+>
+> **Settled behaviors (confirmed by backend):**
+> - Debtor **overpayment is allowed** — excess stays as an unallocated advance/
+>   credit (app already submits without a client-side cap).
+> - An **advance is recoverable** — auto-netted off the employee's next salary.
+> - The **salary endpoint records + pays in one call** and **rejects a period
+>   that already has a salary record** — the app surfaces that backend error;
+>   correct such a period on the web admin.
+> - Test users need one of `MOBILE_EXPENSE_WRITE` / `MOBILE_AR_COLLECT` /
+>   `MOBILE_SALARY_PAY` (seeded to SUPER_ADMIN / ADMIN / FINANCE_MANAGER /
+>   ACCOUNTANT).
 
 The proposed contracts below (pre-implementation):
 
