@@ -575,6 +575,30 @@ class SEn extends S {
   String get todaysRevenue => 'Today\'s Revenue';
 
   @override
+  String get editPrice => 'Edit Price';
+
+  @override
+  String get wholesalePrice => 'Wholesale price';
+
+  @override
+  String get priceUpdated => 'Price updated';
+
+  @override
+  String get minPrice => 'Min price';
+
+  @override
+  String get shareToTelegram => 'Share to Telegram';
+
+  @override
+  String get sendToMe => 'Send to me';
+
+  @override
+  String get sendToGroup => 'Send to group';
+
+  @override
+  String get messageSent => 'Message sent';
+
+  @override
   String get alertPreferences => 'Alert Preferences';
 
   @override

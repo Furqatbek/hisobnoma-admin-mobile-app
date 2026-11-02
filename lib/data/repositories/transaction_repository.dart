@@ -266,8 +266,25 @@ class TransactionRepository {
     return response.data as Map<String, dynamic>;
   }
 
-  // ========== Shifts ==========
+  /// Update a product's persistent selling (and optional wholesale) price.
+  /// Throws with the backend message on rejection (e.g. PRICE_BELOW_MIN when
+  /// the value is under the product's minSellingPrice floor).
+  Future<void> updateProductPrice({
+    required int productId,
+    required double sellingPrice,
+    double? wholesalePrice,
+  }) async {
+    await _apiClient.patch(
+      ApiEndpoints.inventoryPrice,
+      data: {
+        'productId': productId,
+        'sellingPrice': sellingPrice,
+        if (wholesalePrice != null) 'wholesalePrice': wholesalePrice,
+      },
+    );
+  }
 
+  // ========== Shifts ==========
   /// Get current shift for the logged-in user
   Future<Shift?> getCurrentShift() async {
     try {

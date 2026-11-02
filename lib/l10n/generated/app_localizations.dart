@@ -1084,6 +1084,54 @@ abstract class S {
   /// **'Today\'s Revenue'**
   String get todaysRevenue;
 
+  /// No description provided for @editPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Price'**
+  String get editPrice;
+
+  /// No description provided for @wholesalePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Wholesale price'**
+  String get wholesalePrice;
+
+  /// No description provided for @priceUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Price updated'**
+  String get priceUpdated;
+
+  /// No description provided for @minPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Min price'**
+  String get minPrice;
+
+  /// No description provided for @shareToTelegram.
+  ///
+  /// In en, this message translates to:
+  /// **'Share to Telegram'**
+  String get shareToTelegram;
+
+  /// No description provided for @sendToMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to me'**
+  String get sendToMe;
+
+  /// No description provided for @sendToGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to group'**
+  String get sendToGroup;
+
+  /// No description provided for @messageSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Message sent'**
+  String get messageSent;
+
   /// No description provided for @alertPreferences.
   ///
   /// In en, this message translates to:

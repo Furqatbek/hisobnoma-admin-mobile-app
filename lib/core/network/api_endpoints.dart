@@ -48,6 +48,10 @@ abstract final class ApiEndpoints {
   // Finance — expenses, debtor (AR) payments (per MOBILE_MODULE_API.md)
   static const String expenses = '/mobile/expenses';
   static const String debtorPayment = '/mobile/finance/debtor-payment';
+  static const String debtorsTelegram = '/mobile/finance/debtors/telegram';
+
+  // Inventory — persistent price change
+  static const String inventoryPrice = '/mobile/inventory/price';
 
   // HR — salary and advance are two separate endpoints; employee list is
   // assumed present (used like /pos/terminals — not in the mobile doc).

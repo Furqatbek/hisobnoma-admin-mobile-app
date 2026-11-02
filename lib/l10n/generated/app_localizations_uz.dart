@@ -575,6 +575,30 @@ class SUz extends S {
   String get todaysRevenue => 'Бугунги тушум';
 
   @override
+  String get editPrice => 'Нархни ўзгартириш';
+
+  @override
+  String get wholesalePrice => 'Улгуржи нарх';
+
+  @override
+  String get priceUpdated => 'Нарх янгиланди';
+
+  @override
+  String get minPrice => 'Мин. нарх';
+
+  @override
+  String get shareToTelegram => 'Telegram\'га юбориш';
+
+  @override
+  String get sendToMe => 'Менга юбориш';
+
+  @override
+  String get sendToGroup => 'Гуруҳга юбориш';
+
+  @override
+  String get messageSent => 'Хабар юборилди';
+
+  @override
   String get alertPreferences => 'Огоҳлантириш созламалари';
 
   @override

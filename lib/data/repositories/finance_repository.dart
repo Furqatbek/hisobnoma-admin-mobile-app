@@ -63,6 +63,23 @@ class FinanceRepository {
     );
   }
 
+  /// Share the debtors list to Telegram. [target] is 'self' (the signed-in
+  /// user's linked chat) or 'group' (all staff with linked Telegram). Returns
+  /// the recipient count. Throws with the backend message on
+  /// TELEGRAM_NOT_LINKED / TELEGRAM_NO_RECIPIENTS.
+  Future<int> shareDebtorsToTelegram({required String target}) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.debtorsTelegram,
+      queryParameters: {'target': target},
+    );
+    final data = response.data['data'];
+    if (data is Map) {
+      final count = data['recipients'] ?? data['sent'];
+      if (count is num) return count.toInt();
+    }
+    return 0;
+  }
+
   // ------------------------------------------------------------------ Salary
 
   /// List employees for the salary/advance payee picker. Not documented in the

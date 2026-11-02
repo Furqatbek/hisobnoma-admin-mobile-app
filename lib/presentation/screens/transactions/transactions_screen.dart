@@ -12,12 +12,15 @@ import 'package:hisobnoma/data/models/transaction/unpaid_invoice.dart';
 import 'package:hisobnoma/data/models/transaction/sale_record.dart';
 import 'package:hisobnoma/data/repositories/transaction_repository.dart';
 import 'package:hisobnoma/core/di/injection.dart';
+import 'package:hisobnoma/data/repositories/finance_repository.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/shift/shift_cubit.dart';
 import 'package:hisobnoma/presentation/screens/transactions/add_sale_sheet.dart';
+import 'package:hisobnoma/presentation/screens/transactions/price_edit_sheet.dart';
 import 'package:hisobnoma/presentation/screens/transactions/shift_sheet.dart';
 import 'package:hisobnoma/presentation/widgets/common/animations.dart';
+import 'package:hisobnoma/presentation/widgets/common/error_handler.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_empty_state.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_segmented_control.dart';
 import 'package:hisobnoma/presentation/widgets/common/loading_shimmer.dart';
@@ -192,7 +195,15 @@ class _InventoryTab extends StatelessWidget {
         final product = products[index];
         return StaggeredListItem(
           index: index,
-          child: _InventoryTile(product: product, isDark: isDark),
+          child: GestureDetector(
+            onTap: () async {
+              final updated = await PriceEditSheet.show(context, product);
+              if (updated == true && context.mounted) {
+                context.read<TransactionsCubit>().loadData();
+              }
+            },
+            child: _InventoryTile(product: product, isDark: isDark),
+          ),
         );
       },
     );
@@ -359,34 +370,106 @@ class _DebtorsTab extends StatelessWidget {
       );
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.all(AppSpacing.screenPadding),
-      itemCount: debtors.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-      itemBuilder: (context, index) {
-        final debtor = debtors[index];
-        return StaggeredListItem(
-          index: index,
-          child: GestureDetector(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              showModalBottomSheet(
-                context: context,
-                backgroundColor: Colors.transparent,
-                isScrollControlled: true,
-                builder: (_) => _DebtorDetailSheet(
-                  customerId: debtor.customerId,
-                  customerName: debtor.customerName,
-                  netBalance: debtor.netBalance,
-                  isDark: isDark,
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.screenPadding,
+            AppSpacing.sm,
+            AppSpacing.screenPadding,
+            0,
+          ),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () => _shareDebtorsToTelegram(context),
+              icon: const Icon(Icons.send_outlined, size: 18),
+              label: Text(t.shareToTelegram),
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView.separated(
+            padding: const EdgeInsets.all(AppSpacing.screenPadding),
+            itemCount: debtors.length,
+            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+            itemBuilder: (context, index) {
+              final debtor = debtors[index];
+              return StaggeredListItem(
+                index: index,
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.transparent,
+                      isScrollControlled: true,
+                      builder: (_) => _DebtorDetailSheet(
+                        customerId: debtor.customerId,
+                        customerName: debtor.customerName,
+                        netBalance: debtor.netBalance,
+                        isDark: isDark,
+                      ),
+                    );
+                  },
+                  child: _DebtorTile(debtor: debtor, isDark: isDark),
                 ),
               );
             },
-            child: _DebtorTile(debtor: debtor, isDark: isDark),
           ),
-        );
-      },
+        ),
+      ],
     );
+  }
+}
+
+/// Ask the user where to send the debtors list, then share it to Telegram.
+Future<void> _shareDebtorsToTelegram(BuildContext context) async {
+  HapticFeedback.selectionClick();
+  final t = S.of(context);
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+
+  final target = await showModalBottomSheet<String>(
+    context: context,
+    backgroundColor: isDark ? AppColors.darkElevated : AppColors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(AppSpacing.radiusLg),
+      ),
+    ),
+    builder: (sheetContext) => SafeArea(
+      top: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: AppSpacing.sm),
+          ListTile(
+            leading: Icon(Icons.person_outline, color: AppColors.royalBlue),
+            title: Text(t.sendToMe),
+            onTap: () => Navigator.of(sheetContext).pop('self'),
+          ),
+          ListTile(
+            leading: Icon(Icons.group_outlined, color: AppColors.royalBlue),
+            title: Text(t.sendToGroup),
+            onTap: () => Navigator.of(sheetContext).pop('group'),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+      ),
+    ),
+  );
+
+  if (target == null || !context.mounted) return;
+  try {
+    final recipients = await getIt<FinanceRepository>().shareDebtorsToTelegram(
+      target: target,
+    );
+    if (context.mounted) {
+      showSuccessSnackBar(context, '${t.messageSent} ($recipients)');
+    }
+  } catch (e) {
+    // Surfaces TELEGRAM_NOT_LINKED / TELEGRAM_NO_RECIPIENTS messages.
+    if (context.mounted) showErrorSnackBar(context, e);
   }
 }
 

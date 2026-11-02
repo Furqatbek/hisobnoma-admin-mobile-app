@@ -576,6 +576,30 @@ class SRu extends S {
   String get todaysRevenue => 'Выручка за сегодня';
 
   @override
+  String get editPrice => 'Изменить цену';
+
+  @override
+  String get wholesalePrice => 'Оптовая цена';
+
+  @override
+  String get priceUpdated => 'Цена обновлена';
+
+  @override
+  String get minPrice => 'Мин. цена';
+
+  @override
+  String get shareToTelegram => 'Отправить в Telegram';
+
+  @override
+  String get sendToMe => 'Отправить мне';
+
+  @override
+  String get sendToGroup => 'Отправить группе';
+
+  @override
+  String get messageSent => 'Сообщение отправлено';
+
+  @override
   String get alertPreferences => 'Настройки оповещений';
 
   @override
