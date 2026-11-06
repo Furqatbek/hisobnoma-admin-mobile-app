@@ -56,7 +56,20 @@ class SettingsScreen extends StatelessWidget {
               _SectionHeader(title: t.notifications),
               _SettingsGroup(
                 isDark: isDark,
-                children: const [_NotificationsTile()],
+                children: [
+                  const _NotificationsTile(),
+                  HisobListTile(
+                    title: t.telegram,
+                    leading: Icon(
+                      Icons.send_outlined,
+                      size: 22,
+                      color: AppColors.royalBlue,
+                    ),
+                    showChevron: true,
+                    showDivider: false,
+                    onTap: () => context.push(AppRoutes.telegram),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.lg),
 

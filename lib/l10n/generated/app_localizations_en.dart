@@ -599,6 +599,37 @@ class SEn extends S {
   String get messageSent => 'Message sent';
 
   @override
+  String get telegram => 'Telegram';
+
+  @override
+  String get linkTelegram => 'Link Telegram';
+
+  @override
+  String get telegramLinked => 'Telegram linked';
+
+  @override
+  String get telegramNotLinked => 'Telegram not linked';
+
+  @override
+  String get telegramLinkHint =>
+      'Get a code and send it to our bot in Telegram to link your account.';
+
+  @override
+  String get openTelegram => 'Open Telegram';
+
+  @override
+  String get sendCodeToBot => 'Send this code to the bot';
+
+  @override
+  String get codeExpires => 'Code expires in 10 minutes';
+
+  @override
+  String get checkLink => 'I\'ve sent it — check';
+
+  @override
+  String get unlinkTelegram => 'Unlink';
+
+  @override
   String get alertPreferences => 'Alert Preferences';
 
   @override

@@ -600,6 +600,37 @@ class SRu extends S {
   String get messageSent => 'Сообщение отправлено';
 
   @override
+  String get telegram => 'Telegram';
+
+  @override
+  String get linkTelegram => 'Привязать Telegram';
+
+  @override
+  String get telegramLinked => 'Telegram привязан';
+
+  @override
+  String get telegramNotLinked => 'Telegram не привязан';
+
+  @override
+  String get telegramLinkHint =>
+      'Получите код и отправьте его нашему боту в Telegram, чтобы привязать аккаунт.';
+
+  @override
+  String get openTelegram => 'Открыть Telegram';
+
+  @override
+  String get sendCodeToBot => 'Отправьте этот код боту';
+
+  @override
+  String get codeExpires => 'Код действует 10 минут';
+
+  @override
+  String get checkLink => 'Я отправил — проверить';
+
+  @override
+  String get unlinkTelegram => 'Отвязать';
+
+  @override
   String get alertPreferences => 'Настройки оповещений';
 
   @override

@@ -10,6 +10,7 @@ import 'package:hisobnoma/data/local/database_helper.dart';
 import 'package:hisobnoma/data/repositories/auth_repository.dart';
 import 'package:hisobnoma/data/repositories/device_repository.dart';
 import 'package:hisobnoma/data/repositories/finance_repository.dart';
+import 'package:hisobnoma/data/repositories/telegram_repository.dart';
 import 'package:hisobnoma/data/repositories/dashboard_repository.dart';
 import 'package:hisobnoma/data/repositories/transaction_repository.dart';
 import 'package:hisobnoma/data/repositories/alert_repository.dart';
@@ -77,6 +78,9 @@ Future<void> configureDependencies() async {
   );
   getIt.registerLazySingleton<FinanceRepository>(
     () => FinanceRepository(apiClient: getIt()),
+  );
+  getIt.registerLazySingleton<TelegramRepository>(
+    () => TelegramRepository(apiClient: getIt()),
   );
 
   // Services

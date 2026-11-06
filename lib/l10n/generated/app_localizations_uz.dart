@@ -599,6 +599,37 @@ class SUz extends S {
   String get messageSent => 'Хабар юборилди';
 
   @override
+  String get telegram => 'Telegram';
+
+  @override
+  String get linkTelegram => 'Telegram\'ни улаш';
+
+  @override
+  String get telegramLinked => 'Telegram уланган';
+
+  @override
+  String get telegramNotLinked => 'Telegram уланмаган';
+
+  @override
+  String get telegramLinkHint =>
+      'Код олинг ва аккаунтни улаш учун уни Telegram\'даги ботимизга юборинг.';
+
+  @override
+  String get openTelegram => 'Telegram\'ни очиш';
+
+  @override
+  String get sendCodeToBot => 'Бу кодни ботга юборинг';
+
+  @override
+  String get codeExpires => 'Код 10 дақиқа амал қилади';
+
+  @override
+  String get checkLink => 'Юбордим — текшириш';
+
+  @override
+  String get unlinkTelegram => 'Узиш';
+
+  @override
   String get alertPreferences => 'Огоҳлантириш созламалари';
 
   @override

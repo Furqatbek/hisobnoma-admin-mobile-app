@@ -12,6 +12,7 @@ import 'package:hisobnoma/presentation/screens/alerts/alerts_screen.dart';
 import 'package:hisobnoma/presentation/screens/finance/expense_screen.dart';
 import 'package:hisobnoma/presentation/screens/finance/debtor_payment_screen.dart';
 import 'package:hisobnoma/presentation/screens/finance/salary_payment_screen.dart';
+import 'package:hisobnoma/presentation/screens/settings/telegram_link_screen.dart';
 import 'package:hisobnoma/presentation/screens/shell_screen.dart';
 import 'package:hisobnoma/presentation/screens/splash/splash_screen.dart';
 
@@ -27,6 +28,7 @@ abstract final class AppRoutes {
   static const String expenses = '/finance/expenses';
   static const String debtorPayments = '/finance/debtor-payments';
   static const String salaryPayments = '/finance/salary-payments';
+  static const String telegram = '/settings/telegram';
 }
 
 /// Creates the app router with auth-aware redirect.
@@ -133,6 +135,10 @@ GoRouter createAppRouter(AuthCubit authCubit) {
       GoRoute(
         path: AppRoutes.salaryPayments,
         builder: (context, state) => const SalaryPaymentScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.telegram,
+        builder: (context, state) => const TelegramLinkScreen(),
       ),
     ],
   );

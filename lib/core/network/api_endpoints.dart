@@ -53,6 +53,11 @@ abstract final class ApiEndpoints {
   // Inventory — persistent price change
   static const String inventoryPrice = '/mobile/inventory/price';
 
+  // Telegram account linking. These return a raw Map (NOT ApiResponse-wrapped).
+  static const String telegramStatus = '/telegram/status';
+  static const String telegramLinkCode = '/telegram/link-code';
+  static const String telegramUnlink = '/telegram/unlink';
+
   // HR — salary and advance are two separate endpoints; employee list is
   // assumed present (used like /pos/terminals — not in the mobile doc).
   static const String employees = '/mobile/hr/employees';

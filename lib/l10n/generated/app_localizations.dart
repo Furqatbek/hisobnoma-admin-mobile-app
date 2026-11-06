@@ -1132,6 +1132,66 @@ abstract class S {
   /// **'Message sent'**
   String get messageSent;
 
+  /// No description provided for @telegram.
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram'**
+  String get telegram;
+
+  /// No description provided for @linkTelegram.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Telegram'**
+  String get linkTelegram;
+
+  /// No description provided for @telegramLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram linked'**
+  String get telegramLinked;
+
+  /// No description provided for @telegramNotLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram not linked'**
+  String get telegramNotLinked;
+
+  /// No description provided for @telegramLinkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a code and send it to our bot in Telegram to link your account.'**
+  String get telegramLinkHint;
+
+  /// No description provided for @openTelegram.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Telegram'**
+  String get openTelegram;
+
+  /// No description provided for @sendCodeToBot.
+  ///
+  /// In en, this message translates to:
+  /// **'Send this code to the bot'**
+  String get sendCodeToBot;
+
+  /// No description provided for @codeExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Code expires in 10 minutes'**
+  String get codeExpires;
+
+  /// No description provided for @checkLink.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve sent it — check'**
+  String get checkLink;
+
+  /// No description provided for @unlinkTelegram.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get unlinkTelegram;
+
   /// No description provided for @alertPreferences.
   ///
   /// In en, this message translates to:

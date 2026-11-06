@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dio/dio.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
@@ -12,6 +14,7 @@ import 'package:hisobnoma/data/models/transaction/unpaid_invoice.dart';
 import 'package:hisobnoma/data/models/transaction/sale_record.dart';
 import 'package:hisobnoma/data/repositories/transaction_repository.dart';
 import 'package:hisobnoma/core/di/injection.dart';
+import 'package:hisobnoma/core/router/app_router.dart';
 import 'package:hisobnoma/data/repositories/finance_repository.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
@@ -468,9 +471,40 @@ Future<void> _shareDebtorsToTelegram(BuildContext context) async {
       showSuccessSnackBar(context, '${t.messageSent} ($recipients)');
     }
   } catch (e) {
-    // Surfaces TELEGRAM_NOT_LINKED / TELEGRAM_NO_RECIPIENTS messages.
-    if (context.mounted) showErrorSnackBar(context, e);
+    if (!context.mounted) return;
+    // Not linked yet → offer to link right from the error. Other failures
+    // (e.g. TELEGRAM_NO_RECIPIENTS) just surface the backend message.
+    if (_backendErrorCode(e) == 'TELEGRAM_NOT_LINKED') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(extractErrorMessage(e)),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.error,
+          duration: const Duration(seconds: 6),
+          action: SnackBarAction(
+            label: t.linkTelegram,
+            textColor: Colors.white,
+            onPressed: () => context.push(AppRoutes.telegram),
+          ),
+        ),
+      );
+    } else {
+      showErrorSnackBar(context, e);
+    }
   }
+}
+
+/// The backend's `error.code` from a failed request, if any. The error
+/// interceptor normalises 4xx into typed exceptions and drops the code, but
+/// the raw response body is still attached to the DioException.
+String? _backendErrorCode(Object e) {
+  if (e is! DioException) return null;
+  final data = e.response?.data;
+  if (data is Map) {
+    final err = data['error'];
+    if (err is Map && err['code'] != null) return err['code'].toString();
+  }
+  return null;
 }
 
 /// Individual debtor tile
