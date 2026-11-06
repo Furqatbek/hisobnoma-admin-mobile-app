@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+// Prefixed: the excel package exports names (Border, TextStyle…) that clash
+// with Flutter's.
+import 'package:excel/excel.dart' as xl;
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
@@ -401,9 +407,11 @@ class _DebtorsTab extends StatelessWidget {
   }
 }
 
-/// Build ONE debtor's debt transactions as a plain-text table and open the
-/// OS share sheet (Telegram, WhatsApp, SMS, …) — the user picks the chat.
-/// One row per product line: id | product name | price | comment | date.
+/// Build ONE debtor's debt transactions as an Excel (.xlsx) file and open the
+/// OS share sheet (Telegram, WhatsApp, email…) — the user picks the chat.
+/// A file sidesteps Telegram's message-length limit and opens in Excel /
+/// Google Sheets. One row per product line: ID | Product | Price | Comment |
+/// Date, with the price as a numeric column.
 Future<void> _shareDebtorTransactions(
   BuildContext context, {
   required String customerName,
@@ -412,13 +420,23 @@ Future<void> _shareDebtorTransactions(
 }) async {
   HapticFeedback.selectionClick();
   final t = S.of(context);
-  final buf = StringBuffer()
-    ..writeln('${t.debtors}: $customerName')
-    ..writeln('${t.balanceDue}: ${Formatters.currency(balanceDue)}')
-    ..writeln()
-    ..writeln(
-      'ID | ${t.products} | ${t.sellingPrice} | ${t.notes} | ${t.date}',
-    );
+
+  final workbook = xl.Excel.createExcel();
+  final sheet = workbook['Sheet1'];
+
+  // Header block, then the column titles.
+  sheet.appendRow([xl.TextCellValue('${t.debtors}: $customerName')]);
+  sheet.appendRow([
+    xl.TextCellValue('${t.balanceDue}: ${Formatters.currency(balanceDue)}'),
+  ]);
+  sheet.appendRow([xl.TextCellValue('')]);
+  sheet.appendRow([
+    xl.TextCellValue('ID'),
+    xl.TextCellValue(t.products),
+    xl.TextCellValue(t.sellingPrice),
+    xl.TextCellValue(t.notes),
+    xl.TextCellValue(t.date),
+  ]);
 
   for (final inv in invoices) {
     final id = (inv.posTransactionNumber ?? '').isNotEmpty
@@ -431,9 +449,13 @@ Future<void> _shareDebtorTransactions(
 
     if (inv.lines.isEmpty) {
       // Invoice without line items (e.g. a manual debt): one row, the balance.
-      buf.writeln(
-        '$id | — | ${Formatters.currency(inv.balanceDue)} | $comment | $date',
-      );
+      sheet.appendRow([
+        xl.TextCellValue(id),
+        xl.TextCellValue('—'),
+        xl.DoubleCellValue(inv.balanceDue),
+        xl.TextCellValue(comment),
+        xl.TextCellValue(date),
+      ]);
       continue;
     }
     for (final line in inv.lines) {
@@ -441,13 +463,32 @@ Future<void> _shareDebtorTransactions(
       final name = line.quantity == 1
           ? line.productName
           : '${line.productName} ×${formatQuantity(line.quantity)}';
-      buf.writeln(
-        '$id | $name | ${Formatters.currency(line.unitPrice)} | $comment | $date',
-      );
+      sheet.appendRow([
+        xl.TextCellValue(id),
+        xl.TextCellValue(name),
+        xl.DoubleCellValue(line.unitPrice),
+        xl.TextCellValue(comment),
+        xl.TextCellValue(date),
+      ]);
     }
   }
 
-  await Share.share(buf.toString(), subject: customerName);
+  final bytes = workbook.encode();
+  if (bytes == null) return;
+
+  // Write to a temp file and hand it to the share sheet as an attachment.
+  final dir = await getTemporaryDirectory();
+  final safeName = customerName.replaceAll(RegExp(r'[\\/:*?"<>|\s]+'), '_');
+  final file = File('${dir.path}/debt_$safeName.xlsx');
+  await file.writeAsBytes(bytes, flush: true);
+
+  await Share.shareXFiles([
+    XFile(
+      file.path,
+      mimeType:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ),
+  ], subject: customerName);
 }
 
 /// Individual debtor tile
