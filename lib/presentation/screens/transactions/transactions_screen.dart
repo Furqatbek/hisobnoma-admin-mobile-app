@@ -370,86 +370,84 @@ class _DebtorsTab extends StatelessWidget {
       );
     }
 
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.screenPadding,
-            AppSpacing.sm,
-            AppSpacing.screenPadding,
-            0,
-          ),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: () => _shareDebtorsList(context, debtors),
-              icon: const Icon(Icons.share_outlined, size: 18),
-              label: Text(t.shareList),
-            ),
-          ),
-        ),
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.all(AppSpacing.screenPadding),
-            itemCount: debtors.length,
-            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-            itemBuilder: (context, index) {
-              final debtor = debtors[index];
-              return StaggeredListItem(
-                index: index,
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    showModalBottomSheet(
-                      context: context,
-                      backgroundColor: Colors.transparent,
-                      isScrollControlled: true,
-                      builder: (_) => _DebtorDetailSheet(
-                        customerId: debtor.customerId,
-                        customerName: debtor.customerName,
-                        netBalance: debtor.netBalance,
-                        isDark: isDark,
-                      ),
-                    );
-                  },
-                  child: _DebtorTile(debtor: debtor, isDark: isDark),
+    return ListView.separated(
+      padding: const EdgeInsets.all(AppSpacing.screenPadding),
+      itemCount: debtors.length,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (context, index) {
+        final debtor = debtors[index];
+        return StaggeredListItem(
+          index: index,
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (_) => _DebtorDetailSheet(
+                  customerId: debtor.customerId,
+                  customerName: debtor.customerName,
+                  netBalance: debtor.netBalance,
+                  isDark: isDark,
                 ),
               );
             },
+            child: _DebtorTile(debtor: debtor, isDark: isDark),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
 
-/// Build a plain-text debtors list and open the OS share sheet (Telegram,
-/// WhatsApp, SMS, …). No bot or account linking — the user picks the app and
-/// the chat, and it arrives as an ordinary text message.
-Future<void> _shareDebtorsList(
-  BuildContext context,
-  List<CustomerBalance> debtors,
-) async {
+/// Build ONE debtor's debt transactions as a plain-text table and open the
+/// OS share sheet (Telegram, WhatsApp, SMS, …) — the user picks the chat.
+/// One row per product line: id | product name | price | comment | date.
+Future<void> _shareDebtorTransactions(
+  BuildContext context, {
+  required String customerName,
+  required double balanceDue,
+  required List<UnpaidInvoice> invoices,
+}) async {
   HapticFeedback.selectionClick();
   final t = S.of(context);
-  final sorted = [...debtors]
-    ..sort((a, b) => b.netBalance.compareTo(a.netBalance));
-  final total = sorted.fold<double>(0, (sum, d) => sum + d.netBalance);
-
   final buf = StringBuffer()
-    ..writeln('${t.debtors} — ${formatDateYmd(DateTime.now())}')
-    ..writeln();
-  for (var i = 0; i < sorted.length; i++) {
-    final d = sorted[i];
-    buf.writeln(
-      '${i + 1}. ${d.customerName} — ${Formatters.currency(d.netBalance)}',
-    );
-  }
-  buf
+    ..writeln('${t.debtors}: $customerName')
+    ..writeln('${t.balanceDue}: ${Formatters.currency(balanceDue)}')
     ..writeln()
-    ..writeln('${t.total}: ${Formatters.currency(total)}');
+    ..writeln(
+      'ID | ${t.products} | ${t.sellingPrice} | ${t.notes} | ${t.date}',
+    );
 
-  await Share.share(buf.toString(), subject: t.debtors);
+  for (final inv in invoices) {
+    final id = (inv.posTransactionNumber ?? '').isNotEmpty
+        ? inv.posTransactionNumber!
+        : (inv.invoiceNumber.isNotEmpty ? inv.invoiceNumber : '#${inv.id}');
+    final date = inv.invoiceDate.isNotEmpty
+        ? inv.invoiceDate
+        : formatDateYmd(inv.createdAt);
+    final comment = (inv.notes ?? '').trim();
+
+    if (inv.lines.isEmpty) {
+      // Invoice without line items (e.g. a manual debt): one row, the balance.
+      buf.writeln(
+        '$id | — | ${Formatters.currency(inv.balanceDue)} | $comment | $date',
+      );
+      continue;
+    }
+    for (final line in inv.lines) {
+      // Show quantity on the name when it isn't 1, so price stays per-unit.
+      final name = line.quantity == 1
+          ? line.productName
+          : '${line.productName} ×${formatQuantity(line.quantity)}';
+      buf.writeln(
+        '$id | $name | ${Formatters.currency(line.unitPrice)} | $comment | $date',
+      );
+    }
+  }
+
+  await Share.share(buf.toString(), subject: customerName);
 }
 
 /// Individual debtor tile
@@ -1360,6 +1358,18 @@ class _DebtorDetailSheetState extends State<_DebtorDetailSheet> {
                       ),
                     ],
                   ),
+                ),
+                IconButton(
+                  tooltip: t.shareList,
+                  icon: const Icon(Icons.share_outlined),
+                  onPressed: _invoices == null
+                      ? null
+                      : () => _shareDebtorTransactions(
+                          context,
+                          customerName: widget.customerName,
+                          balanceDue: widget.netBalance,
+                          invoices: _invoices!,
+                        ),
                 ),
               ],
             ),
