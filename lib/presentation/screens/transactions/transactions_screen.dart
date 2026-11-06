@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dio/dio.dart';
-import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
 import 'package:hisobnoma/core/constants/app_typography.dart';
@@ -14,8 +13,7 @@ import 'package:hisobnoma/data/models/transaction/unpaid_invoice.dart';
 import 'package:hisobnoma/data/models/transaction/sale_record.dart';
 import 'package:hisobnoma/data/repositories/transaction_repository.dart';
 import 'package:hisobnoma/core/di/injection.dart';
-import 'package:hisobnoma/core/router/app_router.dart';
-import 'package:hisobnoma/data/repositories/finance_repository.dart';
+import 'package:hisobnoma/core/utils/money.dart';
 import 'package:hisobnoma/l10n/generated/app_localizations.dart';
 import 'package:hisobnoma/presentation/blocs/transactions/transactions_cubit.dart';
 import 'package:hisobnoma/presentation/blocs/shift/shift_cubit.dart';
@@ -23,7 +21,6 @@ import 'package:hisobnoma/presentation/screens/transactions/add_sale_sheet.dart'
 import 'package:hisobnoma/presentation/screens/transactions/price_edit_sheet.dart';
 import 'package:hisobnoma/presentation/screens/transactions/shift_sheet.dart';
 import 'package:hisobnoma/presentation/widgets/common/animations.dart';
-import 'package:hisobnoma/presentation/widgets/common/error_handler.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_empty_state.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_segmented_control.dart';
 import 'package:hisobnoma/presentation/widgets/common/loading_shimmer.dart';
@@ -385,9 +382,9 @@ class _DebtorsTab extends StatelessWidget {
           child: Align(
             alignment: Alignment.centerRight,
             child: TextButton.icon(
-              onPressed: () => _shareDebtorsToTelegram(context),
-              icon: const Icon(Icons.send_outlined, size: 18),
-              label: Text(t.shareToTelegram),
+              onPressed: () => _shareDebtorsList(context, debtors),
+              icon: const Icon(Icons.share_outlined, size: 18),
+              label: Text(t.shareList),
             ),
           ),
         ),
@@ -426,85 +423,33 @@ class _DebtorsTab extends StatelessWidget {
   }
 }
 
-/// Ask the user where to send the debtors list, then share it to Telegram.
-Future<void> _shareDebtorsToTelegram(BuildContext context) async {
+/// Build a plain-text debtors list and open the OS share sheet (Telegram,
+/// WhatsApp, SMS, …). No bot or account linking — the user picks the app and
+/// the chat, and it arrives as an ordinary text message.
+Future<void> _shareDebtorsList(
+  BuildContext context,
+  List<CustomerBalance> debtors,
+) async {
   HapticFeedback.selectionClick();
   final t = S.of(context);
-  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final sorted = [...debtors]
+    ..sort((a, b) => b.netBalance.compareTo(a.netBalance));
+  final total = sorted.fold<double>(0, (sum, d) => sum + d.netBalance);
 
-  final target = await showModalBottomSheet<String>(
-    context: context,
-    backgroundColor: isDark ? AppColors.darkElevated : AppColors.white,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(AppSpacing.radiusLg),
-      ),
-    ),
-    builder: (sheetContext) => SafeArea(
-      top: false,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: AppSpacing.sm),
-          ListTile(
-            leading: Icon(Icons.person_outline, color: AppColors.royalBlue),
-            title: Text(t.sendToMe),
-            onTap: () => Navigator.of(sheetContext).pop('self'),
-          ),
-          ListTile(
-            leading: Icon(Icons.group_outlined, color: AppColors.royalBlue),
-            title: Text(t.sendToGroup),
-            onTap: () => Navigator.of(sheetContext).pop('group'),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-        ],
-      ),
-    ),
-  );
-
-  if (target == null || !context.mounted) return;
-  try {
-    final recipients = await getIt<FinanceRepository>().shareDebtorsToTelegram(
-      target: target,
+  final buf = StringBuffer()
+    ..writeln('${t.debtors} — ${formatDateYmd(DateTime.now())}')
+    ..writeln();
+  for (var i = 0; i < sorted.length; i++) {
+    final d = sorted[i];
+    buf.writeln(
+      '${i + 1}. ${d.customerName} — ${Formatters.currency(d.netBalance)}',
     );
-    if (context.mounted) {
-      showSuccessSnackBar(context, '${t.messageSent} ($recipients)');
-    }
-  } catch (e) {
-    if (!context.mounted) return;
-    // Not linked yet → offer to link right from the error. Other failures
-    // (e.g. TELEGRAM_NO_RECIPIENTS) just surface the backend message.
-    if (_backendErrorCode(e) == 'TELEGRAM_NOT_LINKED') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(extractErrorMessage(e)),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: AppColors.error,
-          duration: const Duration(seconds: 6),
-          action: SnackBarAction(
-            label: t.linkTelegram,
-            textColor: Colors.white,
-            onPressed: () => context.push(AppRoutes.telegram),
-          ),
-        ),
-      );
-    } else {
-      showErrorSnackBar(context, e);
-    }
   }
-}
+  buf
+    ..writeln()
+    ..writeln('${t.total}: ${Formatters.currency(total)}');
 
-/// The backend's `error.code` from a failed request, if any. The error
-/// interceptor normalises 4xx into typed exceptions and drops the code, but
-/// the raw response body is still attached to the DioException.
-String? _backendErrorCode(Object e) {
-  if (e is! DioException) return null;
-  final data = e.response?.data;
-  if (data is Map) {
-    final err = data['error'];
-    if (err is Map && err['code'] != null) return err['code'].toString();
-  }
-  return null;
+  await Share.share(buf.toString(), subject: t.debtors);
 }
 
 /// Individual debtor tile

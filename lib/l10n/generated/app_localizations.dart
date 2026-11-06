@@ -1192,6 +1192,12 @@ abstract class S {
   /// **'Unlink'**
   String get unlinkTelegram;
 
+  /// No description provided for @shareList.
+  ///
+  /// In en, this message translates to:
+  /// **'Share list'**
+  String get shareList;
+
   /// No description provided for @alertPreferences.
   ///
   /// In en, this message translates to:

@@ -630,6 +630,9 @@ class SEn extends S {
   String get unlinkTelegram => 'Unlink';
 
   @override
+  String get shareList => 'Share list';
+
+  @override
   String get alertPreferences => 'Alert Preferences';
 
   @override

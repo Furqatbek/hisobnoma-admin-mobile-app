@@ -630,6 +630,9 @@ class SUz extends S {
   String get unlinkTelegram => 'Узиш';
 
   @override
+  String get shareList => 'Рўйхатни улашиш';
+
+  @override
   String get alertPreferences => 'Огоҳлантириш созламалари';
 
   @override

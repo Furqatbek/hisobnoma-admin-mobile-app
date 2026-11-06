@@ -631,6 +631,9 @@ class SRu extends S {
   String get unlinkTelegram => 'Отвязать';
 
   @override
+  String get shareList => 'Поделиться списком';
+
+  @override
   String get alertPreferences => 'Настройки оповещений';
 
   @override
