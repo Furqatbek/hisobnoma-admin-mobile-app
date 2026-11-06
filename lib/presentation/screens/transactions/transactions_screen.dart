@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-// Prefixed: the excel package exports names (Border, TextStyle…) that clash
-// with Flutter's.
-import 'package:excel/excel.dart' as xl;
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
@@ -407,11 +404,11 @@ class _DebtorsTab extends StatelessWidget {
   }
 }
 
-/// Build ONE debtor's debt transactions as an Excel (.xlsx) file and open the
-/// OS share sheet (Telegram, WhatsApp, email…) — the user picks the chat.
-/// A file sidesteps Telegram's message-length limit and opens in Excel /
-/// Google Sheets. One row per product line: ID | Product | Price | Comment |
-/// Date, with the price as a numeric column.
+/// Build ONE debtor's debt transactions as a CSV file and open the OS share
+/// sheet (Telegram, WhatsApp, email…) — the user picks the chat. A file
+/// sidesteps Telegram's message-length limit, and CSV opens in Excel / Google
+/// Sheets with no extra packages. One row per product line:
+/// ID, Product, Price, Comment, Date — price as a plain number.
 Future<void> _shareDebtorTransactions(
   BuildContext context, {
   required String customerName,
@@ -421,22 +418,22 @@ Future<void> _shareDebtorTransactions(
   HapticFeedback.selectionClick();
   final t = S.of(context);
 
-  final workbook = xl.Excel.createExcel();
-  final sheet = workbook['Sheet1'];
+  // Quote a cell only when it needs it (comma, quote or newline).
+  String cell(Object? v) {
+    final s = (v ?? '').toString();
+    return (s.contains(',') || s.contains('"') || s.contains('\n'))
+        ? '"${s.replaceAll('"', '""')}"'
+        : s;
+  }
 
-  // Header block, then the column titles.
-  sheet.appendRow([xl.TextCellValue('${t.debtors}: $customerName')]);
-  sheet.appendRow([
-    xl.TextCellValue('${t.balanceDue}: ${Formatters.currency(balanceDue)}'),
-  ]);
-  sheet.appendRow([xl.TextCellValue('')]);
-  sheet.appendRow([
-    xl.TextCellValue('ID'),
-    xl.TextCellValue(t.products),
-    xl.TextCellValue(t.sellingPrice),
-    xl.TextCellValue(t.notes),
-    xl.TextCellValue(t.date),
-  ]);
+  String row(List<Object?> cells) => cells.map(cell).join(',');
+
+  final lines = <String>[
+    row(['${t.debtors}: $customerName']),
+    row(['${t.balanceDue}: ${Formatters.currency(balanceDue)}']),
+    '',
+    row(['ID', t.products, t.sellingPrice, t.notes, t.date]),
+  ];
 
   for (final inv in invoices) {
     final id = (inv.posTransactionNumber ?? '').isNotEmpty
@@ -449,13 +446,7 @@ Future<void> _shareDebtorTransactions(
 
     if (inv.lines.isEmpty) {
       // Invoice without line items (e.g. a manual debt): one row, the balance.
-      sheet.appendRow([
-        xl.TextCellValue(id),
-        xl.TextCellValue('—'),
-        xl.DoubleCellValue(inv.balanceDue),
-        xl.TextCellValue(comment),
-        xl.TextCellValue(date),
-      ]);
+      lines.add(row([id, '—', formatQuantity(inv.balanceDue), comment, date]));
       continue;
     }
     for (final line in inv.lines) {
@@ -463,31 +454,17 @@ Future<void> _shareDebtorTransactions(
       final name = line.quantity == 1
           ? line.productName
           : '${line.productName} ×${formatQuantity(line.quantity)}';
-      sheet.appendRow([
-        xl.TextCellValue(id),
-        xl.TextCellValue(name),
-        xl.DoubleCellValue(line.unitPrice),
-        xl.TextCellValue(comment),
-        xl.TextCellValue(date),
-      ]);
+      lines.add(row([id, name, formatQuantity(line.unitPrice), comment, date]));
     }
   }
 
-  final bytes = workbook.encode();
-  if (bytes == null) return;
-
-  // Write to a temp file and hand it to the share sheet as an attachment.
-  final dir = await getTemporaryDirectory();
+  // UTF-8 BOM so Excel renders Cyrillic correctly; share the bytes directly as
+  // a file attachment — no temp file or extra packages needed.
+  final csv = lines.join('\r\n');
+  final bytes = Uint8List.fromList([0xEF, 0xBB, 0xBF, ...utf8.encode(csv)]);
   final safeName = customerName.replaceAll(RegExp(r'[\\/:*?"<>|\s]+'), '_');
-  final file = File('${dir.path}/debt_$safeName.xlsx');
-  await file.writeAsBytes(bytes, flush: true);
-
   await Share.shareXFiles([
-    XFile(
-      file.path,
-      mimeType:
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    ),
+    XFile.fromData(bytes, name: 'debt_$safeName.csv', mimeType: 'text/csv'),
   ], subject: customerName);
 }
 
