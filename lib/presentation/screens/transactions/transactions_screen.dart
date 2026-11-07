@@ -462,8 +462,8 @@ Future<void> _shareDebtorTransactions(
     }
   }
 
-  // UTF-8 BOM so Excel renders Cyrillic correctly; share the bytes directly as
-  // a file attachment — no temp file or extra packages needed.
+  // UTF-8 BOM so Excel renders Cyrillic correctly. CRLF line endings for
+  // Excel. The bytes are written to a temp file below and shared by path.
   final csv = lines.join('\r\n');
   final bytes = Uint8List.fromList([0xEF, 0xBB, 0xBF, ...utf8.encode(csv)]);
   final safeName = customerName.replaceAll(RegExp(r'[\\/:*?"<>|\s]+'), '_');
@@ -846,7 +846,9 @@ class _TransactionDetailSheetState extends State<_TransactionDetailSheet> {
     } catch (e) {
       if (mounted)
         setState(() {
-          _error = e.toString();
+          // Friendly text, consistent with every other screen (not Dio's raw
+          // toString()).
+          _error = extractErrorMessage(e);
           _loading = false;
         });
     }
@@ -1313,7 +1315,9 @@ class _DebtorDetailSheetState extends State<_DebtorDetailSheet> {
     } catch (e) {
       if (mounted)
         setState(() {
-          _error = e.toString();
+          // Friendly text, consistent with every other screen (not Dio's raw
+          // toString()).
+          _error = extractErrorMessage(e);
           _loading = false;
         });
     }
@@ -1409,6 +1413,14 @@ class _DebtorDetailSheetState extends State<_DebtorDetailSheet> {
                               showErrorSnackBar(
                                 context,
                                 Exception(_error ?? t.error),
+                              );
+                              return;
+                            }
+                            if (invoices.isEmpty) {
+                              // Nothing to put in a statement.
+                              showErrorSnackBar(
+                                context,
+                                Exception(t.noUnpaidInvoices),
                               );
                               return;
                             }
