@@ -24,6 +24,7 @@ import 'package:hisobnoma/presentation/screens/transactions/add_sale_sheet.dart'
 import 'package:hisobnoma/presentation/screens/transactions/price_edit_sheet.dart';
 import 'package:hisobnoma/presentation/screens/transactions/shift_sheet.dart';
 import 'package:hisobnoma/presentation/widgets/common/animations.dart';
+import 'package:hisobnoma/presentation/widgets/common/error_handler.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_empty_state.dart';
 import 'package:hisobnoma/presentation/widgets/common/hisob_segmented_control.dart';
 import 'package:hisobnoma/presentation/widgets/common/loading_shimmer.dart';
@@ -414,6 +415,7 @@ Future<void> _shareDebtorTransactions(
   required String customerName,
   required double balanceDue,
   required List<UnpaidInvoice> invoices,
+  Rect? sharePositionOrigin,
 }) async {
   HapticFeedback.selectionClick();
   final t = S.of(context);
@@ -463,9 +465,18 @@ Future<void> _shareDebtorTransactions(
   final csv = lines.join('\r\n');
   final bytes = Uint8List.fromList([0xEF, 0xBB, 0xBF, ...utf8.encode(csv)]);
   final safeName = customerName.replaceAll(RegExp(r'[\\/:*?"<>|\s]+'), '_');
-  await Share.shareXFiles([
-    XFile.fromData(bytes, name: 'debt_$safeName.csv', mimeType: 'text/csv'),
-  ], subject: customerName);
+  try {
+    await Share.shareXFiles(
+      [XFile.fromData(bytes, name: 'debt_$safeName.csv', mimeType: 'text/csv')],
+      subject: customerName,
+      // Required on iPad: anchors the share popover to the tapped button.
+      sharePositionOrigin: sharePositionOrigin,
+    );
+  } catch (e) {
+    // Never swallow this — surface the real reason (missing plugin after a
+    // hot-restart, iPad anchor, platform refusal) so it can be diagnosed.
+    if (context.mounted) showErrorSnackBar(context, e);
+  }
 }
 
 /// Individual debtor tile
@@ -1377,17 +1388,38 @@ class _DebtorDetailSheetState extends State<_DebtorDetailSheet> {
                     ],
                   ),
                 ),
-                IconButton(
-                  tooltip: t.shareList,
-                  icon: const Icon(Icons.share_outlined),
-                  onPressed: _invoices == null
-                      ? null
-                      : () => _shareDebtorTransactions(
-                          context,
-                          customerName: widget.customerName,
-                          balanceDue: widget.netBalance,
-                          invoices: _invoices!,
-                        ),
+                Builder(
+                  builder: (btnContext) => IconButton(
+                    tooltip: t.shareList,
+                    icon: const Icon(Icons.share_outlined),
+                    onPressed: _loading
+                        ? null
+                        : () {
+                            final invoices = _invoices;
+                            if (invoices == null) {
+                              // Invoices failed to load — say so instead of
+                              // leaving a button that does nothing.
+                              showErrorSnackBar(
+                                context,
+                                Exception(_error ?? t.error),
+                              );
+                              return;
+                            }
+                            // Anchor for the iPad share popover.
+                            final box =
+                                btnContext.findRenderObject() as RenderBox?;
+                            final origin = box == null
+                                ? null
+                                : box.localToGlobal(Offset.zero) & box.size;
+                            _shareDebtorTransactions(
+                              context,
+                              customerName: widget.customerName,
+                              balanceDue: widget.netBalance,
+                              invoices: invoices,
+                              sharePositionOrigin: origin,
+                            );
+                          },
+                  ),
                 ),
               ],
             ),
