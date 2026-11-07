@@ -551,12 +551,16 @@ class _DebtorTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    Text(
-                      debtor.customerCode,
-                      style: AppTypography.caption1.copyWith(
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.textSecondary,
+                    Flexible(
+                      child: Text(
+                        debtor.customerCode,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.caption1.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
+                        ),
                       ),
                     ),
                     if (debtor.lastInvoiceDate != null) ...[
@@ -566,12 +570,18 @@ class _DebtorTile extends StatelessWidget {
                           color: AppColors.textTertiary,
                         ),
                       ),
-                      Text(
-                        debtor.lastInvoiceDate!,
-                        style: AppTypography.caption1.copyWith(
-                          color: isDark
-                              ? AppColors.darkTextSecondary
-                              : AppColors.textSecondary,
+                      Flexible(
+                        child: Text(
+                          // Backend may send a full timestamp; show the
+                          // date part only.
+                          debtor.lastInvoiceDate!.split('T').first,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.caption1.copyWith(
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
+                          ),
                         ),
                       ),
                     ],
