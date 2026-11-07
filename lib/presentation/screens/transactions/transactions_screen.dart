@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:hisobnoma/core/constants/app_colors.dart';
 import 'package:hisobnoma/core/constants/app_spacing.dart';
@@ -466,8 +468,13 @@ Future<void> _shareDebtorTransactions(
   final bytes = Uint8List.fromList([0xEF, 0xBB, 0xBF, ...utf8.encode(csv)]);
   final safeName = customerName.replaceAll(RegExp(r'[\\/:*?"<>|\s]+'), '_');
   try {
+    // Write a real file: on iOS the share sheet needs an actual path on
+    // disk (XFile.fromData has none and is unreliable there).
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/debt_$safeName.csv');
+    await file.writeAsBytes(bytes, flush: true);
     await Share.shareXFiles(
-      [XFile.fromData(bytes, name: 'debt_$safeName.csv', mimeType: 'text/csv')],
+      [XFile(file.path, mimeType: 'text/csv', name: 'debt_$safeName.csv')],
       subject: customerName,
       // Required on iPad: anchors the share popover to the tapped button.
       sharePositionOrigin: sharePositionOrigin,
