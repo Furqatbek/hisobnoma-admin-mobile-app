@@ -17,11 +17,32 @@ class TransactionsCubit extends Cubit<TransactionsState> {
   /// without going through cubit state (e.g. loading terminals, regions).
   TransactionRepository get transactionRepository => _transactionRepository;
 
-  void reset() => emit(const TransactionsInitial());
+  /// Last successfully loaded screen data. Kept across the other states this
+  /// shared cubit emits (search, quick sale, …) so the Transactions tab can
+  /// come back instantly instead of showing a skeleton on every visit.
+  TransactionsDataLoaded? _lastData;
 
-  /// Load inventory, debtors, and sales history in parallel
+  TransactionsDataLoaded? get lastData => _lastData;
+
+  void reset() {
+    _lastData = null;
+    emit(const TransactionsInitial());
+  }
+
+  /// Load inventory, debtors, and sales history in parallel.
+  ///
+  /// First load shows the skeleton. Later calls (tab revisit, pull-to-refresh,
+  /// after a price edit or sale) are *silent*: the cached list stays on screen
+  /// while fresh data is fetched, and a failed background refresh keeps the
+  /// cached list rather than replacing a working screen with an error.
   Future<void> loadData() async {
-    emit(const TransactionsLoading());
+    final cached = _lastData;
+    if (cached == null) {
+      emit(const TransactionsLoading());
+    } else if (state != cached) {
+      // Coming back from a search/sale state: restore the list right away.
+      emit(cached);
+    }
     try {
       List<InventoryProduct> products = [];
       List<CustomerBalance> debtors = [];
@@ -44,15 +65,17 @@ class TransactionsCubit extends Cubit<TransactionsState> {
             .catchError((Object _) {}),
       ]);
 
-      emit(
-        TransactionsDataLoaded(
-          products: products,
-          debtors: debtors,
-          sales: sales,
-        ),
+      final loaded = TransactionsDataLoaded(
+        products: products,
+        debtors: debtors,
+        sales: sales,
       );
+      _lastData = loaded;
+      emit(loaded);
     } catch (e) {
-      emit(TransactionsError(message: extractErrorMessage(e)));
+      if (cached == null) {
+        emit(TransactionsError(message: extractErrorMessage(e)));
+      }
     }
   }
 

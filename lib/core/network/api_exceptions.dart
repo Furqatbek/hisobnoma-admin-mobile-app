@@ -32,15 +32,13 @@ class NotFoundException extends ApiException {
 }
 
 class ValidationException extends ApiException {
+  /// [code] keeps the backend's business code (e.g. `PRICE_BELOW_MIN`) so
+  /// callers can branch on it instead of string-matching the message.
   const ValidationException({
     String message = 'Invalid request parameters',
     List<String>? details,
-  }) : super(
-         code: 'VALIDATION_ERROR',
-         message: message,
-         details: details,
-         statusCode: 400,
-       );
+    String code = 'VALIDATION_ERROR',
+  }) : super(code: code, message: message, details: details, statusCode: 400);
 }
 
 class RateLimitException extends ApiException {

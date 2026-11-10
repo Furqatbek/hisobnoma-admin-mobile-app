@@ -19,15 +19,24 @@ String extractErrorMessage(Object error) {
       if (msg is String && msg.isNotEmpty) return msg;
     }
 
-    // Fall back to a generic, human-readable line — never Dio's toString().
+    // Fall back to a generic, human-readable line — never Dio's toString()
+    // and never Dio's own verbose "validateStatus was configured…" text.
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.connectionError:
         return 'No internet connection. Please check your network.';
+      case DioExceptionType.badCertificate:
+        return 'Secure connection failed. Please try again.';
+      case DioExceptionType.cancel:
+        return 'Request was cancelled.';
       default:
-        return error.message ?? 'Something went wrong. Please try again.';
+        final status = error.response?.statusCode;
+        if (status != null) {
+          return 'Request failed ($status). Please try again.';
+        }
+        return 'Something went wrong. Please try again.';
     }
   }
 

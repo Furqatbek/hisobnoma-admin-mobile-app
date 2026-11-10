@@ -82,17 +82,24 @@ class _FadeScaleInState extends State<FadeScaleIn>
   }
 }
 
-/// Staggered list animation — each item animates in with a delay
+/// Staggered list animation — each item animates in with a delay.
+///
+/// Only the first [maxAnimatedIndex] items (roughly one screenful) are
+/// staggered. Items further down are built lazily as the user scrolls, and a
+/// delay of `index × staggerDelay` there would leave rows blank for seconds
+/// on long lists — it reads as lag, not polish.
 class StaggeredListItem extends StatefulWidget {
   final Widget child;
   final int index;
   final Duration staggerDelay;
+  final int maxAnimatedIndex;
 
   const StaggeredListItem({
     super.key,
     required this.child,
     required this.index,
     this.staggerDelay = const Duration(milliseconds: 60),
+    this.maxAnimatedIndex = 8,
   });
 
   @override
@@ -121,6 +128,11 @@ class _StaggeredListItemState extends State<StaggeredListItem>
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
+    if (widget.index >= widget.maxAnimatedIndex) {
+      // Off the first screen: show immediately, no fade, no delay.
+      _controller.value = 1.0;
+      return;
+    }
     final delay = widget.staggerDelay * widget.index;
     Future.delayed(delay, () {
       if (mounted) _controller.forward();
